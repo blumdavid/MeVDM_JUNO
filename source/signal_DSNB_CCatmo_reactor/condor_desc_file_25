@@ -1,0 +1,13 @@
+# Description file to submit jobs:
+# name: condor_desc_file_25
+# corresponding to DM mass = 25 MeV
+
+Universe = vanilla
+Executable = /junofs/users/dblum/work/signal_DSNB_CCatmo_reactor/analyze_spectra_v4_server2.py
+Arguments = $(Process) 25
+Output = /junofs/users/dblum/work/signal_DSNB_CCatmo_reactor/dataset_output_25/out$(Process)
+Error = /junofs/users/dblum/work/signal_DSNB_CCatmo_reactor/dataset_output_25/err$(Process)
+Log = /junofs/users/dblum/work/signal_DSNB_CCatmo_reactor/dataset_output_25/log$(Process)
+Accounting_Group = juno
+Requirements = Target.OpSysAndVer =?= "SL6"
+Queue 100
