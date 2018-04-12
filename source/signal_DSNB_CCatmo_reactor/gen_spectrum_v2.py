@@ -79,6 +79,7 @@ N_target = 1.45 * 10 ** 33
 detection_eff = 0.73
 
 """ Often used values of functions: """
+# TODO-me: Do i also have to consider the Elastic Scattering or the Inverse Beta Decay on bound nuclei???
 # IBD cross-section for the DM signal in cm**2, must be calculated only for energy = mass_DM (float):
 sigma_IBD_signal = sigma_ibd(mass_DM, DELTA, MASS_POSITRON)
 # IBD cross-section for the backgrounds in cm**2, must be calculated for the whole energy range E1 (np.array of floats):
