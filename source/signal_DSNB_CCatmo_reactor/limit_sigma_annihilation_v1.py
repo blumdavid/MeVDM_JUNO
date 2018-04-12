@@ -109,22 +109,66 @@ for mass in DM_mass:
     limit_sigma_anni = np.append(limit_sigma_anni, limit)
 
 
+""" 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
+    (th have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 7 of the paper 
+    'Testing MeV Dark Matter with neutrino detectors', arXiv: 0710.5420v1)
+    The digitized data is saved in "/home/astro/blum/PhD/paper/SuperKamiokande/limit_SuperK_digitized.csv".
+"""
+# Dark matter mass in MeV (array of float):
+DM_mass_SuperK = np.array([13.3846, 13.5385, 13.6923, 13.6923, 14.1538, 15.2308, 15.8462, 16.7692, 17.6923, 19.0769,
+                           20, 20.6154, 21.5385, 22.4615, 23.5385, 24.4615, 25.5385, 27.3846, 29.0769, 35.2308,
+                           37.3846, 39.8462, 42.3077, 43.8462, 45.5385, 47.2308, 48.9231, 51.8462, 54.6154, 57.2308,
+                           59.8462, 62.6154, 65.5385, 67.2308, 69.0769, 72.4615, 75.6923, 78.9231, 82, 84.9231,
+                           87.6923, 90.1538, 92.6154, 95.6923, 98.7692, 104.154, 108.923, 113.385, 119.385, 120.769,
+                           121.538, 122])
+# 90% limit of the self-annihilation cross-section (np.array of float):
+sigma_anni_SuperK = np.array([4.74756E-23, 4.21697E-23, 2.7617E-23, 3.68279E-23, 1.08834E-23, 1.83953E-24, 7.62699E-25,
+                              3.10919E-25, 1.63394E-25, 8.58665E-26, 6.43908E-26, 5.62341E-26, 4.99493E-26,
+                              4.66786E-26, 4.51244E-26, 4.58949E-26, 4.82863E-26, 5.62341E-26, 6.54902E-26,
+                              1.18448E-25, 1.50131E-25, 1.83953E-25, 2.17889E-25, 2.29242E-25, 2.33156E-25,
+                              2.33156E-25, 2.25393E-25, 2.00203E-25, 1.63394E-25, 1.28912E-25, 1.03444E-25,
+                              8.44249E-26, 7.49894E-26, 7.24927E-26, 7.24927E-26, 7.62699E-26, 8.44249E-26,
+                              9.66705E-26, 1.14505E-25, 1.42696E-25, 1.77828E-25, 2.29242E-25, 3.00567E-25,
+                              4.58949E-25, 7.12756E-25, 1.77828E-24, 4.66786E-24, 1.22528E-23, 4.99493E-23,
+                              7.00791E-23, 8.30076E-23, 9.83212E-23])
+
 # maximum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
-y_max = 10**(-23)
+y_max = 10**(-22)
 # minimum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
 y_min = 10**(-26)
 
 h1 = plt.figure(1)
-plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='black',
-             label='90% upper limit on $<\sigma_A v>$\n')
-plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="grey", alpha=0.8)
-plt.axhline(sigma_anni_natural, linestyle='--', color='black',
-            label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
-plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.4, hatch='/')
+plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
+             label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
+plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="red", alpha=0.4)
+plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+            label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(y_min, y_max)
 plt.xlabel("Dark Matter mass in MeV")
 plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
 plt.legend()
 plt.grid()
+
+h2 = plt.figure(2)
+plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
+             label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
+plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="red", alpha=0.4)
+plt.semilogy(DM_mass_SuperK, sigma_anni_SuperK, linestyle="--", color='black',
+             label="90% C.L. limit on $<\sigma_A v>$, obtained from Super-K data")
+plt.fill_between(DM_mass_SuperK, y_max, sigma_anni_SuperK, facecolor="gray", alpha=0.4)
+plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+            label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+plt.fill_between(DM_mass_SuperK, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+plt.xlim(np.min(DM_mass_SuperK), np.max(DM_mass_SuperK))
+plt.ylim(y_min, y_max)
+plt.xlabel("Dark Matter mass in MeV")
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
+plt.legend()
+plt.grid()
+
+
 plt.show()

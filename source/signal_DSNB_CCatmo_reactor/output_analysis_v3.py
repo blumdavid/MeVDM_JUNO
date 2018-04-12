@@ -18,7 +18,7 @@ import datetime
 SAVE_DATA = True
 
 """ Set the path of the folder, where the results of the analysis are saved: """
-number_dataset_output = 90
+number_dataset_output = 20
 path_dataset_output = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_{0:d}"\
     .format(number_dataset_output)
 path_analysis = path_dataset_output + "/analysis_mcmc"
