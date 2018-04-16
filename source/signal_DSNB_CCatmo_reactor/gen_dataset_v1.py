@@ -8,6 +8,8 @@ import numpy as np
 from work.MeVDM_JUNO.source.gen_spectrum_functions import compare_4fileinputs
 from matplotlib import pyplot
 
+# TODO-me: also update the file: gen_dataset_v1_server.py
+
 """ Define parameters for saving of the virtual experiments: 
     number_dataset (dataset_stop - dataset_start) defines, how many datasets (virtual experiments)
     are generated. """

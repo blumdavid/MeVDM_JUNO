@@ -27,6 +27,7 @@ import corner
 import scipy.optimize as op
 from matplotlib import pyplot as plt
 
+# TODO-me: also update the files: analyze_spectra_v4_server.py AND analyze_spectra_v4_server2.py
 
 # TODO: i have to cite the package 'emcee', when I use it to analyze
 
@@ -35,7 +36,7 @@ from matplotlib import pyplot as plt
 # TODO-me: using exact=False reduces runtime by 20 sec (1 third) -> therefore the step-number can be increased!!
 
 # TODO-me: check the MCMC sampling again, corresponding to the information in emcee_1202.3665.pdf (acceptance fraction,
-# TODO-me: auto-correlation time
+# TODO-me: auto-correlation time)
 
 
 """ Set boolean value to define, if the result of the analysis are saved: """
