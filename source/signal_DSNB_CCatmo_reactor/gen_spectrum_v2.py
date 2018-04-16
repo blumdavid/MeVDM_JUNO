@@ -72,36 +72,42 @@ time = t_years * 3.156 * 10 ** 7
 # INFO-me: for a different cut on the fiducial volume -> smaller number of free protons
 N_target = 1.45 * 10 ** 33
 # detection efficiency of IBD in JUNO, from physics_report.pdf, page 40, table 2.1
-# (combined efficiency of energy cut, time cut, vertex cut, Muon veto, fiducial volume) (float):
+# (combined efficiency of energy cut, time cut, vertex cut, Muon veto, fiducial volume (only r<17m)) (float):
 # INFO-me: detection efficiency is set to 73 percent from physics_report p. 40 table 2.1
 # INFO-me: the fiducial volume cut (i.e. the smaller number of targets) is already considered in the det. efficiency
+# TODO-me: the cut on the prompt energy here is 0.7MeV < E_prompt < 12 MeV  -> not the correct energy window!!!
 # TODO-me: consider a different IBD detection efficiency
 detection_eff = 0.73
 
 """ Often used values of functions: """
-# TODO-me: Do i also have to consider the Elastic Scattering or the Inverse Beta Decay on bound nuclei???
 # IBD cross-section for the DM signal in cm**2, must be calculated only for energy = mass_DM (float):
 sigma_IBD_signal = sigma_ibd(mass_DM, DELTA, MASS_POSITRON)
 # IBD cross-section for the backgrounds in cm**2, must be calculated for the whole energy range E1 (np.array of floats):
 sigma_IBD = sigma_ibd(E_neutrino, DELTA, MASS_POSITRON)
 
 # INFO-me: currently all neutrinos interact in the detector via Inverse Beta Decay. BUT a neutrino can also interact
-# INFO-me: via elastic scattering or on bound protons.
+# INFO-me: via elastic scattering or IBD on bound protons.
 # TODO-me: consider also other interactions than the IBD -> NOT 100% of the neutrinos interact via IBD
 # INFO-me: -> the rate will decrease!!
+
+
+# TODO-me: include the atmospheric CC flux from HONDA at JUNO site
 
 # TODO-me: Neutral Current atmospheric background has to be investigated and added
 # INFO-me: can be reduced by PSD, but is still a significant background
 
+
 # TODO-me: cosmogenic isotopes (Li11, B14), that mimic an IBD signal, must be investigated and added
 # INFO-me: both can be reduced by reconstructing the muon (-> dead time of the detector) or by PSD between e- and e+
+# INFO-me: Li11 endpoint Q=20.55 MeV
+# INFO-me: B14 endpoint Q=20.6 MeV
+
 
 # TODO-me: Fast neutron background has to be investigated and added
 # INFO-me: rate can be reduced to 1 per year with fiducial volume cut (r<16.8m)
 # -> is already considered in detection efficiency
 # INFO-me: rate can be reduced to 0.01 per year with Pulse Shape Discrimination (PSD)
 
-# TODO-me: include the atmospheric CC flux from HONDA at JUNO site
 
 print("spectrum calculation has started...")
 

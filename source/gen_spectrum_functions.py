@@ -648,7 +648,7 @@ def dsnb_background_v2(energy_neutrino, energy_visible, binning_energy_visible, 
                  ambiguity (Unklarheit) to the expected SRN flux in the energy region of our interest
 
         TODO-me: DSNB background depends on black hole star formation rate, has to be considered
-        TODO-me: (see Talk of Julia at DPG and )
+        TODO-me: (see Talk of Julia at DPG and Janka, Kresse, Ertl from MPA Garching)
 
         It is found that in the energy range of our interest, more than 70 % of the flux comes from local supernova
         explosions at z < 1, while the high-redshift (z > 2) supernova contribution is very small.
@@ -1414,6 +1414,9 @@ def ccatmospheric_background_v2(energy_neutrino, energy_visible, binning_energy_
         """
 
     """ Theoretical spectrum of atmospheric charged-current background: """
+
+    # TODO-me: include the atmospheric CC flux from HONDA at JUNO site
+
     # INFO-me: i have checked the values of the fluxes on 06.02.2018
     # Neutrino energy in MeV from table 3 from paper 1-s2.0-S0927650505000526-main (np.array of float):
     e_data = np.array([0, 13, 15, 17, 19, 21, 24, 27, 30, 33, 38, 42, 47, 53, 60, 67, 75, 84, 94, 106, 119, 133, 150,
@@ -1495,6 +1498,10 @@ def ccatmospheric_background_v3(energy_neutrino, energy_visible, binning_energy_
     :param mass_positron:
     :return:
     """
+
+    # TODO-me: include the atmospheric CC flux from HONDA at JUNO site
+    # TODO-me: Why is the flux in Julia's talk higher than mine?????
+
     return
 
 

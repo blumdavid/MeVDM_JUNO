@@ -28,13 +28,14 @@ import scipy.optimize as op
 from matplotlib import pyplot as plt
 
 
-# TODO: i have to cite the package, when I use it to analyze
+# TODO: i have to cite the package 'emcee', when I use it to analyze
 
-# TODO-me: use different prior probabilities -> no flat distribution?
+# TODO-me: Check the sensitivity of the results depending on the prior probabilities
 
 # TODO-me: using exact=False reduces runtime by 20 sec (1 third) -> therefore the step-number can be increased!!
 
-# TODO-me: check the likelihood fit -> there are curious steps in the distribution of the signal fit-parameter
+# TODO-me: check the MCMC sampling again, corresponding to the information in emcee_1202.3665.pdf (acceptance fraction,
+# TODO-me: auto-correlation time
 
 
 """ Set boolean value to define, if the result of the analysis are saved: """
@@ -437,14 +438,18 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     plt.close(fig)
 
     """ Calculate the mean acceptance fraction. The acceptance fraction is the ratio between the accepted steps 
-        over the total number of steps. In general, acceptance_fraction has an entry for each walker (So 
-        it is a nwalkers-dimensional vector, therefore calculate the mean). 
+        over the total number of steps (Fraction of proposed steps that are accepted). In general, acceptance_fraction 
+        has an entry for each walker (So it is a nwalkers-dimensional vector, therefore calculate the mean). 
         (See: https://gist.github.com/banados/2254240 and 
-        http://eso-python.github.io/ESOPythonTutorials/ESOPythonDemoDay8_MCMC_with_emcee.html)
+        http://eso-python.github.io/ESOPythonTutorials/ESOPythonDemoDay8_MCMC_with_emcee.html
+        and emcee_1202.3665.pdf)
         -   (thumb rule: the acceptance fraction should be between 0.2 and 0.5! If af < 0.2 decrease the a parameter,
             if af > 0.5 increase the a parameter)
-        -   af -> 0 would mean that the chain is not proceeding and is not sampling from the posterior PDF
-        -   af -> 1 would mean that the chain is performing a random walk, without effectively sampling the post. PDF
+        -   if af -> 0, then nearly all steps are rejected. So the chain will have very few independent samples
+            and the sampling will not be representative of the target density.
+        -   if af -> 1, then nearly all steps are accepted and the chain is performing a random walk with no regard
+            for the target density . So this will also not produce representative samples (NO effectively sampling of 
+            the posterior PDF)
         """
     # INFO-me: mean of acceptance fraction should be roughly between 0.2 and 0.5
     # get acceptance fraction (1D np.array of float, dimension = nwalkers):
@@ -454,7 +459,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # append af_mean to the array, which will be saved to txt-file (np.array of float):
     af_mean_array = np.append(af_mean_array, af_mean)
 
-    """ Calculate the auto-correlation time for the chain. """
+    """ Calculate the auto-correlation time for the chain. 
+        The auto-correlation time is a direct measure of the number of evaluations of the posterior PDF required to 
+        produce independent samples of the target density.
+        """
     # TODO-me: include the auto-correlation time to estimate the performance and reliability of the MCMC
     # get the auto-correlation time (1D np.array of float, dimension = ndim (one entry for each dimension of
     # parameter space))
