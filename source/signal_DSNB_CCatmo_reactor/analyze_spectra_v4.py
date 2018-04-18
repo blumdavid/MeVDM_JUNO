@@ -487,6 +487,9 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # shape (nwalkers*steps, ndim), so e.g. (100*800, 4)=(80000, 4))
     samples = sampler.flatchain
 
+    # TODO-me: Change the binning of the histogram, where the mode and 90% limit is calculated
+    # TODO-me: maybe this is the reason for the steps in the signal distribution
+
     time_mode_0 = time.time()
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):

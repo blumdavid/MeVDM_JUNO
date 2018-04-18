@@ -48,6 +48,8 @@ DM_mass = np.arange(20, 105, 5)
 
 # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section is saved:
 limit_sigma_anni = np.array([])
+# Preallocate the array, where the mean of the 90% upper limit of the number of signal events is saved:
+limit_S_90 = np.array([])
 
 # Loop over the different DM masses:
 for mass in DM_mass:
@@ -108,6 +110,9 @@ for mass in DM_mass:
     # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
     limit_sigma_anni = np.append(limit_sigma_anni, limit)
 
+    # append the value of mean_limit_S90 of one DM mass to the array (np.array of float):
+    limit_S_90 = np.append(limit_S_90, mean_limit_S90)
+
 
 """ 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
     (th have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 7 of the paper 
@@ -137,6 +142,7 @@ y_max = 10**(-22)
 # minimum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
 y_min = 10**(-26)
 
+# Semi-logarithmic plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO:
 h1 = plt.figure(1)
 plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
              label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
@@ -152,6 +158,7 @@ plt.title("90% upper limit on the total DM self-annihilation cross-section from 
 plt.legend()
 plt.grid()
 
+# Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K:
 h2 = plt.figure(2)
 plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
              label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
@@ -170,5 +177,33 @@ plt.title("90% upper limit on the total DM self-annihilation cross-section from 
 plt.legend()
 plt.grid()
 
+# Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO:
+h3 = plt.figure(3)
+plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
+         label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
+plt.fill_between(DM_mass, 3*10**(-25), limit_sigma_anni, facecolor="red", alpha=0.4)
+plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+            label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+plt.xlim(np.min(DM_mass), np.max(DM_mass))
+plt.ylim(y_min, 3*10**(-25))
+plt.xlabel("Dark Matter mass in MeV")
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
+plt.legend()
+plt.grid()
+
+# Plot of the mean of the 90% probability limit of the number of signal events from JUNO:
+h4 = plt.figure(4)
+plt.plot(DM_mass, limit_S_90, marker='x', markersize='6.0', linestyle='-', color='blue',
+         label='90% upper limit on number of signal events ($S_{90}$), simulated for JUNO')
+plt.fill_between(DM_mass, 10, limit_S_90, facecolor="red", alpha=0.4)
+plt.xlim(np.min(DM_mass), np.max(DM_mass))
+plt.ylim(0, 10)
+plt.xlabel("Dark Matter mass in MeV")
+plt.ylabel("$S_{90}$ in events")
+plt.title("90% upper probability limit on the number of signal events from the JUNO experiment")
+plt.legend()
+plt.grid()
 
 plt.show()
