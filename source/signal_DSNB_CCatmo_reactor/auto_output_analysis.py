@@ -15,6 +15,7 @@
 import numpy as np
 import subprocess
 
+# TODO: Check, if "output_analysis_v3.py", "output_analysis_v3_server" and "auto_output_analysis.py" are in same folder!
 
 # define the Dark matter masses in MeV, which should be displayed (np.array of float):
 # TODO: set the DM masses that should be analyzed ("masses"):

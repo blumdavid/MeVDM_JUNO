@@ -11,7 +11,7 @@
                 - the code here is based on the example described in the link http://dfm.io/emcee/current/user/line/
                 - on the homepage http://dfm.io/emcee/current/ there are lots of information and also the documentation
 
-    Dataset (virtual experiments) are generated with gen_dataset_v1.py
+    Dataset (virtual experiments) are generated with gen_dataset_v1_local.py
     Simulated spectra are generated with gen_spectrum_v2.py
 
 """
@@ -558,7 +558,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
                             S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli]),
                    fmt='%4.5f',
                    header='Results of the MCMC analysis of virtual experiment (Dataset_{0:d}) to the expected spectrum'
-                          '(analyzed with analyze_spectra_v4.py, {1}):\n'
+                          '(analyzed with analyze_spectra_v4_local.py, {1}):\n'
                           'General information of the analysis are saved in info_mcmc_analysis_{2:d}_{3:d}.txt\n'
                           'Results of the analysis:\n'
                           'mode of the number of signal events,\n'
@@ -580,7 +580,7 @@ if SAVE_DATA:
                          B_CCatmo_true, B_Reactor_true, nwalkers, value_of_a, number_of_steps, step_burnin]),
                fmt='%4.5f',
                header='General information about the MCMC analysis of virtual experiment to the expected spectra '
-                      '(analyzed with analyze_spectra_v4.py, {0}):\n'
+                      '(analyzed with analyze_spectra_v4_local.py, {0}):\n'
                       'The Datasets are saved in folder: {3}\n'
                       'Analyzed datasets: Dataset_{1:d}.txt to Dataset_{2:d}.txt\n'
                       'Input files of the simulated spectra:\n'
@@ -616,7 +616,7 @@ if SAVE_DATA:
                af_mean_array, fmt='%4.5f',
                header='Mean values of the acceptance fraction from the MCMC analysis of the virt. experiments'
                       ' {0:d} to {1:d}:\n'
-                      '(analyzed with analyze_spectra_v4.py, {2})\n'
+                      '(analyzed with analyze_spectra_v4_local.py, {2})\n'
                       'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
                       'Thumb rule: mean of acceptance fraction should be roughly between 0.2 and 0.5:'
                .format(dataset_start, dataset_stop, now))

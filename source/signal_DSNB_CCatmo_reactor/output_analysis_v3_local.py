@@ -1,80 +1,54 @@
-""" Script to display the results of the MCMC analysis for indirect DM search with neutrinos in JUNO:
+""" Script to display and analyze the results of the MCMC analysis done with analyze_spectra_v4_local.py or
+    analyze_spectra_v4_server.py!
 
-    The datasets are generated and the analysis is made on the IHEP cluster in China for different DM masses
-    automatically (see file: "info_auto_simu.txt")
+    In analyze_spectra_v4_local.py the dataset and the simulated spectrum were analyzed with
+    Markov Chain Monte Carlo (MCMC) sampling and the results of the analysis are saved in the files
+    DatasetX_mcmc_analysis.txt
 
-    The output of the analysis (S_mode, S_90_limit, DSNB_mode, CCatmo_mode, Reactor_mode) is saved in
-    txt-files for each DM mass.
+    In analyze_spectra_v4_local.py the mode of the total number of signal and background events are determined by MCMC
+    sampling of the posterior probability
 
-    These txt-files are displayed in this script.
+    Script uses the function output_analysis() from output_analysis_v3.py,
+    but is optimized to run on the local computer.
+
 """
 
 import numpy as np
 from matplotlib import pyplot as plt
+from MeVDM_JUNO.source.signal_DSNB_CCatmo_reactor.output_analysis_v3 import output_analysis
 
+""" Set boolean value to define, if the result of output_analysis_v3.py is saved: """
+SAVE_DATA = True
 
 """ set the DM mass in MeV (float): """
-DM_mass = 95
+DM_mass = 20
 
 """ set the path to the correct folder: """
 path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
 
-""" set the path to the folder, where the results are saved: """
-path_result = path_folder + "/dataset_output_{0}/result_mcmc".format(DM_mass)
+""" set the path of the output folder: """
+path_output = path_folder + "/dataset_output_{0:d}".format(DM_mass)
 
-""" set the path to the file, where the results are saved: """
-file_result_dataset = path_result + "/result_dataset_output_{0}.txt".format(DM_mass)
-file_Signal = path_result + "/S_mode_DMmass{0}.txt".format(DM_mass)
-file_S_90_limit = path_result + "/S_90_limit_DMmass{0}.txt".format(DM_mass)
-file_DSNB = path_result + "/DSNB_mode_DMmass{0}.txt".format(DM_mass)
-file_CCatmo = path_result + "/CCatmo_mode_DMmass{0}.txt".format(DM_mass)
-file_reactor = path_result + "/Reactor_mode_DMmass{0}.txt".format(DM_mass)
+""" set the path of the analysis folder: """
+path_analysis = path_output + "/analysis_mcmc"
 
-""" load the txt files: """
-info_result = np.loadtxt(file_result_dataset)
-S_mode = np.loadtxt(file_Signal)
-S_90_limit = np.loadtxt(file_S_90_limit)
-DSNB_mode = np.loadtxt(file_DSNB)
-CCatmo_mode = np.loadtxt(file_CCatmo)
-Reactor_mode = np.loadtxt(file_reactor)
+""" Set the path of the file, where the information about the analysis is saved: """
+# TODO: Check the file-path
+file_info_analysis = path_analysis + "/info_mcmc_analysis_1_100.txt"
 
-""" get the information of the results from the info_result file: """
-# Lower bound of the energy window in MeV (float):
-lower_energy_bound = info_result[0]
-# upper bound of the energy window in MeV (float):
-upper_energy_bound = info_result[1]
-# Number of datasets that were analyzed (float):
-number_of_entries = info_result[2]
-# Expected number of signal events from simulation (float):
-signal_expected = info_result[3]
-# Mean of the observed number of signal events (float):
-S_50 = info_result[4]
-# Mean of the 90% probability limit of the observed number of signal events (float):
-S_90 = info_result[8]
-# Expected number of DSNB background events from simulation (float):
-DSNB_expected = info_result[12]
-# Mean of the observed number of DSNB background events (float):
-DSNB_50 = info_result[13]
-# 16 % confidence level of the observed number of DSNB background events (float):
-DSNB_50_16 = info_result[15]
-# 84 % confidence level of the observed number of DSNB background events (float):
-DSNB_50_84 = info_result[16]
-# Expected number of CCatmo background events from simulation (float):
-CCatmo_expected = info_result[17]
-# Mean of the observed number of atmo. CC background events (float):
-CCatmo_50 = info_result[18]
-# 16 % confidence level of the observed number of atmo. CC background events (float):
-CCatmo_50_16 = info_result[20]
-# 84 % confidence level of the observed number of atmo. CC background events (float):
-CCatmo_50_84 = info_result[21]
-# Expected number of reactor background events from simulation (float):
-Reactor_expected = info_result[22]
-# Mean of the observed number of Reactor background events (float):
-Reactor_50 = info_result[23]
-# 16 % confidence level of the observed number of Reactor background events (float):
-Reactor_50_16 = info_result[25]
-# 84 % confidence level of the observed number of Reactor background events (float):
-Reactor_50_84 = info_result[26]
+# Set the number of the files, that should be read in:
+file_number_start = 1
+file_number_stop = 10000
+
+
+""" display and analyze the results from the analysis with function output_analysis() from output_analysis_v3.py """
+(number_of_entries, lower_energy_bound, upper_energy_bound, S_mode, S_50, S_50_sigma, S_50_16, S_50_84, signal_expected,
+ S_90_limit, S_90, S_90_sigma, S_90_16, S_90_84, DSNB_mode, DSNB_50, DSNB_50_sigma, DSNB_50_16, DSNB_50_84,
+ DSNB_expected, CCatmo_mode, CCatmo_50, CCatmo_50_sigma, CCatmo_50_16, CCatmo_50_84, CCatmo_expected, Reactor_mode,
+ Reactor_50, Reactor_50_sigma, Reactor_50_16, Reactor_50_84, Reactor_expected) \
+    = output_analysis(SAVE_DATA, DM_mass, path_output, path_analysis, file_info_analysis, file_number_start,
+                      file_number_stop)
+
 
 """ Display the results in histograms: """
 # Display S_mean in histogram:
@@ -82,7 +56,7 @@ h1 = plt.figure(1)
 # Bins1 = 'auto'
 Bins1 = np.arange(0, np.max(S_mode)+0.1, 0.05)
 n_S, bins1, patches1 = plt.hist(S_mode, bins=Bins1, histtype='step', color='b',
-                                label='number of virt. experiments = {0:.0f},\n'
+                                label='number of virt. experiments = {0:d},\n'
                                       'mean of the distribution = {1:.4f}'
                                 .format(number_of_entries, S_50))
 plt.axvline(signal_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
@@ -101,7 +75,7 @@ h2 = plt.figure(2)
 # Bins2 = 'auto'
 Bins2 = np.arange(2, np.max(S_90_limit)+0.1, 0.1)
 n_limit_S, bins2, patches2 = plt.hist(S_90_limit, bins=Bins2, histtype='step', color='b',
-                                      label='number of virt. experiments = {0:.0f},\n'
+                                      label='number of virt. experiments = {0:d},\n'
                                             'mean of the distribution = {1:.3f}'
                                       .format(number_of_entries, S_90))
 plt.xticks(np.arange(2, np.max(S_90_limit)+0.5, 0.5))
@@ -117,7 +91,7 @@ h3 = plt.figure(3)
 Bins3 = 'auto'
 # Bins3 = np.arange(0, 25, 1)
 n_DSNB, bins3, patches3 = plt.hist(DSNB_mode, bins=Bins3, histtype='step', color='b',
-                                   label='number of virt. experiments = {0:.0f}'
+                                   label='number of virt. experiments = {0:d}'
                                    .format(number_of_entries))
 plt.axvline(DSNB_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
             .format(DSNB_expected), color='r')
@@ -137,7 +111,7 @@ h4 = plt.figure(4)
 Bins4 = 'auto'
 # Bins4 = np.arange(0, 3, 0.1)
 n_CCatmo, bins4, patches4 = plt.hist(CCatmo_mode, bins=Bins4, histtype='step', color='b',
-                                     label='number of virt. experiments = {0:.0f}'
+                                     label='number of virt. experiments = {0:d}'
                                      .format(number_of_entries))
 plt.axvline(CCatmo_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
             .format(CCatmo_expected), color='r')
@@ -157,7 +131,7 @@ h5 = plt.figure(5)
 Bins5 = 'auto'
 # Bins5 = np.arange(0, 0.5, 0.01)
 n_Reactor, bins5, patches5 = plt.hist(Reactor_mode, bins=Bins5, histtype='step', color='b',
-                                      label='number of virt. experiments = {0:.0f}'
+                                      label='number of virt. experiments = {0:d}'
                                       .format(number_of_entries))
 plt.axvline(Reactor_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
             .format(Reactor_expected), color='r')

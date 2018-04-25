@@ -7,7 +7,7 @@
 
     The Condor description file is called "condor_desc_file".
 
-    Script is based on the analyze_spectra_v4.py Script, but changed a bit to be able to run it on the cluster.
+    Script is based on the analyze_spectra_v4_local.py Script, but changed a bit to be able to run it on the cluster.
 
     to run the script:
 
@@ -21,7 +21,7 @@
     - sys.argv[4] directory of the output files = dataset_output_20/analysis_mcmc/
 
 
-    Note: the changes to the original script analyze_spectra_v4.py as highlighted with "### CHANGE:"
+    Note: the changes to the original script analyze_spectra_v4_local.py as highlighted with "### CHANGE:"
 """
 
 # import of the necessary packages:
@@ -569,7 +569,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
                             S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli]),
                    fmt='%4.5f',
                    header='Results of the MCMC analysis of vir. experiment (Dataset_{0:d}) to the expected spectrum '
-                          '(job_number = {4}, analyzed with analyze_spectra_v4.py, {1}):\n'
+                          '(job_number = {4}, analyzed with analyze_spectra_v4_local.py, {1}):\n'
                           'General information of the analysis are saved in info_mcmc_analysis_{2:d}_{3:d}.txt\n'
                           'Results of the analysis:\n'
                           'mode of the number of signal events,\n'
@@ -591,7 +591,7 @@ if SAVE_DATA:
                          B_CCatmo_true, B_Reactor_true, nwalkers, value_of_a, number_of_steps, step_burnin]),
                fmt='%4.5f',
                header='General information about the MCMC analysis of virtual experiment to the expected spectra '
-                      '(job_number = {8}, analyzed with analyze_spectra_v4.py, {0}):\n'
+                      '(job_number = {8}, analyzed with analyze_spectra_v4_local.py, {0}):\n'
                       'The Datasets are saved in folder: {3}\n'
                       'Analyzed datasets: Dataset_{1:d}.txt to Dataset_{2:d}.txt\n'
                       'Input files of the simulated spectra:\n'
@@ -627,7 +627,7 @@ if SAVE_DATA:
                af_mean_array, fmt='%4.5f',
                header='Mean values of the acceptance fraction from the MCMC analysis of the virt. experiments'
                       ' {0:d} to {1:d} (job_number = {3}):\n'
-                      '(analyzed with analyze_spectra_v4.py, {2})\n'
+                      '(analyzed with analyze_spectra_v4_local.py, {2})\n'
                       'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
                       'Thumb rule: mean of acceptance fraction should be roughly between 0.2 and 0.5:'
                .format(dataset_start, dataset_stop, now, job_number))

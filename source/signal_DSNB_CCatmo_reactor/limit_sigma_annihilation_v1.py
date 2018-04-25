@@ -30,6 +30,9 @@ from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_annihilation_cro
 # INFO-me: the self-annihilation cross-section (times the relative velocity) necessary to explain the observed
 # INFO-me: abundance of DM in the Universe is ~ 3e-26 cm^3/s
 
+# TODO: make sure, that mean_limit_S90 and std_limit_s90 in the result_dataset_output_{}.txt files are
+# TODO: at the correct position! (index [7] and [8], OR index [8] and [9])
+
 # path of the folder, where the simulated spectra are saved (string):
 path_expected_spectrum = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
 
@@ -84,7 +87,7 @@ for mass in DM_mass:
     # load the result file (np.array of float):
     result = np.loadtxt(path_result)
 
-    """ the structure of the result_dataset_output_{}.txt file is differs for masses divisible by ten (20,30,40,50,60,
+    """ the structure of the result_dataset_output_{}.txt file differs for masses divisible by ten (20,30,40,50,60,
         70,80,90,100) to masses NOT divisible by ten (25,35,45,55,65,75,85,95).
         For masses divisible by ten, mean_limit_S90 = result[7] and std_limit_S90 = result[8].
         For masses NOT divisible by ten, mean_limit_S90 = result[8] and std_limit_S90 = result[9].

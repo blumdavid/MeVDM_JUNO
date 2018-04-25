@@ -1,7 +1,7 @@
 #!/junofs/users/dblum/my_env/bin/python
 # author: David Blum
 
-""" auto_gen_dataset.sh is a script to automate the dataset generation of the indirect MeV-Dark Matter search
+""" auto_gen_dataset.py is a script to automate the dataset generation of the indirect MeV-Dark Matter search
     with JUNO!
 
     INPUT: the simulated spectra of the signal for different DM masses and the different backgrounds
@@ -16,6 +16,7 @@ import os
 import numpy as np
 import subprocess
 
+# TODO: Check, if "gen_dataset_v1.py", "gen_dataset_v1_server.py" and "auto_gen_dataset.py" are is the same folder!!
 
 # define the Dark matter masses in MeV, who's datasets should be generated and that should be analyzed
 # (np.array of float):

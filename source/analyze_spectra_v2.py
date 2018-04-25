@@ -3,7 +3,7 @@
     Version 2:  based on the GERDA paper 'A bayesian approach to the analysis of sparely populated spectra,
                 Calculating the sensitivity of the GERDA experiment' by Caldwell and Kröninger (2006)
 
-    Dataset (virtual experiments) are generated with gen_dataset_v1.py
+    Dataset (virtual experiments) are generated with gen_dataset_v1_local.py
     Simulated spectra are generated with gen_spectrum_v2.py
 
 """

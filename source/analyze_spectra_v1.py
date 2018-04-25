@@ -1,5 +1,5 @@
 """ Script to statistically analyze a large number of dataset-spectra with the simulation-spectrum.
-    Dataset (virtual experiments) are generated with gen_dataset_v1.py
+    Dataset (virtual experiments) are generated with gen_dataset_v1_local.py
     Simulated spectra are generated with gen_spectrum_v2.py
 
     Data of the virtual experiments is fitted to the simulated spectrum with a negative log-likelihood fit

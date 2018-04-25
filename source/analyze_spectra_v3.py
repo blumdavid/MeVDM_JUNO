@@ -7,7 +7,7 @@
                 The estimator for the signal contribution is calculated by minimizing the likelihood function
                 (not like in the GERDA paper by marginalizing the conditional probability)
 
-    Dataset (virtual experiments) are generated with gen_dataset_v1.py
+    Dataset (virtual experiments) are generated with gen_dataset_v1_local.py
     Simulated spectra are generated with gen_spectrum_v2.py
 
 """
