@@ -92,6 +92,7 @@ sigma_IBD = sigma_ibd(E_neutrino, DELTA, MASS_POSITRON)
 
 
 # TODO-me: include the atmospheric CC flux from HONDA at JUNO site
+# TODO-me: see atmospheric_flux.py
 
 # TODO-me: Neutral Current atmospheric background has to be investigated and added
 # INFO-me: can be reduced by PSD, but is still a significant background

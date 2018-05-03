@@ -11,7 +11,8 @@
 
     to run the script:
 
-    python /junofs/users/dblum/work/code/analyze_spectra_v4_server.py 0 /junofs/users/dblum/work/ dataset_output_20/datasets/ dataset_output_20/analysis_mcmc/
+    python /junofs/users/dblum/work/code/analyze_spectra_v4_server.py 0 /junofs/users/dblum/work/
+    dataset_output_20/datasets/ dataset_output_20/analysis_mcmc/
 
     give 7 arguments to the script:
     - sys.argv[0] name of the script = analyze_spectra_v4_server.py
@@ -19,9 +20,6 @@
     - sys.argv[2] directory of the work-folder = /junofs/users/dblum/work/
     - sys.argv[3] directory of the datasets = dataset_output_20/datasets/
     - sys.argv[4] directory of the output files = dataset_output_20/analysis_mcmc/
-
-
-    Note: the changes to the original script analyze_spectra_v4_local.py as highlighted with "### CHANGE:"
 """
 
 # import of the necessary packages:
@@ -50,24 +48,17 @@ SAVE_DATA = True
 """ CHANGE: Set the number of the job submitted: """
 job_number = int(sys.argv[1])
 
-""" set the path of the output folder: """
-### CHANGE: path_output = "dataset_output_20"
-
 """ set the path of the folder, where the datasets were saved: """
-### CHANGE: path_dataset = path_output + "/datasets"
 path_dataset = str(sys.argv[2]) + str(sys.argv[3])
 
 """ set the path of the folder, where the results of the analysis should be saved: """
-### CHANGE: path_analysis = path_output + "/analysis_mcmc"
 path_analysis = str(sys.argv[2]) + str(sys.argv[4])
 
 """ Go through every dataset and perform the analysis: """
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-### CHANGE: dataset_start = 101
 dataset_start = job_number*100 + 1
 
 #  define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-### CHANGE: dataset_stop = 2500
 dataset_stop = job_number*100 + 100
 
 
@@ -82,19 +73,14 @@ min_E_visible = info_dataset[1]
 max_E_visible = info_dataset[2]
 
 """ Load simulated spectra in events/MeV from file (np.array of float): """
-### CHANGE: file_signal = "gen_spectrum_v2/signal_DMmass20_bin100keV.txt"
 file_signal = str(sys.argv[2]) + "simu_spectra/signal_DMmass90_bin100keV.txt"
 Spectrum_signal = np.loadtxt(file_signal)
-### CHANGE: file_info_signal = "gen_spectrum_v2/signal_info_DMmass20_bin100keV.txt"
 file_info_signal = str(sys.argv[2]) + "simu_spectra/signal_info_DMmass90_bin100keV.txt"
 info_signal = np.loadtxt(file_info_signal)
-### CHANGE: file_DSNB = "gen_spectrum_v2/DSNB_EmeanNuXbar22_bin100keV.txt"
 file_DSNB = str(sys.argv[2]) + "simu_spectra/DSNB_EmeanNuXbar22_bin100keV.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
-### CHANGE: file_reactor = "gen_spectrum_v2/Reactor_NH_power36_bin100keV.txt"
 file_reactor = str(sys.argv[2]) + "simu_spectra/Reactor_NH_power36_bin100keV.txt"
 Spectrum_reactor = np.loadtxt(file_reactor)
-### CHANGE: file_CCatmo = "gen_spectrum_v2/CCatmo_Osc1_bin100keV.txt"
 file_CCatmo = str(sys.argv[2]) + "simu_spectra/CCatmo_Osc1_bin100keV.txt"
 Spectrum_CCatmo = np.loadtxt(file_CCatmo)
 
@@ -131,10 +117,9 @@ spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 
 # expected number of signal events in the energy window (float):
 S_true = np.sum(spectrum_Signal_per_bin)
 # maximum value of signal events consistent with existing limits (assuming the 90 % upper limit for the annihilation
-# cross-section of Super-K from paper 0710.5420, the most conservative value is 3.5*10**(-24) cm³/s. This leads to a
-# number of signal events of around 172)
-# INFO-me: S_max is assumed from the limit on the annihilation cross-section of 3.5*10**(-24) cm³/s from Super-K
-S_max = 172
+# cross-section of Super-K from paper 0710.5420, for the description and calculation see limit_from_SuperK.py)
+# INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
+S_max = 24
 # expected number of DSNB background events in the energy window (float):
 B_DSNB_true = np.sum(spectrum_DSNB_per_bin)
 # expected number of CCatmo background events in the energy window (float):
@@ -371,15 +356,11 @@ def neg_ln_likelihood(*args):
 # loop over the Datasets (from dataset_start to dataset_stop):
 for number in np.arange(dataset_start, dataset_stop+1, 1):
 
-    ### CHANGE: print("Analyze dataset_{0:d}".format(number))
-
     # load corresponding dataset (unit: events/bin) (np.array of float):
     Data = np.loadtxt(path_dataset + "Dataset_{0:d}.txt".format(number))
     # dataset in the 'interesting' energy range from min_E_cut to max_E_cut
     # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
     Data = Data[entry_min_E_cut: (entry_max_E_cut + 1)]
-
-    ### CHANGE: time_minimize_0 = time.time()
 
     # guess of the parameters (as guess, the total number of events from the simulated spectrum are used)
     # (np.array of float):
@@ -396,14 +377,9 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # get the best-fit parameters from the minimization (float):
     S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli = result["x"]
 
-    ### CHANGE: time_minimize_1 = time.time()
-    ### CHANGE: print("time in seconds for minimization = {0}".format(time_minimize_1-time_minimize_0))
-
-    ### CHANGE: time_sample_0 = time.time()
-
     """ Sample this distribution using emcee. 
         Start by initializing the walkers in a tiny Gaussian ball around the maximum likelihood result (in the example 
-        on the emcee homepage they found that this tends to be a pretty good initialization ni most cases): 
+        on the emcee homepage they found that this tends to be a pretty good initialization in most cases): 
         Walkers are the members of the ensemble. They are almost like separate Metropolis-Hastings chains but, of 
         course, the proposal distribution for a given walker depends on the positions of all the other walkers in 
         the ensemble. See mcmc_GoodmanWeare_2010.pdf for more details."""
@@ -423,11 +399,8 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # TODO-me: the number of steps should be large (greater than around 1000) to get a reproducible result
     # INFO-me: the auto-correlation time is <~ 60s, therefore min. 13000 steps should be made in the chain
     # Info-me: PROBLEM: sampling 13000 steps with 200 walkers took around 10 minutes!!!
-    number_of_steps = 1300
+    number_of_steps = 3300
     sampler.run_mcmc(pos, number_of_steps)
-
-    ### CHANGE: time_sample_1 = time.time()
-    ### CHNAGE: print("time for sampling = {0}".format(time_sample_1-time_sample_0))
 
     """ The best way to see this is to look at the time series of the parameters in the chain. 
     The sampler object now has an attribute called chain that is an array with the shape 
@@ -494,13 +467,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # sample) (integer):
     step_burnin = 300
     # Take only the samples for step number greater than 'step_burnin' (np.array of floats, three-dimensional array
-    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (100, 800, 4)):
-    samples = sampler.chain[:, step_burnin:, :]
-    # flatchain flattened the chain along the zeroth (nwalkers) axis (two dimensional array of
-    # shape (nwalkers*steps, ndim), so e.g. (100*800, 4)=(80000, 4))
-    samples = sampler.flatchain
-
-    ### CHANGE: time_mode_0 = time.time()
+    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (200, 3000, 4)).
+    # AND: flatten the chain along the zeroth (nwalkers) and first (steps after burnin) axis
+    # (two dimensional array of shape (nwalkers*steps, ndim), so e.g. (200*3000, 4) = (600000, 4)):
+    samples = sampler.chain[:, step_burnin:, :].reshape((-1, ndim))
 
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):
@@ -543,9 +513,6 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     index_Reactor = np.argmax(hist_Reactor)
     # get the mode of the Reactor_sample (float):
     Reactor_mode = bins_Reactor[index_Reactor]
-
-    ### CHANGE: time_mode_1 = time.time()
-    ### CHANGE: print("time to calculate the modes = {0}".format(time_mode_1-time_mode_0))
 
     """ Now that we have this list of samples, let’s make one of the most useful plots you can make with your MCMC 
         results: a corner plot. Generate a corner plot is as simple as: """

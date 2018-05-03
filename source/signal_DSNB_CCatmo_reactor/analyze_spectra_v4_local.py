@@ -29,6 +29,8 @@ from matplotlib import pyplot as plt
 
 # TODO-me: also update the files: analyze_spectra_v4_server.py AND analyze_spectra_v4_server2.py
 
+# TODO-me: after updating all the files, commit and push it to github
+
 # TODO: i have to cite the package 'emcee', when I use it to analyze
 
 # TODO-me: Check the sensitivity of the results depending on the prior probabilities
@@ -60,11 +62,11 @@ path_analysis = path_output + "/analysis_mcmc_test"
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
 dataset_start = 1
 # define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = 1
+dataset_stop = 10000
 
 """ Load information about the generation of the datasets from file (np.array of float): """
 # TODO: Check, if info-files have the same parameter:
-info_dataset = np.loadtxt(path_dataset + "/info_dataset_1_to_1.txt")
+info_dataset = np.loadtxt(path_dataset + "/info_dataset_1_to_100.txt")
 # get the bin-width of the visible energy in MeV from the info-file (float):
 interval_E_visible = info_dataset[0]
 # get minimum of the visible energy in MeV from info-file (float):
@@ -118,10 +120,9 @@ spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 
 # expected number of signal events in the energy window (float):
 S_true = np.sum(spectrum_Signal_per_bin)
 # maximum value of signal events consistent with existing limits (assuming the 90 % upper limit for the annihilation
-# cross-section of Super-K from paper 0710.5420, the most conservative value is 3.5*10**(-24) cm³/s. This leads to a
-# number of signal events of around 172)
-# INFO-me: S_max is assumed from the limit on the annihilation cross-section of 3.5*10**(-24) cm³/s from Super-K
-S_max = 172
+# cross-section of Super-K from paper 0710.5420, for the description and calculation see limit_from_SuperK.py)
+# INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
+S_max = 24
 # expected number of DSNB background events in the energy window (float):
 B_DSNB_true = np.sum(spectrum_DSNB_per_bin)
 # expected number of CCatmo background events in the energy window (float):
@@ -360,6 +361,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     print("Analyze dataset_{0:d}".format(number))
     # load corresponding dataset (unit: events/bin) (np.array of float):
     Data = np.loadtxt(path_dataset + "/Dataset_{0:d}.txt".format(number))
+
     # dataset in the 'interesting' energy range from min_E_cut to max_E_cut
     # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
     Data = Data[entry_min_E_cut: (entry_max_E_cut + 1)]
@@ -405,7 +407,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # TODO-me: the number of steps should be large (greater than around 1000) to get a reproducible result
     # INFO-me: the auto-correlation time is <~ 60s, therefore min. 13000 steps should be made in the chain
     # Info-me: PROBLEM: sampling 13000 steps with 200 walkers took around 10 minutes!!!
-    number_of_steps = 1300
+    number_of_steps = 3300
     sampler.run_mcmc(pos, number_of_steps)
 
     time_sample_1 = time.time()
@@ -418,6 +420,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     (sampler.chain[:, :, 0] has shape (nwalkers, number_of_steps), so the steps as function of the walker, 
     sampler.chain[:, :, 0].T is the transpose of the array with shape (number_of_steps, nwalkers), so the walker as 
     function of steps): """
+    """
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(ndim, 1, sharex='all')
     fig.set_size_inches(10, 10)
     ax1.plot(sampler.chain[:, :, 0].T, '-', color='k', alpha=0.3)
@@ -437,6 +440,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     if SAVE_DATA:
         fig.savefig(path_analysis + '/Dataset{0}_chain_traces.png'.format(number))
     plt.close(fig)
+    """
 
     """ Calculate the mean acceptance fraction. The acceptance fraction is the ratio between the accepted steps 
         over the total number of steps (Fraction of proposed steps that are accepted). In general, acceptance_fraction 
@@ -481,14 +485,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # sample) (integer):
     step_burnin = 300
     # Take only the samples for step number greater than 'step_burnin' (np.array of floats, three-dimensional array
-    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (100, 800, 4)):
-    samples = sampler.chain[:, step_burnin:, :]
-    # flatchain flattened the chain along the zeroth (nwalkers) axis (two dimensional array of
-    # shape (nwalkers*steps, ndim), so e.g. (100*800, 4)=(80000, 4))
-    samples = sampler.flatchain
-
-    # TODO-me: Change the binning of the histogram, where the mode and 90% limit is calculated
-    # TODO-me: maybe this is the reason for the steps in the signal distribution
+    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (200, 3000, 4)).
+    # AND: flatten the chain along the zeroth (nwalkers) and first (steps after burnin) axis
+    # (two dimensional array of shape (nwalkers*steps, ndim), so e.g. (200*3000, 4) = (600000, 4)):
+    samples = sampler.chain[:, step_burnin:, :].reshape((-1, ndim))
 
     time_mode_0 = time.time()
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """

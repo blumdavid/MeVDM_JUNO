@@ -137,10 +137,9 @@ spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 
 # expected number of signal events in the energy window (float):
 S_true = np.sum(spectrum_Signal_per_bin)
 # maximum value of signal events consistent with existing limits (assuming the 90 % upper limit for the annihilation
-# cross-section of Super-K from paper 0710.5420, the most conservative value is 3.5*10**(-24) cm³/s. This leads to a
-# number of signal events of around 172)
-# INFO-me: S_max is assumed from the limit on the annihilation cross-section of 3.5*10**(-24) cm³/s from Super-K
-S_max = 172
+# cross-section of Super-K from paper 0710.5420, for the description and calculation see limit_from_SuperK.py)
+# INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
+S_max = 24
 # expected number of DSNB background events in the energy window (float):
 B_DSNB_true = np.sum(spectrum_DSNB_per_bin)
 # expected number of CCatmo background events in the energy window (float):
@@ -420,7 +419,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # TODO-me: the number of steps should be large (greater than around 1000) to get a reproducible result
     # INFO-me: the auto-correlation time is <~ 60s, therefore min. 13000 steps should be made in the chain
     # Info-me: PROBLEM: sampling 13000 steps with 200 walkers took around 10 minutes!!!
-    number_of_steps = 1300
+    number_of_steps = 3300
     sampler.run_mcmc(pos, number_of_steps)
 
     """ The best way to see this is to look at the time series of the parameters in the chain. 
@@ -488,11 +487,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # sample) (integer):
     step_burnin = 300
     # Take only the samples for step number greater than 'step_burnin' (np.array of floats, three-dimensional array
-    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (100, 800, 4)):
-    samples = sampler.chain[:, step_burnin:, :]
-    # flatchain flattened the chain along the zeroth (nwalkers) axis (two dimensional array of
-    # shape (nwalkers*steps, ndim), so e.g. (100*800, 4)=(80000, 4))
-    samples = sampler.flatchain
+    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (200, 3000, 4)).
+    # AND: flatten the chain along the zeroth (nwalkers) and first (steps after burnin) axis
+    # (two dimensional array of shape (nwalkers*steps, ndim), so e.g. (200*3000, 4) = (600000, 4)):
+    samples = sampler.chain[:, step_burnin:, :].reshape((-1, ndim))
 
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):
