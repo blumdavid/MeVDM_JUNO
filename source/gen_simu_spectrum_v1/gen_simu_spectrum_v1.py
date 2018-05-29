@@ -157,10 +157,10 @@ def energy_neutrino(energy, theospectrum, num):
 def correlation_vis_neutrino(e_neutrino_entry, mass_proton, mass_neutron, mass_positron):
     """ correlation between E_visible and e_neutrino from Inverse Beta Decay from paper of Strumia/Vissani
         'Precise quasielastic neutrino/nucleon cross section', 0302055_IBDcrosssection.pdf:
-        The average lepton energy E_positron is approximated by the equation 16 in the paper
+        The average lepton energy E_positron_Strumia is approximated by the equation 16 in the paper
         (at better than 1 percent below energies of around 100 MeV).
-        This is a much better approximation than the usual formula E_positron = E_neutrino - DELTA.
-        It permits ('erlaubt') to relate E_positron with E_neutrino incorporating ('unter Berücksichtigung')
+        This is a much better approximation than the usual formula E_positron_Strumia = E_neutrino - DELTA.
+        It permits ('erlaubt') to relate E_positron_Strumia with E_neutrino incorporating ('unter Berücksichtigung')
         a large part of the effect due to the recoil of the nucleon.
         e_neutrino_entry: ONE entry of the e_neutrino np.array in MeV, the e_neutrino np.array contains the
                           neutrino energies generated from the theoretical spectrum (float)

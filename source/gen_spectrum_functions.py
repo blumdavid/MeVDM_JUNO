@@ -34,10 +34,10 @@ def correlation_vis_neutrino(energy, mass_proton, mass_neutron, mass_positron):
         'Precise quasielastic neutrino/nucleon cross section', 0302055_IBDcrosssection.pdf:
         (detailed information in folder 'correlation_vis_neutrino' using correlation_vis_neutrino.py)
 
-        The average lepton energy E_positron is approximated by the equation 16 in the paper
+        The average lepton energy E_positron_Strumia is approximated by the equation 16 in the paper
         INFO-me: at better than 1 percent below energies of around 100 MeV
-        This is a much better approximation than the usual formula E_positron = E_neutrino - DELTA.
-        It permits ('erlaubt') to relate E_positron with E_neutrino incorporating ('unter Berücksichtigung')
+        This is a much better approximation than the usual formula E_positron_Strumia = E_neutrino - DELTA.
+        It permits ('erlaubt') to relate E_positron_Strumia with E_neutrino incorporating ('unter Berücksichtigung')
         a large part of the effect due to the recoil of the nucleon.
         INFO-me: a large part of the effect due to the recoil of the nucleon is incorporated
         TODO-me: is quenching of the nucleon (proton) considered???

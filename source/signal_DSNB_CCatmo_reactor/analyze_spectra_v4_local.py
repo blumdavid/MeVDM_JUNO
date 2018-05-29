@@ -29,8 +29,6 @@ from matplotlib import pyplot as plt
 
 # TODO-me: also update the files: analyze_spectra_v4_server.py AND analyze_spectra_v4_server2.py
 
-# TODO-me: after updating all the files, commit and push it to github
-
 # TODO: i have to cite the package 'emcee', when I use it to analyze
 
 # TODO-me: Check the sensitivity of the results depending on the prior probabilities
@@ -50,7 +48,7 @@ SAVE_DATA = True
 path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
 
 """ set the path of the output folder: """
-path_output = path_folder + "/dataset_output_10"
+path_output = path_folder + "/dataset_output_20"
 
 """ set the path of the folder, where the datasets were saved: """
 path_dataset = path_output + "/datasets"
