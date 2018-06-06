@@ -384,7 +384,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         course, the proposal distribution for a given walker depends on the positions of all the other walkers in 
         the ensemble. See mcmc_GoodmanWeare_2010.pdf for more details."""
     # INFO-me: nwalkers=200 might be ok
-    ndim, nwalkers = 4, 200
+    ndim, nwalkers = 4, 400
     pos = [result["x"] + 10**(-4)*np.random.randn(ndim) for i in range(nwalkers)]
 
     """ Then, we can set up the sampler 
@@ -399,7 +399,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # TODO-me: the number of steps should be large (greater than around 1000) to get a reproducible result
     # INFO-me: the auto-correlation time is <~ 60s, therefore min. 13000 steps should be made in the chain
     # Info-me: PROBLEM: sampling 13000 steps with 200 walkers took around 10 minutes!!!
-    number_of_steps = 3300
+    number_of_steps = 2500
     sampler.run_mcmc(pos, number_of_steps)
 
     """ The best way to see this is to look at the time series of the parameters in the chain. 
@@ -465,7 +465,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # INFO-me: step_burnin should be 'correct' value
     # set number of step, which are used for "burning in" (the first 'step_burnin' steps are not considered in the
     # sample) (integer):
-    step_burnin = 300
+    step_burnin = 500
     # Take only the samples for step number greater than 'step_burnin' (np.array of floats, three-dimensional array
     # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (200, 3000, 4)).
     # AND: flatten the chain along the zeroth (nwalkers) and first (steps after burnin) axis

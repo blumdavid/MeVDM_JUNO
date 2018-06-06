@@ -152,7 +152,7 @@ def output_analysis(save_data, dm_mass, path_output, path_analysis, file_info_an
     reactor_expected = information_analysis[8]
 
     if save_data:
-        np.savetxt(path_output + "/result_mcmc/result_dataset_output_{0:d}.txt".format(dm_mass),
+        np.savetxt(path_output + "/result_mcmc_test/result_dataset_output_{0:d}.txt".format(dm_mass),
                    np.array([lower_energy_bound, upper_energy_bound, number_of_entries,
                              signal_expected, s_50, s_50_sigma, s_50_16, s_50_84,
                              s_90, s_90_sigma, s_90_16, s_90_84,

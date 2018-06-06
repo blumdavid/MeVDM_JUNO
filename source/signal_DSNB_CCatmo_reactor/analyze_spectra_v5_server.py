@@ -1,68 +1,70 @@
-""" Script to statistically analyze a large number of dataset-spectra with the simulation-spectrum on the local PC!!
+#!/junofs/users/dblum/my_env/bin/python
+# author: David Blum
 
-    Version 4:  !!NO Calculation of the conditional probability for the hypothesis H to be true or not!!
+""" Script to analyze a large number of dataset-spectra with the simulation-spectrum on the IHEP cluster in China.
 
-                The fitting of the datasets to the model (simulated spectrum) is based on the python package emcee:
-                -  emcee is an MIT licensed pure-Python implementation of Goodman & Weare’s Affine Invariant
-                Markov chain Monte Carlo (MCMC) Ensemble sampler
-                - it's designed for Bayesian parameter estimation (marginalization of the posterior probability)
-                - based on Markov Chain Monte Carlo (MCMC) sampling
-                - more information about the algorithm in the paper emcee_1202.3665.pdf
-                - the code here is based on the example described in the link http://dfm.io/emcee/current/user/line/
-                - on the homepage http://dfm.io/emcee/current/ there are lots of information and also the documentation
+    Use the script to analyze datasets corresponding to ONE dark matter mass.
 
-    Dataset (virtual experiments) are generated with gen_dataset_v1_local.py
-    Simulated spectra are generated with gen_spectrum_v2.py
+    The Condor description file is called "condor_desc_file".
 
+    Script is based on the analyze_spectra_v5_local.py Script, but changed a bit to be able to run it on the cluster.
+
+    to run the script:
+
+    python /junofs/users/dblum/work/code/analyze_spectra_v5_server.py 0 /junofs/users/dblum/work/
+    dataset_output_20/datasets/ dataset_output_20/analysis_mcmc/
+
+    give 7 arguments to the script:
+    - sys.argv[0] name of the script = analyze_spectra_v5_server.py
+    - sys.argv[1] number of the job = 0
+    - sys.argv[2] directory of the work-folder = /junofs/users/dblum/work/
+    - sys.argv[3] directory of the datasets = dataset_output_20/datasets/
+    - sys.argv[4] directory of the output files = dataset_output_20/analysis_mcmc/
 """
 
 # import of the necessary packages:
 import datetime
-import time
 import numpy as np
 from scipy.special import factorial
 from scipy.special import erf
+import scipy.optimize as op
+import matplotlib
+# To generate images without having a window appear, do:
+# The easiest way is use a non-interactive backend such as Agg (for PNGs), PDF, SVG or PS.
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import emcee
 import corner
-import scipy.optimize as op
-from matplotlib import pyplot as plt
+import sys
 
-# TODO: i have to cite the package 'emcee', when I use it to analyze
-
-# TODO-me: Check the sensitivity of the results depending on the prior probabilities
-
-# TODO-me: using exact=False reduces runtime by 20 sec (1 third) -> therefore the step-number can be increased!!
-
-# TODO-me: check the MCMC sampling again, corresponding to the information in emcee_1202.3665.pdf (acceptance fraction,
-# TODO-me: auto-correlation time)
-
+# INFO-me: You have to import matplotlib first, then set a non-interactive backend and then import pyplot to avoid
+# INFO-me: an ERROR by building the figures!!
 
 """ Set boolean value to define, if the result of the analysis are saved: """
 # save the results and the plot of likelihood-function with fit parameters
 # (if data should be saved, SAVE_DATA must be True):
 SAVE_DATA = True
 
-""" set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
-
-""" set the path of the output folder: """
-path_output = path_folder + "/dataset_output_25"
+""" CHANGE: Set the number of the job submitted: """
+job_number = int(sys.argv[1])
 
 """ set the path of the folder, where the datasets were saved: """
-path_dataset = path_output + "/datasets"
+path_dataset = str(sys.argv[2]) + str(sys.argv[3])
 
 """ set the path of the folder, where the results of the analysis should be saved: """
-path_analysis = path_output + "/analysis_mcmc_test"
+path_analysis = str(sys.argv[2]) + str(sys.argv[4])
 
 """ Go through every dataset and perform the analysis: """
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-dataset_start = 1
-# define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = 1
+dataset_start = job_number*100 + 1
+
+#  define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
+dataset_stop = job_number*100 + 100
+
 
 """ Load information about the generation of the datasets from file (np.array of float): """
 # TODO: Check, if info-files have the same parameter:
-info_dataset = np.loadtxt(path_dataset + "/info_dataset_1_to_10000.txt")
+info_dataset = np.loadtxt(path_dataset + "info_dataset_1_to_10000.txt")
 # get the bin-width of the visible energy in MeV from the info-file (float):
 interval_E_visible = info_dataset[0]
 # get minimum of the visible energy in MeV from info-file (float):
@@ -71,16 +73,15 @@ min_E_visible = info_dataset[1]
 max_E_visible = info_dataset[2]
 
 """ Load simulated spectra in events/MeV from file (np.array of float): """
-path_simu = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
-file_signal = path_simu + "/signal_DMmass25_bin100keV.txt"
+file_signal = str(sys.argv[2]) + "simu_spectra/signal_DMmass25_bin100keV.txt"
 Spectrum_signal = np.loadtxt(file_signal)
-file_info_signal = path_simu + "/signal_info_DMmass25_bin100keV.txt"
+file_info_signal = str(sys.argv[2]) + "simu_spectra/signal_info_DMmass25_bin100keV.txt"
 info_signal = np.loadtxt(file_info_signal)
-file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin100keV.txt"
+file_DSNB = str(sys.argv[2]) + "simu_spectra/DSNB_EmeanNuXbar22_bin100keV.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
-file_reactor = path_simu + "/Reactor_NH_power36_bin100keV.txt"
+file_reactor = str(sys.argv[2]) + "simu_spectra/Reactor_NH_power36_bin100keV.txt"
 Spectrum_reactor = np.loadtxt(file_reactor)
-file_CCatmo = path_simu + "/CCatmo_Osc1_bin100keV.txt"
+file_CCatmo = str(sys.argv[2]) + "simu_spectra/CCatmo_Osc1_bin100keV.txt"
 Spectrum_CCatmo = np.loadtxt(file_CCatmo)
 
 """ Variable, which defines the date and time of running the script: """
@@ -136,8 +137,13 @@ fraction_CCatmo = spectrum_CCatmo_per_bin / B_CCatmo_true
 # Fraction of reactor background (np.array of float):
 fraction_Reactor = spectrum_Reactor_per_bin / B_Reactor_true
 
-""" Preallocate the array, where the acceptance fraction of each analysis is appended to (empty np.array): """
-af_mean_array = np.array([])
+""" Preallocate the array, where the acceptance fraction of the actual sampling of each analysis is appended to 
+(empty np.array): """
+af_sample_mean_array = np.array([])
+""" Preallocate the array, where the acceptance fraction during burnin-phase is appended to (empty np.array): """
+af_burnin_mean_array = np.array([])
+""" Preallocate the array, where the mean of autocorrelation time is appended to (empty np.array): """
+mean_acor_array = np.array([])
 
 
 """ Define functions: """
@@ -354,15 +360,13 @@ def neg_ln_likelihood(*args):
 
 # loop over the Datasets (from dataset_start to dataset_stop):
 for number in np.arange(dataset_start, dataset_stop+1, 1):
-    print("Analyze dataset_{0:d}".format(number))
-    # load corresponding dataset (unit: events/bin) (np.array of float):
-    Data = np.loadtxt(path_dataset + "/Dataset_{0:d}.txt".format(number))
 
+    # load corresponding dataset (unit: events/bin) (np.array of float):
+    Data = np.loadtxt(path_dataset + "Dataset_{0:d}.txt".format(number))
     # dataset in the 'interesting' energy range from min_E_cut to max_E_cut
     # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
     Data = Data[entry_min_E_cut: (entry_max_E_cut + 1)]
 
-    time_minimize_0 = time.time()
     # guess of the parameters (as guess, the total number of events from the simulated spectrum are used)
     # (np.array of float):
     parameter_guess = np.array([S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
@@ -377,37 +381,56 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     # get the best-fit parameters from the minimization (float):
     S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli = result["x"]
-    time_minimize_1 = time.time()
-    print("time in seconds for minimization = {0}".format(time_minimize_1-time_minimize_0))
 
-    time_sample_0 = time.time()
     """ Sample this distribution using emcee. 
         Start by initializing the walkers in a tiny Gaussian ball around the maximum likelihood result (in the example 
-        on the emcee homepage they found that this tends to be a pretty good initialization ni most cases): 
+        on the emcee homepage they found that this tends to be a pretty good initialization in most cases): 
         Walkers are the members of the ensemble. They are almost like separate Metropolis-Hastings chains but, of 
         course, the proposal distribution for a given walker depends on the positions of all the other walkers in 
-        the ensemble. See mcmc_GoodmanWeare_2010.pdf for more details."""
+        the ensemble. See mcmc_GoodmanWeare_2010.pdf for more details.
+        Run with large number of walkers -> more independent samples per autocorrelation time. BUT: disadvantage of 
+        large number of walkers is that the burnin-phase can be slow. Therefore: use the smallest number of walkers 
+        for which the acceptance fraction during burn-in is good (see emcee_1202.3665.pdf): """
     # INFO-me: nwalkers=200 might be ok
-    ndim, nwalkers = 4, 200
-    pos = [result["x"] + 10**(-4)*np.random.randn(ndim) for i in range(nwalkers)]
+    ndim, nwalkers = 4, 50
+    P0 = [result["x"] + 10**(-4)*np.random.randn(ndim) for i in range(nwalkers)]
 
     """ Then, we can set up the sampler 
         EnsembleSampler: a generalized Ensemble sampler that uses 2 ensembles for parallelization.
         (The "a" parameter controls the step size, the default is a=2): """
-    value_of_a = 2.0
+    value_of_a = 3.0
     sampler = emcee.EnsembleSampler(nwalkers, ndim, ln_posteriorprob, a=value_of_a,
                                     args=(Data, fraction_Signal, fraction_DSNB, fraction_CCatmo, fraction_Reactor))
+
+    """ Set up the burnin-phase:
+         the burnin-phase is initial sampling phase from the initial conditions (tiny Gaussian
+         ball around the maximum likelihood result) to reasonable sampling. """
+    # INFO-me: step_burnin should be 'correct' value
+    # set number of steps, which are used for "burning in" (the first 'step_burnin' steps are not considered in the
+    # sample) (integer):
+    step_burnin = 1000
+    # run the MCMC for 'step_burnin' steps starting from the tiny ball defined above (run_mcmc iterates sample() for
+    # N iterations and returns the result of the final sample):
+    pos, prob, state = sampler.run_mcmc(P0, step_burnin)
+
+    """ Calculate the mean acceptance fraction during burnin phase: """
+    # INFO-me: mean of acceptance fraction should be roughly between 0.2 and 0.5
+    # get acceptance fraction (1D np.array of float, dimension = nwalkers):
+    af_burnin = sampler.acceptance_fraction
+    # calculate the mean of the acceptance fraction (float):
+    af_burnin_mean = np.mean(af_burnin)
+    # append af_mean to the array, which will be saved to txt-file (np.array of float):
+    af_burnin_mean_array = np.append(af_burnin_mean_array, af_burnin_mean)
+    print("mean acceptance fraction during burnin-phase = {0}".format(af_burnin_mean))
+
+    """ Reset the sampler (to get rid of the previous chain and start where the sampler left off at variable 'pos'):"""
+    sampler.reset()
 
     """ and run the MCMC for 'number_of_steps' steps starting from the tiny ball defined above: 
         (run_mcmc iterates sample() for N iterations and returns the result of the final sample) """
     # TODO-me: the number of steps should be large (greater than around 1000) to get a reproducible result
-    # INFO-me: the auto-correlation time is <~ 60s, therefore min. 13000 steps should be made in the chain
-    # Info-me: PROBLEM: sampling 13000 steps with 200 walkers took around 10 minutes!!!
-    number_of_steps = 13300
+    number_of_steps = 10000
     sampler.run_mcmc(pos, number_of_steps)
-
-    time_sample_1 = time.time()
-    print("time for sampling = {0}".format(time_sample_1-time_sample_0))
 
     """ The best way to see this is to look at the time series of the parameters in the chain. 
     The sampler object now has an attribute called chain that is an array with the shape 
@@ -416,6 +439,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     (sampler.chain[:, :, 0] has shape (nwalkers, number_of_steps), so the steps as function of the walker, 
     sampler.chain[:, :, 0].T is the transpose of the array with shape (number_of_steps, nwalkers), so the walker as 
     function of steps): """
+    """
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(ndim, 1, sharex='all')
     fig.set_size_inches(10, 10)
     ax1.plot(sampler.chain[:, :, 0].T, '-', color='k', alpha=0.3)
@@ -433,18 +457,18 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     ax4.set_xlabel('step number')
     plt.legend()
     if SAVE_DATA:
-        fig.savefig(path_analysis + '/Dataset{0}_chain_traces.png'.format(number))
+        fig.savefig(path_analysis + 'Dataset{0}_chain_traces.png'.format(number))
     plt.close(fig)
+    """
 
     """ Calculate the mean acceptance fraction. The acceptance fraction is the ratio between the accepted steps 
         over the total number of steps (Fraction of proposed steps that are accepted). In general, acceptance_fraction 
         has an entry for each walker (So it is a nwalkers-dimensional vector, therefore calculate the mean). 
         (See: https://gist.github.com/banados/2254240 and 
-        http://eso-python.github.io/ESOPythonTutorials/ESOPythonDemoDay8_MCMC_with_emcee.html
-        and emcee_1202.3665.pdf)
+        http://eso-python.github.io/ESOPythonTutorials/ESOPythonDemoDay8_MCMC_with_emcee.html)
         -   (thumb rule: the acceptance fraction should be between 0.2 and 0.5! If af < 0.2 decrease the a parameter,
             if af > 0.5 increase the a parameter)
-        -   if af -> 0, then nearly all steps are rejected. So the chain will have very few independent samples
+            -   if af -> 0, then nearly all steps are rejected. So the chain will have very few independent samples
             and the sampling will not be representative of the target density.
         -   if af -> 1, then nearly all steps are accepted and the chain is performing a random walk with no regard
             for the target density . So this will also not produce representative samples (NO effectively sampling of 
@@ -452,39 +476,43 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         """
     # INFO-me: mean of acceptance fraction should be roughly between 0.2 and 0.5
     # get acceptance fraction (1D np.array of float, dimension = nwalkers):
-    af = sampler.acceptance_fraction
+    af_sample = sampler.acceptance_fraction
     # calculate the mean of the acceptance fraction (float):
-    af_mean = np.mean(af)
+    af_sample_mean = np.mean(af_sample)
     # append af_mean to the array, which will be saved to txt-file (np.array of float):
-    af_mean_array = np.append(af_mean_array, af_mean)
+    af_sample_mean_array = np.append(af_sample_mean_array, af_sample_mean)
 
     """ Calculate the auto-correlation time for the chain. 
         The auto-correlation time is a direct measure of the number of evaluations of the posterior PDF required to 
-        produce independent samples of the target density.
+        produce independent samples of the target density. It is an estimate of the number of steps needed in the 
+        chain in order to draw independent samples from the target density.
         """
     # TODO-me: include the auto-correlation time to estimate the performance and reliability of the MCMC
-    # get the auto-correlation time (1D np.array of float, dimension = ndim (one entry for each dimension of
-    # parameter space))
     # (The longer the auto-correlation time, the larger the number of the samples we must generate to obtain the
-    # desired sampling of the posterior PDF)
-    # (You should run the sampler for a few (e.g. 10) auto-correlation times. After that, you are almost completely
-    # sure to have independent samples from the posterior PDF):
-    # autocorr_time = sampler.acor
-    # print("auto-correlation time = {0}".format(autocorr_time))
+    # desired sampling of the posterior PDF) (You should run the sampler for a few (e.g. 10) auto-correlation times.
+    # After that, you are almost completely sure to have independent samples from the posterior PDF).
+    # Estimate the autocorrelation time for each dimension (np.array of float, dimension=ndim):
+    try:
+        # estimate autocorrelation time, c = the minimum number of autocorrelation times needed to trust the estimate
+        # (default: 10) (np.array of float):
+        autocorr_time = sampler.get_autocorr_time(c=10)
+        # calculate the mean of autocorr_time (float):
+        mean_autocorr_time = np.mean(autocorr_time)
+    except emcee.autocorr.AutocorrError:
+        # if there is an emcee.autocorr.AutocorrError, set the autocorrelation time to 1001001 (-> this means that there
+        # was an error):
+        mean_autocorr_time = 1001001
 
-    """ we’ll just accept it and discard the initial 50 steps and flatten the chain so that we have a flat list of 
-        samples: """
-    # INFO-me: step_burnin should be 'correct' value
-    # set number of step, which are used for "burning in" (the first 'step_burnin' steps are not considered in the
-    # sample) (integer):
-    step_burnin = 300
-    # Take only the samples for step number greater than 'step_burnin' (np.array of floats, three-dimensional array
-    # of shape (number walkers nwalkers, number of steps after step_burnin, dimensions ndim), e.g (200, 3000, 4)).
-    # AND: flatten the chain along the zeroth (nwalkers) and first (steps after burnin) axis
-    # (two dimensional array of shape (nwalkers*steps, ndim), so e.g. (200*3000, 4) = (600000, 4)):
-    samples = sampler.chain[:, step_burnin:, :].reshape((-1, ndim))
+    # append mean_autocorr_time to the array (np.array of float):
+    mean_acor_array = np.append(mean_acor_array, mean_autocorr_time)
 
-    time_mode_0 = time.time()
+    """ flatten the chain so that we have a flat list of samples: """
+    # the chain is a three-dimensional array of shape (number walkers nwalkers, number of steps, dimensions ndim),
+    # e.g (200, 3000, 4)).
+    # The 'flatchain' function flattens the chain along the zeroth (nwalkers) axis and you get a two dimensional
+    # array of shape (nwalkers*steps, ndim), so e.g. (200*3000, 4) = (600000, 4)):
+    samples = sampler.flatchain
+
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):
     signal_sample = samples[:, 0]
@@ -527,9 +555,6 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # get the mode of the Reactor_sample (float):
     Reactor_mode = bins_Reactor[index_Reactor]
 
-    time_mode_1 = time.time()
-    print("time to calculate the modes = {0}".format(time_mode_1-time_mode_0))
-
     """ Now that we have this list of samples, let’s make one of the most useful plots you can make with your MCMC 
         results: a corner plot. Generate a corner plot is as simple as: """
     # NOTE: the quantile(0.5) is equal to the np.median() and is equal to np.percentile(50) -> NOT equal to np.mean()
@@ -538,7 +563,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
                          quantiles=[0.16, 0.5, 0.84], show_titles=True, title_fmt='.4f', labels_args={"fontsize": 40})
     # save figure:
     if SAVE_DATA:
-        fig1.savefig(path_analysis + "/Dataset{0}_fitresult.png".format(number))
+        fig1.savefig(path_analysis + "Dataset{0}_fitresult.png".format(number))
     plt.close(fig1)
 
     """ Clear the chain and lnprobability array. Also reset the bookkeeping parameters: """
@@ -547,12 +572,12 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # to save the analysis, SAVE_DATA must be True:
     if SAVE_DATA:
         # save the output of the analysis of the dataset to txt-file:
-        np.savetxt(path_analysis + '/Dataset{}_mcmc_analysis.txt'.format(number),
+        np.savetxt(path_analysis + 'Dataset{0}_mcmc_analysis.txt'.format(number),
                    np.array([S_mode, S_90, DSNB_mode, CCatmo_mode, Reactor_mode,
                             S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli]),
                    fmt='%4.5f',
-                   header='Results of the MCMC analysis of virtual experiment (Dataset_{0:d}) to the expected spectrum'
-                          '(analyzed with analyze_spectra_v4_local.py, {1}):\n'
+                   header='Results of the MCMC analysis of vir. experiment (Dataset_{0:d}) to the expected spectrum '
+                          '(job_number = {4}, analyzed with analyze_spectra_v5_server.py, {1}):\n'
                           'General information of the analysis are saved in info_mcmc_analysis_{2:d}_{3:d}.txt\n'
                           'Results of the analysis:\n'
                           'mode of the number of signal events,\n'
@@ -564,17 +589,17 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
                           'best-fit parameter for the number of DSNB background events,\n'
                           'best-fit parameter for the number of atmo. CC background events,\n'
                           'best-fit parameter for the number of reactor background events:'
-                   .format(number, now, dataset_start, dataset_stop))
+                   .format(number, now, dataset_start, dataset_stop, job_number))
 
 # To save the general information about the analysis, SAVE_DATA must be True:
 if SAVE_DATA:
     # save the general information of the analysis in txt file:
-    np.savetxt(path_analysis + '/info_mcmc_analysis_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
+    np.savetxt(path_analysis + 'info_mcmc_analysis_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
                np.array([DM_mass, min_E_cut, max_E_cut, interval_E_visible, S_true, S_max, B_DSNB_true,
                          B_CCatmo_true, B_Reactor_true, nwalkers, value_of_a, number_of_steps, step_burnin]),
                fmt='%4.5f',
                header='General information about the MCMC analysis of virtual experiment to the expected spectra '
-                      '(analyzed with analyze_spectra_v4_local.py, {0}):\n'
+                      '(job_number = {8}, analyzed with analyze_spectra_v5_server.py, {0}):\n'
                       'The Datasets are saved in folder: {3}\n'
                       'Analyzed datasets: Dataset_{1:d}.txt to Dataset_{2:d}.txt\n'
                       'Input files of the simulated spectra:\n'
@@ -603,14 +628,34 @@ if SAVE_DATA:
                       'number of step, which are used for "burning in" (the first steps are not considered in the '
                       'sample):'
                .format(now, dataset_start, dataset_stop, path_dataset, file_signal, file_DSNB, file_CCatmo,
-                       file_reactor))
+                       file_reactor, job_number))
 
-    # Save the mean of the acceptance fractions of every analyzed dataset to txt-file:
-    np.savetxt(path_analysis + '/acceptance_fraction_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
-               af_mean_array, fmt='%4.5f',
-               header='Mean values of the acceptance fraction from the MCMC analysis of the virt. experiments'
-                      ' {0:d} to {1:d}:\n'
-                      '(analyzed with analyze_spectra_v4_local.py, {2})\n'
+    # Save the mean of the acceptance fractions during sampling of every analyzed dataset to txt-file:
+    np.savetxt(path_analysis + '/acceptance_fraction_sampling_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
+               af_sample_mean_array, fmt='%4.5f',
+               header='Mean values of the acceptance fraction during sampling of the sample from the MCMC analysis of '
+                      'the virt. experiments {0:d} to {1:d}:\n'
+                      '(analyzed with analyze_spectra_v5_server.py, {2})\n'
                       'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
                       'Thumb rule: mean of acceptance fraction should be roughly between 0.2 and 0.5:'
+               .format(dataset_start, dataset_stop, now))
+
+    # Save the mean of the acceptance fractions during burnin-phase of every analyzed dataset to txt-file:
+    np.savetxt(path_analysis + '/acceptance_fraction_burnin_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
+               af_burnin_mean_array, fmt='%4.5f',
+               header='Mean values of the acceptance fraction during burnin-phase of the sample from the MCMC analysis '
+                      'of the virt. experiments {0:d} to {1:d}:\n'
+                      '(analyzed with analyze_spectra_v5_server.py, {2})\n'
+                      'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
+                      'Thumb rule: mean of acceptance fraction should be roughly between 0.2 and 0.5:'
+               .format(dataset_start, dataset_stop, now))
+
+    # Save the mean of the autocorrelation time of every analyzed dataset to txt-file:
+    np.savetxt(path_analysis + '/autocorrelation_time_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
+               mean_acor_array, fmt='%4.5f',
+               header='Mean values of the autocorrelation time of the sample from the MCMC analysis of the virt.'
+                      'experiments {0:d} to {1:d}:\n'
+                      '(analyzed with analyze_spectra_v5_server.py, {2}\n'
+                      'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
+                      'IMPORTANT: value=1001001 means there was an emcee.autocorr.AutocorrError:'
                .format(dataset_start, dataset_stop, now))

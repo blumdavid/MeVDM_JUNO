@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 
 
 """ set the DM mass in MeV (float): """
-DM_mass = 95
+DM_mass = 25
 
 """ set the path to the correct folder: """
 path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
@@ -78,7 +78,7 @@ Reactor_50_84 = info_result[26]
 
 """ Display the results in histograms: """
 # Display S_mean in histogram:
-h1 = plt.figure(1)
+h1 = plt.figure(1, figsize=(15, 8))
 # Bins1 = 'auto'
 Bins1 = np.arange(0, np.max(S_mode)+0.1, 0.05)
 n_S, bins1, patches1 = plt.hist(S_mode, bins=Bins1, histtype='step', color='b',
@@ -91,13 +91,13 @@ plt.axvline(signal_expected, linestyle='dashed', label='expected number of event
 plt.xlabel("total number of observed signal events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of signal events from DM with mass={2:.1f}MeV in virtual experiments "
-          "(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+          "\n(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
 
 
 # Display S_90_limit in histogram:
-h2 = plt.figure(2)
+h2 = plt.figure(2, figsize=(15, 8))
 # Bins2 = 'auto'
 Bins2 = np.arange(2, np.max(S_90_limit)+0.1, 0.1)
 n_limit_S, bins2, patches2 = plt.hist(S_90_limit, bins=Bins2, histtype='step', color='b',
@@ -113,7 +113,7 @@ plt.legend()
 
 
 # Display DSNB_mean in histogram:
-h3 = plt.figure(3)
+h3 = plt.figure(3, figsize=(15, 8))
 Bins3 = 'auto'
 # Bins3 = np.arange(0, 25, 1)
 n_DSNB, bins3, patches3 = plt.hist(DSNB_mode, bins=Bins3, histtype='step', color='b',
@@ -127,13 +127,13 @@ plt.axvline(DSNB_50_84, linestyle='-.', label='84% probability limit = {0:.4f}'.
 plt.xlabel("total number of observed DSNB background events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of DSNB background events in virtual experiments "
-          "(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+          "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
 
 
 # Display CCatmo_mean in histogram:
-h4 = plt.figure(4)
+h4 = plt.figure(4, figsize=(15, 8))
 Bins4 = 'auto'
 # Bins4 = np.arange(0, 3, 0.1)
 n_CCatmo, bins4, patches4 = plt.hist(CCatmo_mode, bins=Bins4, histtype='step', color='b',
@@ -147,13 +147,13 @@ plt.axvline(CCatmo_50_84, linestyle='-.', label='84% probability limit = {0:.4f}
 plt.xlabel("total number of observed atmo. CC background events events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of atmospheric CC background events in virtual experiments "
-          "(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+          "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
 
 
 # Display Reactor_mean in histogram:
-h5 = plt.figure(5)
+h5 = plt.figure(5, figsize=(15, 8))
 Bins5 = 'auto'
 # Bins5 = np.arange(0, 0.5, 0.01)
 n_Reactor, bins5, patches5 = plt.hist(Reactor_mode, bins=Bins5, histtype='step', color='b',
@@ -167,7 +167,7 @@ plt.axvline(Reactor_50_84, linestyle='-.', label='84% probability limit = {0:.4f
 plt.xlabel("total number of observed reactor background events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of reactor background events in virtual experiments "
-          "(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+          "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
 
