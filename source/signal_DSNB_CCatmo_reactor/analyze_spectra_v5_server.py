@@ -193,6 +193,12 @@ def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, 
     # calculate the addends (Summanden) of the log-likelihood-function defined on page 3, equ. 11 of the GERDA paper
     # (np.array of float):
     sum_1 = data*np.log(lamb)
+
+    """ From documentation scipy 0.14: scipy.special.factorial: (on the server scipy 0.19 is installed)
+    scipy.special.factorial is the factorial function, n! = special.gamma(n+1).
+    If exact is 0, then floating point precision is used, otherwise exact long integer is computed.
+    Array argument accepted only for exact=False case. If n<0, the return value is 0.
+    """
     # INFO-me: until factorial(14) there is no difference between the result for exact=True and exact=False!!
     # INFO-me: from fac(15) to fac(19) the deviation is less than 3.4e-7% !!
     # INFO-me: exact=True is only valid up to factorial(20), for larger values the int64 is to 'small'
@@ -244,7 +250,8 @@ def ln_priorprob(param):
         # calculate the natural logarithm of the numerator of equ. 21 (do NOT calculate exp(-(B-mu)**2)/(2*sigma**2))
         # first and then take the logarithm, because exp(-1e-3)=0.0 in python and therefore ln(0.0)=-inf for small
         # values) (float):
-        sum_1_dsnb = -(b_ccatmo - mu_b_dsnb)**2 / (2 * sigma_b_dsnb**2)
+        # INFO-me: there was an error in sum_1_dsnb: instead of b_dsnb, there was b_ccatmo (11.06.2018)
+        sum_1_dsnb = -(b_dsnb - mu_b_dsnb)**2 / (2 * sigma_b_dsnb**2)
         # natural logarithm of the prior probability (float):
         ln_prior_b_dsnb = sum_1_dsnb - sum_2_dsnb
     else:
@@ -403,12 +410,12 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
                                     args=(Data, fraction_Signal, fraction_DSNB, fraction_CCatmo, fraction_Reactor))
 
     """ Set up the burnin-phase:
-         the burnin-phase is initial sampling phase from the initial conditions (tiny Gaussian
-         ball around the maximum likelihood result) to reasonable sampling. """
+        the burnin-phase is initial sampling phase from the initial conditions (tiny Gaussian
+        ball around the maximum likelihood result) to reasonable sampling. """
     # INFO-me: step_burnin should be 'correct' value
     # set number of steps, which are used for "burning in" (the first 'step_burnin' steps are not considered in the
     # sample) (integer):
-    step_burnin = 1000
+    step_burnin = 500
     # run the MCMC for 'step_burnin' steps starting from the tiny ball defined above (run_mcmc iterates sample() for
     # N iterations and returns the result of the final sample):
     pos, prob, state = sampler.run_mcmc(P0, step_burnin)
@@ -426,10 +433,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     """ Reset the sampler (to get rid of the previous chain and start where the sampler left off at variable 'pos'):"""
     sampler.reset()
 
-    """ and run the MCMC for 'number_of_steps' steps starting from the tiny ball defined above: 
+    """ Now run the MCMC for 'number_of_steps' steps starting, where the sampler left off in the burnin-phase: 
         (run_mcmc iterates sample() for N iterations and returns the result of the final sample) """
-    # TODO-me: the number of steps should be large (greater than around 1000) to get a reproducible result
-    number_of_steps = 10000
+    # TODO-me: the number of steps should be large (greater than around 10000) to get a reproducible result
+    number_of_steps = 15000
     sampler.run_mcmc(pos, number_of_steps)
 
     """ The best way to see this is to look at the time series of the parameters in the chain. 
@@ -465,10 +472,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         over the total number of steps (Fraction of proposed steps that are accepted). In general, acceptance_fraction 
         has an entry for each walker (So it is a nwalkers-dimensional vector, therefore calculate the mean). 
         (See: https://gist.github.com/banados/2254240 and 
-        http://eso-python.github.io/ESOPythonTutorials/ESOPythonDemoDay8_MCMC_with_emcee.html)
+        http://eso-python.github.io/ESOPythonTutorials/ESOPythonDemoDay8_MCMC_with_emcee.html and emcee_1202.3665.pdf)
         -   (thumb rule: the acceptance fraction should be between 0.2 and 0.5! If af < 0.2 decrease the a parameter,
             if af > 0.5 increase the a parameter)
-            -   if af -> 0, then nearly all steps are rejected. So the chain will have very few independent samples
+        -   if af -> 0, then nearly all steps are rejected. So the chain will have very few independent samples
             and the sampling will not be representative of the target density.
         -   if af -> 1, then nearly all steps are accepted and the chain is performing a random walk with no regard
             for the target density . So this will also not produce representative samples (NO effectively sampling of 
@@ -493,8 +500,8 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # After that, you are almost completely sure to have independent samples from the posterior PDF).
     # Estimate the autocorrelation time for each dimension (np.array of float, dimension=ndim):
     try:
-        # estimate autocorrelation time, c = the minimum number of autocorrelation times needed to trust the estimate
-        # (default: 10) (np.array of float):
+        # estimate integrated autocorrelation time, c = the minimum number of autocorrelation times needed to trust
+        # the estimate (default: 10) (np.array of float):
         autocorr_time = sampler.get_autocorr_time(c=10)
         # calculate the mean of autocorr_time (float):
         mean_autocorr_time = np.mean(autocorr_time)
@@ -516,12 +523,19 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):
     signal_sample = samples[:, 0]
-    # put signal_sample in a histogram (2 np.arrays of float):
-    hist_S, bins_S = np.histogram(signal_sample, bins='auto', range=(0, signal_sample.max()))
-    # get the index, where hist_S is maximal (integer):
+    # put signal_sample in a histogram (2 np.arrays of float), hist are the values of the histogram,
+    # bins return the bin edges (length(hist)+1)
+    hist_S, bin_edges_S = np.histogram(signal_sample, bins='auto', range=(0, signal_sample.max()))
+    # get the index of the bin, where hist_S is maximal (integer):
     index_S = np.argmax(hist_S)
-    # get the mode of the signal_sample (float):
-    S_mode = bins_S[index_S]
+    # get the value of the left edge of the bin for index_S from above (float):
+    value_left_edge_S = bin_edges_S[index_S]
+    # get the value of the right edge of the bin for index_S from above (float):
+    value_right_edge_S = bin_edges_S[index_S + 1]
+    # calculate the mode of the signal_sample, therefore calculate the mean of value_left_edge and value_right_edge to
+    # get the value in the middle of the bin (float):
+    S_mode = (value_left_edge_S + value_right_edge_S) / 2
+
     # Calculate the 90 percent upper limit of the signal contribution (float)
     S_90 = np.percentile(signal_sample, 90)
 
@@ -529,31 +543,46 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # get the sample-chain of the DSNB background contribution (np.array of float):
     DSNB_sample = samples[:, 1]
     # put DSNB_sample in a histogram (2 np.arrays of float):
-    hist_DSNB, bins_DSNB = np.histogram(DSNB_sample, bins='auto', range=(0, DSNB_sample.max()))
-    # get the index, where hist_DSNB is maximal (integer):
+    hist_DSNB, bin_edges_DSNB = np.histogram(DSNB_sample, bins='auto', range=(0, DSNB_sample.max()))
+    # get the index of the bin, where hist_DSNB is maximal (integer):
     index_DSNB = np.argmax(hist_DSNB)
-    # get the mode of the DSNB_sample (float):
-    DSNB_mode = bins_DSNB[index_DSNB]
+    # get the value of the left edge of the bin for index_DSNB from above (float):
+    value_left_edge_DSNB = bin_edges_DSNB[index_DSNB]
+    # get the value of the right edge of the bin for index_DSNB from above (float):
+    value_right_edge_DSNB = bin_edges_DSNB[index_DSNB+1]
+    # calculate the mode of the DSNB_sample, therefore calculate the mean of value_left_edge and value_right_edge to
+    # get the value in the middle of the bin (float):
+    DSNB_mode = (value_left_edge_DSNB + value_right_edge_DSNB) / 2
 
     """ Calculate the mode of the CCatmo_sample distribution: """
     # get the sample-chain of the atmo. CC background contribution (np.array of float):
     CCatmo_sample = samples[:, 2]
     # put CCatmo_sample in a histogram (2 np.arrays of float):
-    hist_CCatmo, bins_CCatmo = np.histogram(CCatmo_sample, bins='auto', range=(0, CCatmo_sample.max()))
-    # get the index, where hist_CCatmo is maximal (integer):
+    hist_CCatmo, bin_edges_CCatmo = np.histogram(CCatmo_sample, bins='auto', range=(0, CCatmo_sample.max()))
+    # get the index of the bin, where hist_CCatmo is maximal (integer):
     index_CCatmo = np.argmax(hist_CCatmo)
-    # get the mode of the CCatmo_sample (float):
-    CCatmo_mode = bins_CCatmo[index_CCatmo]
+    # get the value of the left edge of the bin for index_CCatmo from above (float):
+    value_left_edge_CCatmo = bin_edges_CCatmo[index_CCatmo]
+    # get the value of the right edge of the bin for index_CCatmo from above (float):
+    value_right_edge_CCatmo = bin_edges_CCatmo[index_CCatmo+1]
+    # calculate the mode of the CCatmo_sample, therefore calculate the mean of value_left_edge and value_right_edge to
+    # get the value in the middle of the bin (float):
+    CCatmo_mode = (value_left_edge_CCatmo + value_right_edge_CCatmo) / 2
 
     """ Calculate the mode of the Reactor_sample distribution: """
     # get the sample-chain of the reactor background contribution (np.array of float):
     Reactor_sample = samples[:, 3]
     # put Reactor_sample in a histogram (2 np.arrays of float):
-    hist_Reactor, bins_Reactor = np.histogram(Reactor_sample, bins='auto', range=(0, Reactor_sample.max()))
-    # get the index, where hist_Reactor is maximal (integer):
+    hist_Reactor, bin_edges_Reactor = np.histogram(Reactor_sample, bins='auto', range=(0, Reactor_sample.max()))
+    # get the index of the bin, where hist_Reactor is maximal (integer):
     index_Reactor = np.argmax(hist_Reactor)
-    # get the mode of the Reactor_sample (float):
-    Reactor_mode = bins_Reactor[index_Reactor]
+    # get the value of the left edge of the bin for index_Reactor from above (float):
+    value_left_edge_Reactor = bin_edges_Reactor[index_Reactor]
+    # get the value of the right edge of the bin for index_Reactor from above (float):
+    value_right_edge_Reactor = bin_edges_Reactor[index_Reactor+1]
+    # calculate the mode of the Reactor_sample, therefore calculate the mean of value_left_edge and value_right_edge to
+    # get the value in the middle of the bin (float):
+    Reactor_mode = (value_left_edge_Reactor + value_right_edge_Reactor) / 2
 
     """ Now that we have this list of samples, let’s make one of the most useful plots you can make with your MCMC 
         results: a corner plot. Generate a corner plot is as simple as: """
@@ -574,7 +603,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         # save the output of the analysis of the dataset to txt-file:
         np.savetxt(path_analysis + 'Dataset{0}_mcmc_analysis.txt'.format(number),
                    np.array([S_mode, S_90, DSNB_mode, CCatmo_mode, Reactor_mode,
-                            S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli]),
+                             S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli]),
                    fmt='%4.5f',
                    header='Results of the MCMC analysis of vir. experiment (Dataset_{0:d}) to the expected spectrum '
                           '(job_number = {4}, analyzed with analyze_spectra_v5_server.py, {1}):\n'
