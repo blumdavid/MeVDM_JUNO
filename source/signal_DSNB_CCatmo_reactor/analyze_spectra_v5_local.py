@@ -43,14 +43,11 @@ from matplotlib import pyplot as plt
 
 # TODO-me: Check the sensitivity of the results depending on the prior probabilities
 
-# TODO-me: check the MCMC sampling again, corresponding to the information in emcee_1202.3665.pdf (acceptance fraction,
-# TODO-me: auto-correlation time)
-
 
 """ Set boolean value to define, if the result of the analysis are saved: """
 # save the results and the plot of likelihood-function with fit parameters
 # (if data should be saved, SAVE_DATA must be True):
-SAVE_DATA = True
+SAVE_DATA = False
 
 """ set the path to the correct folder: """
 path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
@@ -156,6 +153,7 @@ mean_acor_array = np.array([])
 
 
 """ Define functions: """
+# INFO-me: emcee actually requires the logarithm of p (see http://dfm.io/emcee/current/user/quickstart/)
 
 
 def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor):
@@ -495,7 +493,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         -   if af -> 1, then nearly all steps are accepted and the chain is performing a random walk with no regard
             for the target density . So this will also not produce representative samples (NO effectively sampling of 
             the posterior PDF)
-        """
+    """
     # INFO-me: mean of acceptance fraction should be roughly between 0.2 and 0.5
     # get acceptance fraction (1D np.array of float, dimension = nwalkers):
     af_sample = sampler.acceptance_fraction
@@ -544,10 +542,20 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # get the sample-chain of the signal contribution (np.array of float):
     signal_sample = samples[:, 0]
     # put signal_sample in a histogram (2 np.arrays of float), hist are the values of the histogram,
-    #     # bins return the bin edges (length(hist)+1):
+    # bins_edges return the bin edges (length(hist)+1):
     hist_S, bin_edges_S = np.histogram(signal_sample, bins='auto', range=(0, signal_sample.max()))
 
-    plt.plot(bin_edges_S[0:-1], hist_S, 'x-')
+    # use bin_edges_S to calculate the value of the middle of each bin (np.array of float):
+    bin_middle_S = (bin_edges_S[0:-1] + bin_edges_S[1:]) / 2
+
+    # calculate the bin-width, 'auto' generates bins with equal width(float):
+    bin_width_S = bin_edges_S[1] - bin_edges_S[0]
+
+    # integrate hist_S over bin_middle_S (float):
+    integral_hist_S = np.sum(hist_S) * bin_width_S
+    print("integral = {0}".format(integral_hist_S))
+
+    plt.step(bin_middle_S, hist_S, 'x')
     plt.xlabel("S")
     plt.ylabel("counts")
     plt.title("p(S) from MCMC sampling for one dataset")
@@ -565,6 +573,26 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     # Calculate the 90 percent upper limit of the signal contribution (float)
     S_90 = np.percentile(signal_sample, 90)
+
+    # calculate S_90 by integrating hist_S over bin_middle_S up to 0.9*integral_hist_S:
+    for index_bin in np.arange(1, len(bin_middle_S), 1):
+        # integral until index_bin:
+        integral = np.sum(hist_S[0:index_bin]) * bin_width_S
+
+        if integral < 0.9*integral_hist_S:
+            continue
+        elif integral == 0.9*integral_hist_S:
+            S_90_test = bin_middle_S[index_bin]
+            break
+        else:
+            # must be improved further!!!!!
+            blabla = bin_middle_S[index_bin - 1]
+            S_90_test = bin_middle_S[index_bin]
+            break
+
+    print("S_90 from old calculation = {0}".format(S_90))
+    print("S_90 from new calculation (index - 1) = {0}".format(blabla))
+    print("S_90 from new calculation = {0}".format(S_90_test))
 
     """ Calculate the mode of the DSNB_sample distribution: """
     # get the sample-chain of the DSNB background contribution (np.array of float):
@@ -619,7 +647,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # NOTE: the quantile(0.5) is equal to the np.median() and is equal to np.percentile(50) -> NOT equal to np.mean()
     fig1 = corner.corner(samples, labels=["$S$", "$B_{DSNB}$", "$B_{CCatmo}$", "$B_{reactor}$"],
                          truths=[S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true], truth_color='b',
-                         quantiles=[0.16, 0.5, 0.84], show_titles=True, title_fmt='.4f', labels_args={"fontsize": 40})
+                         show_titles=True, title_fmt='.4f', labels_args={"fontsize": 40})
     # save figure:
     if SAVE_DATA:
         fig1.savefig(path_analysis + "/Dataset{0}_fitresult.png".format(number))
@@ -678,7 +706,6 @@ if SAVE_DATA:
                       'Expected number of signal events in this energy range,\n'
                       'S_max,\n'
                       'Expected number of DSNB background events in this energy range,\n'
-                      'B_DSNB_max,\n'
                       'Expected number of CC atmospheric background events in this energy range,\n'
                       'Expected number of reactor background events in this energy range,\n'
                       'Number of walkers in the Markov Chain,\n'

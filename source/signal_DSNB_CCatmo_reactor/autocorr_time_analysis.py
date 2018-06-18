@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 DM_mass = 25
 
 # number of the test:
-test_number = 9
+test_number = 10
 
 # path to the folder, where the txt files are saved:
 path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_{0}/" \
