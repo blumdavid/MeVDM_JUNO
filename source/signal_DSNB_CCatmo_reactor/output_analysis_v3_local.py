@@ -21,20 +21,20 @@ from work.MeVDM_JUNO.source.signal_DSNB_CCatmo_reactor.output_analysis_v3 import
 SAVE_DATA = True
 
 """ set the DM mass in MeV (float): """
-DM_mass = 25
+DM_mass = 30
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
 
 """ set the path of the output folder: """
 path_output = path_folder + "/dataset_output_{0:d}".format(DM_mass)
 
 """ set the path of the analysis folder: """
-path_analysis = path_output + "/analysis_mcmc_test"
+path_analysis = path_output + "/analysis_mcmc"
 
 """ Set the path of the file, where the information about the analysis is saved: """
 # TODO: Check the file-path
-file_info_analysis = path_analysis + "/info_mcmc_analysis_1_100.txt"
+file_info_analysis = path_analysis + "/info_mcmc_analysis_1_50.txt"
 
 # Set the number of the files, that should be read in:
 file_number_start = 1
@@ -56,11 +56,11 @@ h1 = plt.figure(1, figsize=(15, 8))
 # Bins1 = 'auto'
 Bins1 = np.arange(0, np.max(S_mode)+0.1, 0.05)
 n_S, bins1, patches1 = plt.hist(S_mode, bins=Bins1, histtype='step', color='b',
-                                label='number of virt. experiments = {0:d},\n'
-                                      'mean of the distribution = {1:.4f}'
-                                .format(number_of_entries, S_50))
-plt.axvline(signal_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
-            .format(signal_expected), color='r')
+                                label='number of virt. experiments = {0:d}'
+                                .format(number_of_entries))
+plt.axvline(S_50, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(S_50))
+# plt.axvline(signal_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
+#             .format(signal_expected), color='r')
 # plt.xticks(np.arange(0, np.max(S_mode)+0.5, 0.5))
 plt.xlabel("total number of observed signal events")
 plt.ylabel("counts")
@@ -72,13 +72,13 @@ plt.legend()
 
 # Display S_90_limit in histogram:
 h2 = plt.figure(2, figsize=(15, 8))
-# Bins2 = 'auto'
-Bins2 = np.arange(2, np.max(S_90_limit)+0.1, 0.1)
+Bins2 = 'auto'
+# Bins2 = np.arange(2, np.max(S_90_limit)+0.1, 0.1)
 n_limit_S, bins2, patches2 = plt.hist(S_90_limit, bins=Bins2, histtype='step', color='b',
-                                      label='number of virt. experiments = {0:d},\n'
-                                            'mean of the distribution = {1:.3f}'
-                                      .format(number_of_entries, S_90))
-plt.xticks(np.arange(2, np.max(S_90_limit)+0.5, 0.5))
+                                      label='number of virt. experiments = {0:d}'
+                                      .format(number_of_entries))
+plt.axvline(S_90, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(S_90))
+# plt.xticks(np.arange(2, np.max(S_90_limit)+0.5, 0.5))
 plt.xlabel("90 percent limit of number of observed signal events S")
 plt.ylabel("counts")
 plt.title("Distribution of the 90 % upper limit of the signal contribution for DM with mass = {0:.1f} MeV"

@@ -5,6 +5,9 @@
 
     Use the script to analyze datasets corresponding to ONE dark matter mass.
 
+    Only the signal contribution is fitted to the data. The three backgrounds are fixed to the value of the expected
+    number of events!!!!
+
     The Condor description file is called "condor_desc_file".
 
     Script is based on the analyze_spectra_v5_local.py Script, but changed a bit to be able to run it on the cluster.
@@ -50,21 +53,25 @@ job_number = int(sys.argv[1])
 
 """ set the path of the folder, where the datasets were saved: """
 path_dataset = str(sys.argv[2]) + str(sys.argv[3])
+### path_dataset = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_30/datasets/"
 
 """ set the path of the folder, where the results of the analysis should be saved: """
 path_analysis = str(sys.argv[2]) + str(sys.argv[4])
+### path_analysis = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_30/" \
+###                 "analysis_mcmc_fixBkg/"
 
 """ Go through every dataset and perform the analysis: """
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-dataset_start = job_number*50 + 1 + 5000
+dataset_start = job_number*50 + 1
+### dataset_start = 1
 
 #  define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = job_number*50 + 50 + 5000
-
+dataset_stop = job_number*50 + 50
+### dataset_stop = 1
 
 """ Load information about the generation of the datasets from file (np.array of float): """
 # TODO: Check, if info-files have the same parameter:
-info_dataset = np.loadtxt(path_dataset + "info_dataset_1_to_5000.txt")
+info_dataset = np.loadtxt(path_dataset + "info_dataset_1_to_10000.txt")
 # get the bin-width of the visible energy in MeV from the info-file (float):
 interval_E_visible = info_dataset[0]
 # get minimum of the visible energy in MeV from info-file (float):
@@ -74,14 +81,23 @@ max_E_visible = info_dataset[2]
 
 """ Load simulated spectra in events/MeV from file (np.array of float): """
 file_signal = str(sys.argv[2]) + "simu_spectra/signal_DMmass30_bin100keV.txt"
+### file_signal = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/signal_DMmass30_bin100keV.txt"
 Spectrum_signal = np.loadtxt(file_signal)
+
 file_info_signal = str(sys.argv[2]) + "simu_spectra/signal_info_DMmass30_bin100keV.txt"
+### file_info_signal = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/signal_info_DMmass30_bin100keV.txt"
 info_signal = np.loadtxt(file_info_signal)
+
 file_DSNB = str(sys.argv[2]) + "simu_spectra/DSNB_EmeanNuXbar22_bin100keV.txt"
+### file_DSNB = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/DSNB_EmeanNuXbar22_bin100keV.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
+
 file_reactor = str(sys.argv[2]) + "simu_spectra/Reactor_NH_power36_bin100keV.txt"
+### file_reactor = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/Reactor_NH_power36_bin100keV.txt"
 Spectrum_reactor = np.loadtxt(file_reactor)
+
 file_CCatmo = str(sys.argv[2]) + "simu_spectra/CCatmo_Osc1_bin100keV.txt"
+### file_CCatmo = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/CCatmo_Osc1_bin100keV.txt"
 Spectrum_CCatmo = np.loadtxt(file_CCatmo)
 
 """ Variable, which defines the date and time of running the script: """
@@ -90,10 +106,7 @@ date = datetime.datetime.now()
 now = date.strftime("%Y-%m-%d %H:%M")
 
 """ Get Dark Matter mass from the info_signal file: """
-# DM_mass = info_signal[9]
-
-# TODO-me: DM_mass has to be set to the correct value for "NO signal" case (corresponding to file_signal)
-DM_mass = 30
+DM_mass = info_signal[9]
 
 """ Define the energy window, where spectrum of virtual experiment and simulated spectrum is analyzed
     (from min_E_cut in MeV to max_E_cut in MeV): """
@@ -155,15 +168,17 @@ mean_acor_array = np.array([])
 def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor):
     """
     Function, which represents the log-likelihood function.
+
+    The log-likelihood function only depends on the number of signal events. All other parameters are fixed.
+
     The function is defined by the natural logarithm of the function p_spectrum_sb(), that is defined
     on page 3, equation 11 in the GERDA paper.
 
     The likelihood function is given in the GERDA paper (equation 11: p_spectrum_sb) and in the paper arXiv:1208.0834
     'A novel way of constraining WIMPs annihilation in the Sun: MeV neutrinos', page 15, equation (24)
 
-    :param param: np.array of the 'unknown' parameters of the log-likelihood function (param represents the number
-    of signal events, the number of DSNB background events, the number of atmospheric CC background events,
-    and the number of reactor background events (np.array of 4 float)
+    :param param: 'unknown' parameter of the log-likelihood function (param represents the number
+    of signal events (float)
 
     :param data: represents the data, that the model will be fitted to ('observed' number of events for each bin
     from the dataset ('observed' spectrum)) (np.array of float)
@@ -186,12 +201,13 @@ def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, 
     :return: the value of the log-likelihood function (float) (alternatively: returns the log-likelihood function
     as function of the unknown parameters param)
     """
-    # get the single parameters from param (float):
-    s, b_dsnb, b_ccatmo, b_reactor = param
-    # calculate the variable lambda_i(s, b_dsnb, b_ccatmo, b_reactor), which is defined on page 3, equ. 9 of the
+    # get the parameter from param (float):
+    s = param
+    # calculate the variable lambda_i(s), which is defined on page 3, equ. 9 of the
     # GERDA paper 'A Bayesian approach to the analysis of sparsely populated spectra, Calculating the sensitivity of
     # the GERDA experiment' (np.array of float):
-    lamb = fraction_signal*s + fraction_dsnb*b_dsnb + fraction_ccatmo*b_ccatmo + fraction_reactor*b_reactor
+    lamb = (fraction_signal*s + fraction_dsnb*B_DSNB_true + fraction_ccatmo*B_CCatmo_true +
+            fraction_reactor*B_Reactor_true)
 
     # calculate the addends (Summanden) of the log-likelihood-function defined on page 3, equ. 11 of the GERDA paper
     # (np.array of float):
@@ -213,18 +229,17 @@ def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, 
 
 def ln_priorprob(param):
     """
-    Function to calculate the natural logarithm of the prior probabilities of the parameter param.
+    Function to calculate the natural logarithm of the prior probability of the parameter param.
 
     The prior probabilities are partly considered from the GERDA paper, page 6, equ. 20 and 21.
 
-    :param param: np.array of the 'unknown' parameters of the prior probability (param represents the number
-    of signal events, the number of DSNB background events, the number of atmospheric CC background events,
-    and the number of reactor background events (np.array of 4 float)
+    :param param: 'unknown' parameter of the prior probability (param represents the number
+    of signal events (float)
 
     :return: the sum of log of the prior probabilities of the different parameters param
     """
     # get the single parameters from param (float):
-    s, b_dsnb, b_ccatmo, b_reactor = param
+    s = param
 
     # define the ln of the prior probability for the expected signal contribution
     # (flat probability until maximum value S_max):
@@ -237,76 +252,8 @@ def ln_priorprob(param):
         # if s < 0 or s > S_max, the prior probability p_0_s is set to 0 -> ln(0) = -infinity (float):
         ln_prior_s = -np.inf
 
-    # define the ln of the prior probability for the expected DSNB background contribution (the background
-    # contribution is assumed to be 'very poorly known' -> width = 2*B_DSNB_true (poorly known background corresponds
-    # to a width = B_DSNB_true, fairly known background corresponds to a width = B_DSNB_true/2).
-    # The prior probability is chosen to be of Gaussian shape with mean value mu = B_DSNB_true and
-    # width = 2*B_DSNB_true):
-    # INFO-me: DSNB background is assumed to be Gaussian with width = 2*B_DSNB_true -> "very poorly known background"
-    if b_dsnb >= 0.0:
-        # define the mean and the width of the Gaussian function (float):
-        mu_b_dsnb = B_DSNB_true
-        sigma_b_dsnb = B_DSNB_true * 2
-        # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
-        # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
-        sum_2_dsnb = np.log(np.sqrt(np.pi/2) * (sigma_b_dsnb * (erf(mu_b_dsnb / (np.sqrt(2)*sigma_b_dsnb)) + 1)))
-        # calculate the natural logarithm of the numerator of equ. 21 (do NOT calculate exp(-(B-mu)**2)/(2*sigma**2))
-        # first and then take the logarithm, because exp(-1e-3)=0.0 in python and therefore ln(0.0)=-inf for small
-        # values) (float):
-        # INFO-me: there was an error in sum_1_dsnb: instead of b_dsnb, there was b_ccatmo (11.06.2018)
-        sum_1_dsnb = -(b_dsnb - mu_b_dsnb)**2 / (2 * sigma_b_dsnb**2)
-        # natural logarithm of the prior probability (float):
-        ln_prior_b_dsnb = sum_1_dsnb - sum_2_dsnb
-    else:
-        # if b_dsnb < 0, the prior probability is set to 0 -> ln(0) = -infinity (float):
-        ln_prior_b_dsnb = -np.inf
-
-    # define the ln of the prior probability for the expected atmospheric CC background contribution (the background
-    # contribution is assumed to be known up to a factor of 2 -> 'fairly known background'.
-    # The prior probability is chosen to be of Gaussian shape with mean value mu = B_CCatmo_true and
-    # width = B_CCatmo_true/2)
-    if b_ccatmo >= 0.0:
-        # define the mean and the width of the Gaussian function (float):
-        mu_b_ccatmo = B_CCatmo_true
-        sigma_b_ccatmo = B_CCatmo_true / 2
-        # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
-        # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
-        sum_2_ccatmo = np.log(np.sqrt(np.pi/2) * (sigma_b_ccatmo *
-                                                  (erf(mu_b_ccatmo / (np.sqrt(2)*sigma_b_ccatmo)) + 1)))
-        # calculate the natural logarithm of the numerator of equ. 21 (do NOT calculate exp(-(B-mu)**2)/(2*sigma**2))
-        # first and then take the logarithm, because exp(-1e-3)=0.0 in python and therefore ln(0.0)=-inf for small
-        # values) (float):
-        sum_1_ccatmo = -(b_ccatmo - mu_b_ccatmo)**2 / (2 * sigma_b_ccatmo**2)
-        # natural logarithm of the prior probability (float):
-        ln_prior_b_ccatmo = sum_1_ccatmo - sum_2_ccatmo
-    else:
-        # if b_ccatmo < 0, the prior probability is set to 0 -> ln(o) = -infinity (float):
-        ln_prior_b_ccatmo = -np.inf
-
-    # define the ln of the prior probability for the expected reactor background contribution (the background
-    # contribution is assumed to be known up to a factor of 2 -> 'fairly known background'.
-    # The prior probability is chosen to be of Gaussian shape with mean value mu = B_Reactor_true and
-    # width = B_events_reactor/2)
-    if b_reactor >= 0.0:
-        # define the mean and the width of the Gaussian function (float):
-        mu_b_reactor = B_Reactor_true
-        sigma_b_reactor = B_Reactor_true / 2
-        # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
-        # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
-        sum_2_reactor = np.log(np.sqrt(np.pi/2) * (sigma_b_reactor *
-                                                   (erf(mu_b_reactor / (np.sqrt(2)*sigma_b_reactor)) + 1)))
-        # calculate the natural logarithm of the numerator of equ. 21 (do NOT calculate exp(-(B-mu)**2)/(2*sigma**2))
-        # first and then take the logarithm, because exp(-1e-3)=0.0 in python and therefore ln(0.0)=-inf for small
-        # values) (float):
-        sum_1_reactor = -(b_reactor - mu_b_reactor)**2 / (2 * sigma_b_reactor**2)
-        # natural logarithm of the prior probability (float):
-        ln_prior_b_reactor = sum_1_reactor - sum_2_reactor
-    else:
-        # if b_reactor < 0, the prior probability is set to 0 -> ln(o) = -infinity (float):
-        ln_prior_b_reactor = -np.inf
-
-    # return the sum of the log of the prior probabilities (float)
-    return ln_prior_s + ln_prior_b_dsnb + ln_prior_b_ccatmo + ln_prior_b_reactor
+    # return the log of the prior probability (float)
+    return ln_prior_s
 
 
 def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor):
@@ -321,9 +268,8 @@ def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatm
     IMPORTANT:  the denominator of equ. 12 (integral over p_spectrum_SB * p_0_S * p_0_b) is not considered
                 -> it is just a normalization constant
 
-    :param param: np.array of the 'unknown' parameters of the log-likelihood function (param represents the number
-    of signal events, the number of DSNB background events, the number of atmospheric CC background events,
-    and the number of reactor background events (np.array of 4 float)
+    :param param: 'unknown' parameter of the log-likelihood function (param represents the number
+    of signal events (float)
 
     :param data: represents the data, that the model will be fitted to ('observed' number of events for each bin
     from the dataset ('observed' spectrum)) (np.array of float)
@@ -347,7 +293,7 @@ def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatm
     (alternatively: returns the log of the posterior probability as function of the unknown parameters param)
 
     """
-    # calculate the prior probabilities for the parameters (float):
+    # calculate the prior probabilities for the parameter (float):
     lnprior = ln_priorprob(param)
 
     # check if lnprior is finite. If not, return -infinity as full probability:
@@ -379,14 +325,10 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     # guess of the parameters (as guess, the total number of events from the simulated spectrum are used)
     # (np.array of float):
-    # parameter_guess = np.array([S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
+    parameter_guess = np.array([S_true])
 
-    # TODO-me: Change the parameter guess in the "NO signal" case!!!
-    # parameter guess, if there were NO signal events present in the simulated spectrum
-    parameter_guess = np.array([0, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
-
-    # bounds of the parameters (parameters have to be positive or zero) (tuple):
-    bnds = ((0, None), (0, None), (0, None), (0, None))
+    # bounds of the parameter (parameters have to be positive or zero) (tuple):
+    bnds = ((0, None),)
 
     # Minimize the negative log-likelihood function with the L-BFGS-B method for the defined bounds above:
     result = op.minimize(neg_ln_likelihood, parameter_guess,
@@ -394,7 +336,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
                          method='L-BFGS-B', bounds=bnds, options={'disp': None})
 
     # get the best-fit parameters from the minimization (float):
-    S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli = result["x"]
+    S_maxlikeli = result["x"]
 
     """ Sample this distribution using emcee. 
         Start by initializing the walkers in a tiny Gaussian ball around the maximum likelihood result (in the example 
@@ -406,7 +348,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         large number of walkers is that the burnin-phase can be slow. Therefore: use the smallest number of walkers 
         for which the acceptance fraction during burn-in is good (see emcee_1202.3665.pdf): """
     # INFO-me: nwalkers=200 might be ok
-    ndim, nwalkers = 4, 50
+    ndim, nwalkers = 1, 50
     P0 = [result["x"] + 10**(-4)*np.random.randn(ndim) for i in range(nwalkers)]
 
     """ Then, we can set up the sampler 
@@ -454,21 +396,11 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     sampler.chain[:, :, 0].T is the transpose of the array with shape (number_of_steps, nwalkers), so the walker as 
     function of steps): """
     """
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(ndim, 1, sharex='all')
+    fig = plt.figure(1)
     fig.set_size_inches(10, 10)
-    ax1.plot(sampler.chain[:, :, 0].T, '-', color='k', alpha=0.3)
-    ax1.axhline(y=S_true, color='b', linestyle='--')
-    ax1.set_ylabel('$S$')
-    ax2.plot(sampler.chain[:, :, 1].T, '-', color='k', alpha=0.3)
-    ax2.axhline(y=B_DSNB_true, color='b', linestyle='--')
-    ax2.set_ylabel('$B_{DSNB}$')
-    ax3.plot(sampler.chain[:, :, 2].T, '-', color='k', alpha=0.3)
-    ax3.axhline(y=B_CCatmo_true, color='b', linestyle='--')
-    ax3.set_ylabel('$B_{CCatmo}$')
-    ax4.plot(sampler.chain[:, :, 3].T, '-', color='k', alpha=0.3)
-    ax4.axhline(y=B_Reactor_true, color='b', linestyle='--', label='expected number of events')
-    ax4.set_ylabel('$B_{Reactor}$')
-    ax4.set_xlabel('step number')
+    plt.plot(sampler.chain[:, :, 0].T, '-', color='k', alpha=0.3)
+    plt.axhline(y=S_true, color='b', linestyle='--')
+    plt.ylabel('$S$')
     plt.legend()
     if SAVE_DATA:
         fig.savefig(path_analysis + 'Dataset{0}_chain_traces.png'.format(number))
@@ -529,7 +461,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):
-    signal_sample = samples[:, 0]
+    signal_sample = samples
     # put signal_sample in a histogram (2 np.arrays of float), hist are the values of the histogram,
     # bins return the bin edges (length(hist)+1)
     hist_S, bin_edges_S = np.histogram(signal_sample, bins='auto', range=(0, signal_sample.max()))
@@ -543,84 +475,16 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # get the value in the middle of the bin (float):
     S_mode = (value_left_edge_S + value_right_edge_S) / 2
 
-    """
-    # Info-me: try to calculate the 90% limit not with np.percentile, BUT directly with the integral:
-    # use bin_edges_S to calculate the value of the middle of each bin (np.array of float):
-    bin_middle_S = (bin_edges_S[0:-1] + bin_edges_S[1:]) / 2
-    # calculate the bin-width, 'auto' generates bins with equal width(float):
-    bin_width_S = bin_edges_S[1] - bin_edges_S[0]
-    # integrate hist_S over bin_middle_S (float):
-    integral_hist_S = np.sum(hist_S) * bin_width_S
-    # calculate S_90 by integrating hist_S over bin_middle_S up to 0.9*integral_hist_S:
-    for index_bin in np.arange(1, len(bin_middle_S), 1):
-        # integral until index_bin:
-        integral = np.sum(hist_S[0:index_bin]) * bin_width_S
-
-        if integral < 0.9*integral_hist_S:
-            continue
-
-        else:
-            # last bin for which the integral is smaller than 0.9*integral_hist_S:
-            S_90_index_minus_1 = bin_middle_S[index_bin - 1]
-            # first bin for which the integral is greater than 0.9*integral_hist_S:
-            S_90_index = bin_middle_S[index_bin]
-            break
-    """
-
     # Calculate the 90 percent upper limit of the signal contribution (float)
     S_90 = np.percentile(signal_sample, 90)
 
-    """ Calculate the mode of the DSNB_sample distribution: """
-    # get the sample-chain of the DSNB background contribution (np.array of float):
-    DSNB_sample = samples[:, 1]
-    # put DSNB_sample in a histogram (2 np.arrays of float):
-    hist_DSNB, bin_edges_DSNB = np.histogram(DSNB_sample, bins='auto', range=(0, DSNB_sample.max()))
-    # get the index of the bin, where hist_DSNB is maximal (integer):
-    index_DSNB = np.argmax(hist_DSNB)
-    # get the value of the left edge of the bin for index_DSNB from above (float):
-    value_left_edge_DSNB = bin_edges_DSNB[index_DSNB]
-    # get the value of the right edge of the bin for index_DSNB from above (float):
-    value_right_edge_DSNB = bin_edges_DSNB[index_DSNB+1]
-    # calculate the mode of the DSNB_sample, therefore calculate the mean of value_left_edge and value_right_edge to
-    # get the value in the middle of the bin (float):
-    DSNB_mode = (value_left_edge_DSNB + value_right_edge_DSNB) / 2
-
-    """ Calculate the mode of the CCatmo_sample distribution: """
-    # get the sample-chain of the atmo. CC background contribution (np.array of float):
-    CCatmo_sample = samples[:, 2]
-    # put CCatmo_sample in a histogram (2 np.arrays of float):
-    hist_CCatmo, bin_edges_CCatmo = np.histogram(CCatmo_sample, bins='auto', range=(0, CCatmo_sample.max()))
-    # get the index of the bin, where hist_CCatmo is maximal (integer):
-    index_CCatmo = np.argmax(hist_CCatmo)
-    # get the value of the left edge of the bin for index_CCatmo from above (float):
-    value_left_edge_CCatmo = bin_edges_CCatmo[index_CCatmo]
-    # get the value of the right edge of the bin for index_CCatmo from above (float):
-    value_right_edge_CCatmo = bin_edges_CCatmo[index_CCatmo+1]
-    # calculate the mode of the CCatmo_sample, therefore calculate the mean of value_left_edge and value_right_edge to
-    # get the value in the middle of the bin (float):
-    CCatmo_mode = (value_left_edge_CCatmo + value_right_edge_CCatmo) / 2
-
-    """ Calculate the mode of the Reactor_sample distribution: """
-    # get the sample-chain of the reactor background contribution (np.array of float):
-    Reactor_sample = samples[:, 3]
-    # put Reactor_sample in a histogram (2 np.arrays of float):
-    hist_Reactor, bin_edges_Reactor = np.histogram(Reactor_sample, bins='auto', range=(0, Reactor_sample.max()))
-    # get the index of the bin, where hist_Reactor is maximal (integer):
-    index_Reactor = np.argmax(hist_Reactor)
-    # get the value of the left edge of the bin for index_Reactor from above (float):
-    value_left_edge_Reactor = bin_edges_Reactor[index_Reactor]
-    # get the value of the right edge of the bin for index_Reactor from above (float):
-    value_right_edge_Reactor = bin_edges_Reactor[index_Reactor+1]
-    # calculate the mode of the Reactor_sample, therefore calculate the mean of value_left_edge and value_right_edge to
-    # get the value in the middle of the bin (float):
-    Reactor_mode = (value_left_edge_Reactor + value_right_edge_Reactor) / 2
-
-    """ Now that we have this list of samples, let’s make one of the most useful plots you can make with your MCMC 
-        results: a corner plot. Generate a corner plot is as simple as: """
-    # NOTE: the quantile(0.5) is equal to the np.median() and is equal to np.percentile(50) -> NOT equal to np.mean()
-    fig1 = corner.corner(samples, labels=["$S$", "$B_{DSNB}$", "$B_{CCatmo}$", "$B_{reactor}$"],
-                         truths=[S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true], truth_color='b',
-                         quantiles=[0.16, 0.5, 0.84], show_titles=True, title_fmt='.4f', labels_args={"fontsize": 40})
+    fig1 = plt.figure(2)
+    plt.step(bin_edges_S[:-1], hist_S, label="S_mode = {0:.4f}\nS_90 = {1:.4f}".format(S_mode, S_90))
+    plt.xticks(np.arange(0, 20, 0.5))
+    plt.xlabel("number of 'observed' signal events S")
+    plt.ylabel("counts")
+    plt.title("p(S) from MCMC sampling for one dataset")
+    plt.legend()
     # save figure:
     if SAVE_DATA:
         fig1.savefig(path_analysis + "Dataset{0}_fitresult.png".format(number))
@@ -633,23 +497,16 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     if SAVE_DATA:
         # save the output of the analysis of the dataset to txt-file:
         np.savetxt(path_analysis + 'Dataset{0}_mcmc_analysis.txt'.format(number),
-                   np.array([S_mode, S_90, DSNB_mode, CCatmo_mode, Reactor_mode,
-                             S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli]),
+                   np.array([S_mode, S_90, S_maxlikeli]),
                    fmt='%4.5f',
                    header='Results of the MCMC analysis of vir. experiment (Dataset_{0:d}) to the expected spectrum '
-                          '(job_number = {4}, analyzed with analyze_spectra_v5_server.py, {1}):\n'
+                          '(analyzed with analyze_spectra_v5_server_fixBkg.py, {1}):\n'
                           'General information of the analysis are saved in info_mcmc_analysis_{2:d}_{3:d}.txt\n'
                           'Results of the analysis:\n'
                           'mode of the number of signal events,\n'
                           '90% upper limit of the number of signal events,\n'
-                          'mode of the number of DSNB background events,\n'
-                          'mode of the number of atmospheric CC background events,\n'
-                          'mode of the number of reactor background events,\n'
-                          'best-fit parameter for the number of signal events,\n'
-                          'best-fit parameter for the number of DSNB background events,\n'
-                          'best-fit parameter for the number of atmo. CC background events,\n'
-                          'best-fit parameter for the number of reactor background events:'
-                   .format(number, now, dataset_start, dataset_stop, job_number))
+                          'best-fit parameter for the number of signal events:'
+                   .format(number, now, dataset_start, dataset_stop))
 
 # To save the general information about the analysis, SAVE_DATA must be True:
 if SAVE_DATA:
@@ -659,7 +516,7 @@ if SAVE_DATA:
                          B_CCatmo_true, B_Reactor_true, nwalkers, value_of_a, number_of_steps, step_burnin]),
                fmt='%4.5f',
                header='General information about the MCMC analysis of virtual experiment to the expected spectra '
-                      '(job_number = {8}, analyzed with analyze_spectra_v5_server.py, {0}):\n'
+                      '(analyzed with analyze_spectra_v5_server_fixBkg.py, {0}):\n'
                       'The Datasets are saved in folder: {3}\n'
                       'Analyzed datasets: Dataset_{1:d}.txt to Dataset_{2:d}.txt\n'
                       'Input files of the simulated spectra:\n'
@@ -668,11 +525,6 @@ if SAVE_DATA:
                       '{6},\n'
                       '{7},\n'
                       'Prior Probability of Signal: flat_distribution (1/S_max) from 0 to S_max\n'
-                      'Prior Prob. of DSNB bkg: Gaussian with mean=B_DSNB_true and sigma = 2*B_DSNB_true\n'
-                      'Corresponding to page 16 in the GERDA paper -> "very poorly known background"\n'
-                      'Prior Prob. of atmo. CC bkg: Gaussian with mean=B_CCatmo_true and sigma = B_CCatmo_true/2\n'
-                      'Prior Prob. of reactor bkg: Gaussian with mean=B_Reactor_true and sigma = B_Reactor_true/2\n'
-                      'Equations 20 and 21 of GERDA paper ("fairly known background")\n'
                       'Values below:\n'
                       'Dark matter mass in MeV:\n'
                       'minimum E_cut in MeV, maximum E_cut in MeV, interval-width of the E_cut array in MeV,\n'
@@ -687,7 +539,7 @@ if SAVE_DATA:
                       'number of step, which are used for "burning in" (the first steps are not considered in the '
                       'sample):'
                .format(now, dataset_start, dataset_stop, path_dataset, file_signal, file_DSNB, file_CCatmo,
-                       file_reactor, job_number))
+                       file_reactor))
 
     # Save the mean of the acceptance fractions during sampling of every analyzed dataset to txt-file:
     np.savetxt(path_analysis + '/acceptance_fraction_sampling_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),

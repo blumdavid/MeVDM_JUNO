@@ -1415,8 +1415,6 @@ def ccatmospheric_background_v2(energy_neutrino, energy_visible, binning_energy_
 
     """ Theoretical spectrum of atmospheric charged-current background: """
 
-    # TODO-me: include the atmospheric CC flux from HONDA at JUNO site
-
     # INFO-me: i have checked the values of the fluxes on 06.02.2018
     # Neutrino energy in MeV from table 3 from paper 1-s2.0-S0927650505000526-main (np.array of float):
     e_data = np.array([0, 13, 15, 17, 19, 21, 24, 27, 30, 33, 38, 42, 47, 53, 60, 67, 75, 84, 94, 106, 119, 133, 150,
@@ -1476,7 +1474,16 @@ def ccatmospheric_background_v3(energy_neutrino, energy_visible, binning_energy_
                                 t, detection_efficiency, mass_proton, mass_neutron, mass_positron):
     """ Simulate the atmospheric Charged Current electron-antineutrino background:
 
-        ! Version 3:  !
+        ! Version 3: the atmospheric CC neutrino flux is based on the simulations of HONDA for the JUNO location!
+
+        Results of the HONDA simulation are based on the paper of Honda2015: 'Atmospheric neutrino flux calculation
+        using the NRLMSISE-00 atmospheric model')
+
+        The HONDA flux is simulated for JUNO site only for energies above 100 MeV. In the range below 100 MeV the
+        spectral shape of the FLUKA simulation in the range from 10 to 100 MeV is used, but normalized to the flux
+        from the HONDA simulation.
+
+        Detailed information about the calculations are in the python script 'atmospheric_flux.py'.
 
         Convolution of the theoretical spectrum with gaussian distribution is calculated with the
         function convolution()
@@ -1485,24 +1492,203 @@ def ccatmospheric_background_v3(energy_neutrino, energy_visible, binning_energy_
         detail in the my notes. In the paper the electron- and muon-antineutrino flux is simulated for energies
         from 10 MeV to 100 MeV.
 
+    :param energy_neutrino: energy corresponding to the electron-antineutrino energy in MeV (np.array of float)
+    :param energy_visible: energy corresponding to the visible energy in the detector (np.array of float)
+    :param binning_energy_visible: bin-width of the visible energy in MeV (float)
+    :param crosssection: IBD cross-section in cm**2 (np.array of float), produced with the function sigma_ibd()
+    :param n_target: number of free protons in JUNO (float)
+    :param t: exposure time in seconds (float)
+    :param detection_efficiency: detection efficiency of IBD in JUNO (float)
+    :param mass_proton: mass of the proton in MeV (float)
+    :param mass_neutron: mass of the neutron in MeV (float)
+    :param mass_positron: mass of the positron in MeV (float)
 
-    :param energy_neutrino:
-    :param energy_visible:
-    :param binning_energy_visible:
-    :param crosssection:
-    :param n_target:
-    :param t:
-    :param detection_efficiency:
-    :param mass_proton:
-    :param mass_neutron:
-    :param mass_positron:
-    :return:
+    :return:spectrum_ccatmospheric: spectrum of electron-antineutrinos of CC atmospheric background (np.array of float)
+            n_neutrino_ccatmospheric_vis: number of neutrinos from calculated spectrum (float9)
+            theo_spectrum_ccatmospheric: Theoretical spectrum of the atmospheric CC electron-antineutrino background
+            in 1/MeV (number of events as function of the electron-antineutrino energy) (np.array of float64)
+            e_visible_ccatmospheric: array of visible energies in MeV (np.array of float)
+            n_neutrino_ccatmospheric_theo: number of atmospheric CC electron-antineutrino events in JUNO after "time"
+            (float64)
+            oscillation: oscillation is considered for oscillation=1, oscillation is not considered for oscillation=0
+            (integer)
+            prob_e_to_e: survival probability of electron-antineutrinos (electron-antineutrinos oscillate to
+            electron-antineutrinos) (float)
+            prob_mu_to_e: oscillation probability (muon-antineutrinos oscillate to electron-antineutrinos) (float)
     """
 
-    # TODO-me: include the atmospheric CC flux from HONDA at JUNO site
-    # TODO-me: Why is the flux in Julia's talk higher than mine?????
+    # INFO-me: in the notes "Vergleich Atmospheric Flux aus Paper mit Julia's Werten", the flux of Julia was higher
+    # than in the data of the paper. BUT in Julia's talk in Strasbourg, the spectrum was lower than in the previous
+    # spectrum. Now the spectrum of Julia and from atmospheric_flux.py are more similar.
 
-    return
+    """ Theoretical spectrum of atmospheric charged-current background: """
+
+    """ Results of the FLUKA simulation (from the paper of Battistoni2005 'The atmospheric neutrino fluxes below 100 MeV: 
+    The FLUKA results'): """
+    # Neutrino energy in MeV from table 3 from paper 1-s2.0-S0927650505000526-main (np.array of float):
+    energy_fluka = np.array([0, 13, 15, 17, 19, 21, 24, 27, 30, 33, 38, 42, 47, 53, 60, 67, 75, 84, 94, 106, 119, 133,
+                             150, 168, 188, 211, 237, 266, 299, 335, 376, 422, 473, 531, 596, 668, 750, 841, 944])
+
+    # differential flux from FLUKA in energy for no oscillation for electron-antineutrinos for solar average at the site
+    # of Super-Kamiokande, in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float).
+    # Assumption: for energy = 0 MeV, the flux is also 0!
+    flux_nuebar_fluka = 10 ** (-4) * np.array([0, 63.7, 69.7, 79.5, 84.2, 89.4, 95.0, 99.3, 103., 104., 101., 96.1,
+                                               83.5, 65.9, 60.0, 56.4, 51.4, 46.3, 43.0, 37.2, 32.9, 28.8, 24.9, 21.3,
+                                               18.3, 15.4, 12.9, 10.6, 8.80, 7.13, 5.75, 4.60, 3.68, 2.88, 2.28,
+                                               1.87, 1.37, 1.06, 0.800])
+
+    # differential flux from FLUKA in energy for no oscillation for muon-antineutrinos for solar average at the site of
+    # Super-K, in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float).
+    # Assumption: for energy = 0 MeV, the flux is also 0!
+    flux_numubar_fluka = 10 ** (-4) * np.array([0, 116., 128., 136., 150., 158., 162., 170., 196., 177., 182., 183.,
+                                                181., 155., 132., 123., 112., 101., 92.1, 82.2, 72.5, 64.0, 55.6,
+                                                47.6, 40.8, 34.1, 28.6, 23.5, 19.3, 15.7, 12.6, 10.2, 8.15, 6.48,
+                                                5.02, 3.94, 3.03, 2.33, 1.79])
+
+    """ Results of the HONDA simulation (based on the paper of Honda2015: 'Atmospheric neutrino flux calculation using
+    the NRLMSISE-00 atmospheric model'): """
+    # Neutrino energy in MeV from the table from file HONDA_juno-ally-01-01-solmin.d (is equal to neutrino energy
+    # in HONDA_juno-ally-01-01-solmax.d) (np.array of float):
+    energy_honda = 10**3 * np.array([1.0000E-01, 1.1220E-01, 1.2589E-01, 1.4125E-01, 1.5849E-01, 1.7783E-01, 1.9953E-01,
+                                     2.2387E-01, 2.5119E-01, 2.8184E-01, 3.1623E-01, 3.5481E-01, 3.9811E-01, 4.4668E-01,
+                                     5.0119E-01, 5.6234E-01, 6.3096E-01, 7.0795E-01, 7.9433E-01, 8.9125E-01,
+                                     1.0000E+00])
+
+    """ for solar minimum (HONDA_juno-ally-01-01-solmin.d): """
+    # all-direction averaged flux for no oscillation for electron-antineutrinos for solar minimum at the site of JUNO
+    # (WITHOUT mountain over the detector), in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float):
+    # INFO-me: Solid angle (Raumwinkel) of the whole spherical angle  is = 4*pi sr! -> factor 4*pi must be correct!
+    flux_nuebar_min_honda = 10**(-7) * 4*np.pi * np.array([2.9367E+03, 2.5746E+03, 2.2332E+03, 1.9206E+03, 1.6395E+03,
+                                                           1.3891E+03, 1.1679E+03, 9.7454E+02, 8.0732E+02, 6.6312E+02,
+                                                           5.4052E+02, 4.3731E+02, 3.5122E+02, 2.8033E+02, 2.2264E+02,
+                                                           1.7581E+02, 1.3804E+02, 1.0776E+02, 8.3623E+01, 6.4555E+01,
+                                                           4.9632E+01])
+
+    # all-direction averaged flux for no oscillation for muon-antineutrinos for solar minimum at the site of JUNO
+    # (WITHOUT mountain over the detector), in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float):
+    flux_numubar_min_honda = 10**(-7) * 4*np.pi * np.array([6.2903E+03, 5.5084E+03, 4.8032E+03, 4.1620E+03, 3.5763E+03,
+                                                            3.0444E+03, 2.5663E+03, 2.1426E+03, 1.7736E+03, 1.4575E+03,
+                                                            1.1890E+03, 9.6400E+02, 7.7693E+02, 6.2283E+02, 4.9647E+02,
+                                                            3.9325E+02, 3.1003E+02, 2.4324E+02, 1.9004E+02, 1.4788E+02,
+                                                            1.1447E+02])
+
+    """ for solar maximum (HONDA_juno-ally-01-01-solmax.d): """
+    # all-direction averaged flux for no oscillation for electron-antineutrinos for solar maximum at the site of JUNO
+    # (WITHOUT mountain over the detector), in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float):
+    flux_nuebar_max_honda = 10**(-7) * 4*np.pi * np.array([2.7733E+03, 2.4332E+03, 2.1124E+03, 1.8187E+03, 1.5545E+03,
+                                                           1.3190E+03, 1.1105E+03, 9.2820E+02, 7.7040E+02, 6.3403E+02,
+                                                           5.1790E+02, 4.1997E+02, 3.3811E+02, 2.7054E+02, 2.1539E+02,
+                                                           1.7049E+02, 1.3418E+02, 1.0499E+02, 8.1651E+01, 6.3166E+01,
+                                                           4.8654E+01])
+
+    # all-direction averaged flux for no oscillation for muon-antineutrinos for solar maximum at the site of JUNO
+    # (WITHOUT mountain over the detector), in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float):
+    flux_numubar_max_honda = 10**(-7) * 4*np.pi * np.array([5.8966E+03, 5.1676E+03, 4.5104E+03, 3.9127E+03, 3.3665E+03,
+                                                            2.8701E+03, 2.4238E+03, 2.0277E+03, 1.6821E+03, 1.3857E+03,
+                                                            1.1333E+03, 9.2144E+02, 7.4476E+02, 5.9875E+02, 4.7865E+02,
+                                                            3.8024E+02, 3.0060E+02, 2.3645E+02, 1.8519E+02, 1.4444E+02,
+                                                            1.1204E+02])
+
+    # all-direction averaged flux for no oscillation for electron-antineutrinos for solar AVERAGE at the site of JUNO
+    # (WITHOUT mountain over the detector), in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float):
+    flux_atmo_nuebar_honda = (flux_nuebar_min_honda + flux_nuebar_max_honda) / 2
+
+    # all-direction averaged flux for no oscillation for muon-antineutrinos for solar AVERAGE at the site of JUNO
+    # (WITHOUT mountain over the detector), in (MeV**(-1) * cm**(-2) * s**(-1)) (np.array of float):
+    flux_atmo_numubar_honda = (flux_numubar_min_honda + flux_numubar_max_honda) / 2
+
+    """ Extrapolate the HONDA flux to the energies of the FLUKA simulation from 10 MeV to 100 MeV: """
+    """ Assumption:
+        1. the shape of the FLUKA flux as function of energy do NOT depend on the location
+            -> the shape of the flux at Super-K can also be used at JUNO site
+        
+        2. the absolute value of the FLUKA flux at Super-K should be normalized to the location of JUNO
+            ->  therefore get the normalization factor by comparing the HONDA flux and the FLUKA flux in the energy 
+                range from 100 MeV to 1 GeV        
+    """
+    # define the energy-array, in which the normalization will be calculated (neutrino energy in MeV)
+    # (np.array of float):
+    energy_norm = np.arange(min(energy_honda), max(energy_fluka)+0.1, 0.1)
+
+    """ For electron antineutrinos: """
+    # Interpolate the flux of FLUKA to get the differential flux in the energy range from 100 MeV to 950 MeV,
+    # in 1/(MeV * cm**2 * s) (np.array of float):
+    flux_nuebar_fluka_interpolated = np.interp(energy_norm, energy_fluka, flux_nuebar_fluka)
+
+    # Interpolate the flux of HONDA to get the differential flux in the energy range from 100 MeV to 950 MeV,
+    # in 1/(MeV * cm**2 * s) (np.array of float):
+    flux_nuebar_honda_interpolated = np.interp(energy_norm, energy_honda, flux_atmo_nuebar_honda)
+
+    # Calculate the integral of the FLUKA flux in the energy range given by energy_norm (float):
+    integral_nuebar_fluka = np.trapz(flux_nuebar_fluka_interpolated, energy_norm)
+
+    # Calculate the integral of the HONDA flux in the energy range given by energy_norm (float):
+    integral_nuebar_honda = np.trapz(flux_nuebar_honda_interpolated, energy_norm)
+
+    # Interpolate the INTERESTING part of the FLUKA flux in the energy range from 10 MeV to 115 MeV, in 1/(MeV*s*cm**2)
+    # (np.array of float):
+    flux_nuebar_fluka_interesting = np.interp(energy_neutrino, energy_fluka, flux_nuebar_fluka)
+
+    # Normalize flux_nuebar_fluka_interesting at Super-K to the electron-antineutrino flux at JUNO,
+    # in 1/(MeV * s * cm**2) (np.array of float):
+    flux_nuebar_juno = flux_nuebar_fluka_interesting * integral_nuebar_honda / integral_nuebar_fluka
+
+    """ For muon antineutrinos: """
+    # Interpolate the flux of FLUKA to get the differential flux in the energy range from 100 MeV to 950 MeV,
+    # in 1/(MeV * cm**2 * s) (np.array of float):
+    flux_numubar_fluka_interpolated = np.interp(energy_norm, energy_fluka, flux_numubar_fluka)
+
+    # Interpolate the flux of HONDA to get the differential flux in the energy range from 100 MeV to 950 MeV,
+    # in 1/(MeV * cm**2 * s) (np.array of float):
+    flux_numubar_honda_interpolated = np.interp(energy_norm, energy_honda, flux_atmo_numubar_honda)
+
+    # Calculate the integral of the FLUKA flux in the energy range given by energy_norm (float):
+    integral_numubar_fluka = np.trapz(flux_numubar_fluka_interpolated, energy_norm)
+
+    # Calculate the integral of the HONDA flux in the energy range given by energy_norm (float):
+    integral_numubar_honda = np.trapz(flux_numubar_honda_interpolated, energy_norm)
+
+    # Interpolate the INTERESTING part of the FLUKA flux in the energy range from 10 MeV to 100 MeV, in 1/(MeV*s*cm**2)
+    # (np.array of float):
+    flux_numubar_fluka_interesting = np.interp(energy_neutrino, energy_fluka, flux_numubar_fluka)
+
+    # Normalize flux_numubar_fluka_interesting at Super-K to the muon-antineutrino flux at JUNO,
+    # in 1/(MeV * s * cm**2) (np.array of float):
+    flux_numubar_juno = flux_numubar_fluka_interesting * integral_numubar_honda / integral_numubar_fluka
+
+    """ Taking account neutrino oscillation from the Appendix B of the paper of Fogli et al. from 2004 with title
+    "Three-generation flavor transitions and decays of supernova relic neutrinos" (like in ccatmospheric_background_v2):
+    """
+    # Integer, that defines, if oscillation is considered (oscillation = 1) or not (oscillation = 0):
+    oscillation = 1
+    # survival probability of electron-antineutrinos (prob_e_to_e = 0.67):
+    prob_e_to_e = 0.67
+    # oscillation probability (muon-antineutrinos oscillate to electron-antineutrinos) (prob_mu_to_e = 0.17):
+    prob_mu_to_e = 0.17
+
+    # total electron-antineutrino flux in the INTERESTING part (10 to 115 MeV) of FLUKA simulation normalized to
+    # JUNO site (HONDA) in 1/(MeV * cm**2 * s), (np.array of float):
+    flux_total_ccatmospheric_nu_e_bar = prob_e_to_e * flux_nuebar_juno + prob_mu_to_e * flux_numubar_juno
+
+    # Theoretical spectrum (in events per MeV) of electron-antineutrinos ("number of positron-events") from
+    # inverse beta decay on free protons (from paper 0903.5323.pdf, equ. 64) (np.array of float):
+    theo_spectrum_ccatmospheric = (flux_total_ccatmospheric_nu_e_bar * crosssection *
+                                   detection_efficiency * n_target * t)
+
+    # number of neutrinos from CC atmospheric background in JUNO detector after "time":
+    n_neutrino_ccatmospheric_theo = np.trapz(theo_spectrum_ccatmospheric, energy_neutrino)
+
+    """ Spectrum of the atmospheric charged-current electron-antineutrino background in 1/MeV, 
+        theoretical spectrum is convolved with gaussian distribution: """
+    spectrum_ccatmospheric = convolution(energy_neutrino, energy_visible, binning_energy_visible,
+                                         theo_spectrum_ccatmospheric, mass_proton, mass_neutron, mass_positron)
+
+    # calculate the number of neutrinos from the spectrum_ccatmospheric as test (float)
+    # (compare it with n_neutrino_ccatmospheric_theo to check if the convolution works well):
+    n_neutrino_ccatmospheric_vis = np.trapz(spectrum_ccatmospheric, energy_visible)
+
+    return (spectrum_ccatmospheric, n_neutrino_ccatmospheric_vis, theo_spectrum_ccatmospheric,
+            n_neutrino_ccatmospheric_theo, oscillation, prob_e_to_e, prob_mu_to_e)
 
 
 def compare_4fileinputs(signal, dsnb, ccatmo, reactor, output_string):

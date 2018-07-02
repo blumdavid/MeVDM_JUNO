@@ -7,14 +7,16 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # DM mass in MeV:
-DM_mass = 25
+DM_mass = 30
 
 # number of the test:
-test_number = 10
+test_number = 11
 
 # path to the folder, where the txt files are saved:
-path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_{0}/" \
-             "analysis_mcmc_test{1}/".format(DM_mass, test_number)
+###path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_{0}/" \
+###             "analysis_mcmc_test{1}/".format(DM_mass, test_number)
+path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_30/" \
+             "analysis_mcmc_fixBkg/"
 
 # variable, that includes, for how many datasets the autocorrelation time could be calculated (integer):
 number_acor_calculated = 0
@@ -27,7 +29,7 @@ acor_time_calculated = np.array([])
 number_acor_failed = 0
 
 # loop over the txt files:
-for index in np.arange(1, 10000, 100):
+for index in np.arange(1, 5000, 100):
 
     # load the mean autocorrelation time from the txt files (np.array of float):
     autocorr_time = np.loadtxt(path_files + "autocorrelation_time_{0}_{1}.txt".format(index, index+99))
@@ -65,7 +67,7 @@ n1, bins1, patches1 = plt.hist(acor_time_calculated, bins=Bins1, histtype='step'
                                label="number of entries = {0}".format(number_acor_calculated))
 plt.xlabel("calculated mean autocorrelation time")
 plt.ylabel("counts")
-plt.title("Mean autocorrelation time for 10000 datasets in dataset_output_{0}".format(DM_mass))
+plt.title("Mean autocorrelation time for 5000 datasets in dataset_output_{0}".format(DM_mass))
 plt.legend()
 plt.show()
 

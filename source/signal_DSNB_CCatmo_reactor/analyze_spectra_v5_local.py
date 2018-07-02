@@ -37,7 +37,7 @@ import corner
 import scipy.optimize as op
 from matplotlib import pyplot as plt
 
-# TODO-me: create and update the files: analyze_spectra_v5_server.py AND analyze_spectra_v5_server2.py
+# TODO-me: update the files: analyze_spectra_v5_server2.py
 
 # TODO: i have to cite the package 'emcee', when I use it to analyze
 
@@ -121,7 +121,8 @@ spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 
 
 """ 'true' values of the parameters: """
 # expected number of signal events in the energy window (float):
-S_true = np.sum(spectrum_Signal_per_bin)
+# S_true = np.sum(spectrum_Signal_per_bin)
+S_true = 0
 # maximum value of signal events consistent with existing limits (assuming the 90 % upper limit for the annihilation
 # cross-section of Super-K from paper 0710.5420, for the description and calculation see limit_from_SuperK.py)
 # INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
@@ -477,6 +478,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     ax4.set_ylabel('$B_{Reactor}$')
     ax4.set_xlabel('step number')
     plt.legend()
+    plt.show()
     if SAVE_DATA:
         fig.savefig(path_analysis + '/Dataset{0}_chain_traces.png'.format(number))
     plt.close(fig)
@@ -556,6 +558,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     print("integral = {0}".format(integral_hist_S))
 
     plt.step(bin_middle_S, hist_S, 'x')
+    plt.xticks(np.arange(0, 20, 0.5))
     plt.xlabel("S")
     plt.ylabel("counts")
     plt.title("p(S) from MCMC sampling for one dataset")

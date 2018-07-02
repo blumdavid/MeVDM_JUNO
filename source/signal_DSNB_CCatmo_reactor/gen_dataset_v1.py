@@ -313,7 +313,7 @@ def gen_dataset(mass_dm, save_data_txt, save_data_all, display_data, dataset_sta
 
     # to save the simulated total spectrum, save_data_all must be True:
     if save_data_all:
-        # save total simulated spectrum to spectrum-file_
+        # save total simulated spectrum to spectrum-file:
         np.savetxt(path_output + '/spectrum_simulated.txt', spectrum_total_per_bin, fmt='%4.5f',
                    header='Total simulated spectrum in events/bin:\n'
                           '(sum of single spectra from input files:\n'

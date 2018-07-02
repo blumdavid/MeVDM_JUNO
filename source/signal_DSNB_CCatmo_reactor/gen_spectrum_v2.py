@@ -16,15 +16,15 @@ import datetime
 import numpy as np
 from matplotlib import pyplot
 from work.MeVDM_JUNO.source.gen_spectrum_functions import sigma_ibd, darkmatter_signal_v2, dsnb_background_v2, \
-    reactor_background_v2, ccatmospheric_background_v2
+    reactor_background_v2, ccatmospheric_background_v3
 
 """ Set boolean values to define, what is simulated in the code, if the data is saved and if spectra are displayed: """
 # generate signal from DM annihilation:
-DM_SIGNAL = True
+DM_SIGNAL = False
 # generate DSNB background:
 DSNB_BACKGROUND = False
 # generate CC atmospheric background:
-CCATMOSPHERIC_BACKGROUND = False
+CCATMOSPHERIC_BACKGROUND = True
 # generate reactor antineutrino background:
 REACTOR_BACKGROUND = False
 # save the data:
@@ -40,7 +40,7 @@ now = date.strftime("%Y-%m-%d %H:%M")
 """ Dark Matter mass in MeV:"""
 # Dark Matter mass in MeV (float):
 # TODO-me: change the Dark Matter mass to scan the whole energy range
-mass_DM = 95.0
+mass_DM = 30.0
 
 """ energy-array: """
 # energy corresponding to the electron-antineutrino energy in MeV (np.array of float64):
@@ -91,9 +91,6 @@ sigma_IBD = sigma_ibd(E_neutrino, DELTA, MASS_POSITRON)
 # INFO-me: -> the rate will decrease!!
 
 
-# TODO-me: include the atmospheric CC flux from HONDA at JUNO site
-# TODO-me: see atmospheric_flux.py
-
 # TODO-me: Neutral Current atmospheric background has to be investigated and added
 # INFO-me: can be reduced by PSD, but is still a significant background
 
@@ -125,7 +122,8 @@ if DM_SIGNAL:
     if SAVE_DATA:
         # save Spectrum_signal to txt-spectrum-file and information about simulation in txt-info-file:
         print("... save data of spectrum to file...")
-        np.savetxt('gen_spectrum_v2/signal_DMmass{0:.0f}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/'
+                   'signal_DMmass{0:.0f}_bin{1:.0f}keV.txt'
                    .format(mass_DM, interval_E_visible*1000), Spectrum_signal, fmt='%1.5e',
                    header='Spectrum in electron-antineutrino/MeV of DM annihilation signal '
                           '(calculated with gen_spectrum_v2.py, {0}):'
@@ -134,7 +132,8 @@ if DM_SIGNAL:
                           'E_visible = {5:.3f} MeV:'
                    .format(now, mass_DM, N_neutrino_signal_theo, N_neutrino_signal_vis, sigma_Anni,
                            interval_E_visible))
-        np.savetxt('gen_spectrum_v2/signal_info_DMmass{0:.0f}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/'
+                   'signal_info_DMmass{0:.0f}_bin{1:.0f}keV.txt'
                    .format(mass_DM, interval_E_visible*1000),
                    np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
                              interval_E_visible, t_years, N_target, detection_eff, mass_DM, N_neutrino_signal_theo,
@@ -163,7 +162,7 @@ if DSNB_BACKGROUND:
     if SAVE_DATA:
         # save Spectrum_DSNB to txt-spectrum-file and information about simulation in txt-info-file:
         print("... save data of spectrum to file...")
-        np.savetxt('gen_spectrum_v2/DSNB_EmeanNuXbar{0:.0f}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/DSNB_EmeanNuXbar{0:.0f}_bin{1:.0f}keV.txt'
                    .format(E_mean_NuXbar, interval_E_visible*1000), Spectrum_DSNB, fmt='%1.5e',
                    header='Spectrum in electron-antineutrino/MeV of DSNB background '
                           '(calculated with gen_spectrum_v2.py, {0}):'
@@ -173,7 +172,7 @@ if DSNB_BACKGROUND:
                           'binning of E_visible = {7:.3f} Mev:'
                    .format(now, N_neutrino_DSNB_theo, N_neutrino_DSNB_vis, E_mean_NuEbar, beta_NuEbar,
                            E_mean_NuXbar, beta_NuXbar, interval_E_visible))
-        np.savetxt('gen_spectrum_v2/DSNB_info_EmeanNuXbar{0:.0f}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/DSNB_info_EmeanNuXbar{0:.0f}_bin{1:.0f}keV.txt'
                    .format(E_mean_NuXbar, interval_E_visible*1000),
                    np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
                              interval_E_visible, t_years, N_target, detection_eff, N_neutrino_DSNB_theo,
@@ -202,7 +201,7 @@ if REACTOR_BACKGROUND:
     if SAVE_DATA:
         # save Spectrum_reactor to txt-spectrum-file and information about simulation in txt-info-file:
         print("... save data of spectrum to file...")
-        np.savetxt('gen_spectrum_v2/Reactor_NH_power{0:.0f}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/Reactor_NH_power{0:.0f}_bin{1:.0f}keV.txt'
                    .format(power_thermal, interval_E_visible*1000), Spectrum_reactor, fmt='%1.5e',
                    header='Spectrum in electron-antineutrino/MeV of reactor background '
                           '(calculated with gen_spectrum_v2.py, {0}):'
@@ -210,7 +209,7 @@ if REACTOR_BACKGROUND:
                           'normal hierarchy considered, thermal power = {3:.2f} GW, binning of E_visible = {4:.3f} MeV:'
                           .format(now, N_neutrino_reactor_theo, N_neutrino_reactor_vis,
                                   power_thermal, interval_E_visible))
-        np.savetxt('gen_spectrum_v2/Reactor_info_NH_power{0:.0f}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/Reactor_info_NH_power{0:.0f}_bin{1:.0f}keV.txt'
                    .format(power_thermal, interval_E_visible*1000),
                    np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
                              interval_E_visible, t_years, N_target, detection_eff, N_neutrino_reactor_theo,
@@ -233,23 +232,25 @@ if CCATMOSPHERIC_BACKGROUND:
 
     (Spectrum_CCatmospheric, N_neutrino_CCatmospheric_vis, Theo_spectrum_CCatmospheric, N_neutrino_CCatmospheric_theo,
      Oscillation, Prob_e_to_e, Prob_mu_to_e) = \
-        ccatmospheric_background_v2(E_neutrino, E_visible, interval_E_visible, sigma_IBD, N_target, time, detection_eff,
+        ccatmospheric_background_v3(E_neutrino, E_visible, interval_E_visible, sigma_IBD, N_target, time, detection_eff,
                                     MASS_PROTON, MASS_NEUTRON, MASS_POSITRON)
 
     if SAVE_DATA:
         # save Spectrum_CCatmospheric to txt-spectrum-file and information about simulation in txt-info-file:
         print("... save data of spectrum to file...")
-        np.savetxt('gen_spectrum_v2/CCatmo_Osc{0:d}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/CCatmo_Osc{0:d}_bin{1:.0f}keV.txt'
                    .format(Oscillation, interval_E_visible*1000), Spectrum_CCatmospheric, fmt='%1.5e',
                    header='Spectrum in 1/MeV of CC atmospheric electron-antineutrino background '
-                          '(calculated with gen_spectrum_v2.py, {0}):'
+                          '(calculated with gen_spectrum_v2.py \n'
+                          'and function ccatmospheric_background_v3(), {0}):'
+                          'Atmospheric CC electron-antineutrino flux at the site of JUNO!\n'
                           '\nTheo. number of neutrinos = {1:.6f}, Number of neutrinos from spectrum = {2:.6f},\n'
                           'Is oscillation considered (1=yes, 0=no)? {3:d}, '
                           '\nsurvival probability of nu_Ebar = {4:.2f}, '
                           'oscillation prob. nu_Mubar to nu_Ebar = {5:.2f}:'
                    .format(now, N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis, Oscillation,
                            Prob_e_to_e, Prob_mu_to_e))
-        np.savetxt('gen_spectrum_v2/CCatmo_info_Osc{0:d}_bin{1:.0f}keV.txt'
+        np.savetxt('/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/CCatmo_info_Osc{0:d}_bin{1:.0f}keV.txt'
                    .format(Oscillation, interval_E_visible*1000),
                    np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
                              interval_E_visible, t_years, N_target, detection_eff,
@@ -257,6 +258,7 @@ if CCATMOSPHERIC_BACKGROUND:
                              Prob_e_to_e, Prob_mu_to_e]),
                    fmt='%1.9e',
                    header='Information to CCatmo_Osc{0:d}_bin{1:.0f}keV.txt:\n'
+                          'Atmospheric CC electron-antineutrino flux at the site of JUNO!\n'
                           'values below: E_neutrino[0] in MeV, E_neutrino[-1] in MeV, interval_E_neutrino in MeV,'
                           '\nE_visible[0] in MeV, E_visible[-1] in MeV, interval_E_visible in MeV,\n'
                           'exposure time t_years in years, number of free protons N_target, IBD detection efficiency, '
