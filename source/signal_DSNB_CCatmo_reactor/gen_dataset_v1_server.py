@@ -9,7 +9,7 @@
     - sys.argv[1] Dark matter mass in MeV
     - sys.argv[2] dataset_start
     - sys.argv[3] dataset_stop
-    - sys.argv[4] directory of the correct folder = "/junofs/users/dblum/work/signal_DSNB_CCatmo_reactor"
+    - sys.argv[4] directory of the correct folder = "/junofs/users/dblum/work/S90_DSNB_CCatmo_reactor"
     - sys.argv[5] dataset_output folder = "dataset_output_{DM_mass}"
     - sys.argv[6] datasets folder = "datasets"
     - sys.argv[7] directory of the simulated spectra = "/junofs/users/dblum/work/simu_spectra"
@@ -59,8 +59,8 @@ path_dataset = path_output + "/" + str(sys.argv[6])
 """ Files, that are read in to generate data-sets (virtual experiments): """
 path_simu = str(sys.argv[7])
 # TODO: check the file of the simulated signal spectrum:
-file_signal = path_simu + "/signal_DMmass{0}_bin100keV.txt".format(DM_mass)
-file_signal_info = path_simu + "/signal_info_DMmass{0}_bin100keV.txt".format(DM_mass)
+file_signal = path_simu + "/{0}signal_bin100keV.txt".format(DM_mass)
+file_signal_info = path_simu + "/{0}signal_info_bin100keV.txt".format(DM_mass)
 file_DSNB = path_simu + "/" + str(sys.argv[8])
 file_DSNB_info = path_simu + "/" + str(sys.argv[9])
 file_CCatmo = path_simu + "/" + str(sys.argv[10])

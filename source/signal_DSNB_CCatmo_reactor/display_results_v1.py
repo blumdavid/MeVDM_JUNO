@@ -14,10 +14,10 @@ from matplotlib import pyplot as plt
 
 
 """ set the DM mass in MeV (float): """
-DM_mass = 25
+DM_mass = 100
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
 
 """ set the path to the folder, where the results are saved: """
 path_result = path_folder + "/dataset_output_{0}/result_mcmc".format(DM_mass)
@@ -80,20 +80,21 @@ Reactor_50_84 = info_result[26]
 # Display S_mean in histogram:
 h1 = plt.figure(1, figsize=(15, 8))
 # Bins1 = 'auto'
-Bins1 = np.arange(0, np.max(S_mode)+0.1, 0.05)
+Bins1 = np.arange(0, np.max(S_mode)+0.1, 0.1)
 n_S, bins1, patches1 = plt.hist(S_mode, bins=Bins1, histtype='step', color='b',
                                 label='number of virt. experiments = {0:.0f},\n'
                                       'mean of the distribution = {1:.4f}'
                                 .format(number_of_entries, S_50))
 plt.axvline(signal_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
             .format(signal_expected), color='r')
-# plt.xticks(np.arange(0, np.max(S_mode)+0.5, 0.5))
+plt.xticks(np.arange(0, np.max(S_mode)+0.5, 0.5))
 plt.xlabel("total number of observed signal events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of signal events from DM with mass={2:.1f}MeV in virtual experiments "
           "\n(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
+plt.savefig(path_result + "/result_signal.png")
 
 
 # Display S_90_limit in histogram:
@@ -101,15 +102,15 @@ h2 = plt.figure(2, figsize=(15, 8))
 # Bins2 = 'auto'
 Bins2 = np.arange(2, np.max(S_90_limit)+0.1, 0.1)
 n_limit_S, bins2, patches2 = plt.hist(S_90_limit, bins=Bins2, histtype='step', color='b',
-                                      label='number of virt. experiments = {0:.0f},\n'
-                                            'mean of the distribution = {1:.3f}'
-                                      .format(number_of_entries, S_90))
+                                      label='number of virt. experiments = {0:.0f}'.format(number_of_entries))
+plt.axvline(S_90, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(S_90), color='r')
 plt.xticks(np.arange(2, np.max(S_90_limit)+0.5, 0.5))
 plt.xlabel("90 percent limit of number of observed signal events S")
 plt.ylabel("counts")
 plt.title("Distribution of the 90 % upper limit of the signal contribution for DM with mass = {0:.1f} MeV"
           .format(DM_mass))
 plt.legend()
+plt.savefig(path_result + "/result_S90.png")
 
 
 # Display DSNB_mean in histogram:
@@ -124,12 +125,14 @@ plt.axvline(DSNB_expected, linestyle='dashed', label='expected number of events 
 plt.axvline(DSNB_50, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(DSNB_50), color='b')
 plt.axvline(DSNB_50_16, linestyle=':', label='16% probability limit = {0:.4f}'.format(DSNB_50_16), color='b')
 plt.axvline(DSNB_50_84, linestyle='-.', label='84% probability limit = {0:.4f}'.format(DSNB_50_84), color='b')
+plt.xticks(np.arange(0, np.max(DSNB_mode)+2.5, 2.5))
 plt.xlabel("total number of observed DSNB background events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of DSNB background events in virtual experiments "
           "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
+plt.savefig(path_result + "/result_DSNB.png")
 
 
 # Display CCatmo_mean in histogram:
@@ -144,12 +147,14 @@ plt.axvline(CCatmo_expected, linestyle='dashed', label='expected number of event
 plt.axvline(CCatmo_50, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(CCatmo_50), color='b')
 plt.axvline(CCatmo_50_16, linestyle=':', label='16% probability limit = {0:.4f}'.format(CCatmo_50_16), color='b')
 plt.axvline(CCatmo_50_84, linestyle='-.', label='84% probability limit = {0:.4f}'.format(CCatmo_50_84), color='b')
+plt.xticks(np.arange(15, np.max(CCatmo_mode)+2.5, 2.5))
 plt.xlabel("total number of observed atmo. CC background events events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of atmospheric CC background events in virtual experiments "
           "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
+plt.savefig(path_result + "/result_CCatmo.png")
 
 
 # Display Reactor_mean in histogram:
@@ -164,11 +169,13 @@ plt.axvline(Reactor_expected, linestyle='dashed', label='expected number of even
 plt.axvline(Reactor_50, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(Reactor_50), color='b')
 plt.axvline(Reactor_50_16, linestyle=':', label='16% probability limit = {0:.4f}'.format(Reactor_50_16), color='b')
 plt.axvline(Reactor_50_84, linestyle='-.', label='84% probability limit = {0:.4f}'.format(Reactor_50_84), color='b')
+plt.xticks(np.arange(20, np.max(Reactor_mode)+2.5, 2.5))
 plt.xlabel("total number of observed reactor background events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of reactor background events in virtual experiments "
           "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
+plt.savefig(path_result + "/result_reactor.png")
 
 plt.show()

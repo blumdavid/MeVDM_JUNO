@@ -10,11 +10,11 @@ import time
 
 # define the Dark matter masses in MeV (np.array of float):
 # TODO: set the DM masses that should be analyzed ("masses"):
-DM_mass = np.array([25, 35, 45, 55, 65, 75, 85, 95])
+DM_mass = np.array([20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
 
 # directory to the simulation (string):
 # TODO: check the directory "path_folder"
-path_folder = "/junofs/users/dblum/work/signal_DSNB_CCatmo_reactor"
+path_folder = "/junofs/users/dblum/work/S90_DSNB_CCatmo_reactor"
 
 # folder, where the analysis files are saved (string):
 path_analysis = "/analysis_mcmc"
@@ -22,17 +22,20 @@ path_analysis = "/analysis_mcmc"
 # Set the number of datasets, which were generated per DM mass (integer):
 # TODO: check if Number_dataset is correct!
 Number_dataset = 10000
+# for each dataset 1 files is generated (Dataset{}_mcmc_analysis.txt) (integer):
+file_per_dataset = 1
 
-# ONE info_mcmc_analysis_{}_{}.txt file and one acceptance_fraction_{}_{}.txt file is generated per Job during the
-# analysis (integer):
-Number_output = 2
+# ONE info_mcmc_analysis_{}_{}.txt file, ONE acceptance_fraction_burnin_{}_{}.txt file,
+# ONE acceptance_fraction_sampling_{}_{}.txt file and ONE autocorrelation_time_{}_{}.txt file is generated per Job
+# during the analysis (integer):
+Number_output = 4
 
 # Number of jobs, that were submitted per DM mass (integer):
 # TODO: set the number of jobs!
 Number_jobs_per_mass = 100
 
 # Number of files, that should exist in the directory "/analysis_mcmc", when the jobs are finished (integer):
-Stop_criterion = Number_dataset + Number_jobs_per_mass * Number_output
+Stop_criterion = file_per_dataset * Number_dataset + Number_jobs_per_mass * Number_output
 
 
 def check_file_number(directory):
@@ -63,8 +66,9 @@ for mass in DM_mass:
 
         if Number_actual < Stop_criterion:
             print("jobs for DM mass = {0} are not finished...".format(mass))
-            # if correct number is not reached -> wait a certain time and check again:
-            time.sleep(60*10)
+            # if correct number is not reached -> wait a certain time and check again
+            # (in time.sleep(t), t is the time in seconds):
+            time.sleep(60*30)
         else:
             # if correct number is reached -> print info and go to the folder of the next mass:
             print("Analysis of DM mass = {0} MeV is finished".format(mass))

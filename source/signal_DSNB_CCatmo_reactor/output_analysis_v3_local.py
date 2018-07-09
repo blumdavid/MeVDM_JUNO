@@ -24,13 +24,13 @@ SAVE_DATA = True
 DM_mass = 30
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
 
 """ set the path of the output folder: """
 path_output = path_folder + "/dataset_output_{0:d}".format(DM_mass)
 
 """ set the path of the analysis folder: """
-path_analysis = path_output + "/analysis_mcmc"
+path_analysis = path_output + "/analysis_mcmc_moreBkgEv"
 
 """ Set the path of the file, where the information about the analysis is saved: """
 # TODO: Check the file-path
@@ -38,7 +38,7 @@ file_info_analysis = path_analysis + "/info_mcmc_analysis_1_50.txt"
 
 # Set the number of the files, that should be read in:
 file_number_start = 1
-file_number_stop = 10000
+file_number_stop = 5000
 
 
 """ display and analyze the results from the analysis with function output_analysis() from output_analysis_v3.py """
@@ -49,6 +49,41 @@ file_number_stop = 10000
     = output_analysis(SAVE_DATA, DM_mass, path_output, path_analysis, file_info_analysis, file_number_start,
                       file_number_stop)
 
+if SAVE_DATA:
+    # Save the array S_mode to txt file:
+    np.savetxt(path_output + "/result_mcmc/S_mode_DMmass{0}.txt".format(DM_mass),
+               S_mode, fmt="%4.5f",
+               header="Observed number of signal events (mode of S) from DM with mass={2:.1f}MeV in virtual "
+                      "experiments\n (in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+               .format(lower_energy_bound, upper_energy_bound, DM_mass))
+
+    # Save the array S_90_limit to txt file:
+    np.savetxt(path_output + "/result_mcmc/S_90_limit_DMmass{0}.txt".format(DM_mass),
+               S_90_limit, fmt="%4.5f",
+               header="90 % upper limit of number of observed signal events S from DM with mass={0:.1f}MeV in virtual"
+                      "experiments"
+               .format(DM_mass))
+
+    # Save the array DSNB_mode to txt file:
+    np.savetxt(path_output + "/result_mcmc/DSNB_mode_DMmass{0}.txt".format(DM_mass),
+               DSNB_mode, fmt="%4.5f",
+               header="Observed number of DSNB background events (mode of B_DSNB) in virtual experiments\n"
+                      "(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+               .format(lower_energy_bound, upper_energy_bound))
+
+    # Save the array CCatmo_mode to txt file:
+    np.savetxt(path_output + "/result_mcmc/CCatmo_mode_DMmass{0}.txt".format(DM_mass),
+               CCatmo_mode, fmt="%4.5f",
+               header="Observed number of CCatmo background events (mode of B_CCatmo) in virtual experiments\n"
+                      "(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+               .format(lower_energy_bound, upper_energy_bound))
+
+    # Save the array Reactor_mode to txt file:
+    np.savetxt(path_output + "/result_mcmc/Reactor_mode_DMmass{0}.txt".format(DM_mass),
+               Reactor_mode, fmt="%4.5f",
+               header="Observed number of reactor background events (mode of B_reactor) in virtual experiments\n"
+                      "(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
+               .format(lower_energy_bound, upper_energy_bound))
 
 """ Display the results in histograms: """
 # Display S_mean in histogram:
@@ -59,9 +94,9 @@ n_S, bins1, patches1 = plt.hist(S_mode, bins=Bins1, histtype='step', color='b',
                                 label='number of virt. experiments = {0:d}'
                                 .format(number_of_entries))
 plt.axvline(S_50, linestyle='dashed', label='mean of the distribution = {0:.4f}'.format(S_50))
-# plt.axvline(signal_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
-#             .format(signal_expected), color='r')
-# plt.xticks(np.arange(0, np.max(S_mode)+0.5, 0.5))
+plt.axvline(signal_expected, linestyle='dashed', label='expected number of events from simulation = {0:.3f}'
+            .format(signal_expected), color='r')
+plt.xticks(np.arange(0, np.max(S_mode)+0.5, 0.5))
 plt.xlabel("total number of observed signal events")
 plt.ylabel("counts")
 plt.title("Distribution of the observed number of signal events from DM with mass={2:.1f}MeV in virtual experiments "

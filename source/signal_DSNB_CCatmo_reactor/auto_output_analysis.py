@@ -19,14 +19,14 @@ import subprocess
 
 # define the Dark matter masses in MeV, which should be displayed (np.array of float):
 # TODO: set the DM masses that should be analyzed ("masses"):
-masses = np.array([25, 35, 45, 55, 65, 75, 85, 95])
+masses = np.array([20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
 
 # loop over the DM masses:
 for DM_mass in masses:
 
     # define the names of the different directories and folders:
     # TODO: check the directory "path_folder"
-    path_folder = "/junofs/users/dblum/work/signal_DSNB_CCatmo_reactor"
+    path_folder = "/junofs/users/dblum/work/S90_DSNB_CCatmo_reactor"
     path_dataset_output = "dataset_output_{0}".format(DM_mass)
 
     # Number of files (equal to number of datasets per DM mass), that should be displayed
@@ -44,7 +44,7 @@ for DM_mass in masses:
     """ Description of the arguments for the output_analysis_v3_server.py script:
         - sys.argv[0] name of the script = output_analysis_v3_server.py
         - sys.argv[1] Dark matter mass in MeV
-        - sys.argv[2] directory of the correct folder = "/junofs/users/dblum/work/signal_DSNB_CCatmo_reactor"
+        - sys.argv[2] directory of the correct folder = "/junofs/users/dblum/work/S90_DSNB_CCatmo_reactor"
         - sys.argv[3] dataset_output folder = "dataset_output_{DM_mass}"
         - sys.argv[4] number of datasets analyzed per job = number_of_datasets_per_job
         - sys.argv[5] dataset_start

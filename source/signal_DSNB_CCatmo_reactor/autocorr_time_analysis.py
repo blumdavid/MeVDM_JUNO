@@ -7,7 +7,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # DM mass in MeV:
-DM_mass = 30
+DM_mass = 100
 
 # number of the test:
 test_number = 11
@@ -15,8 +15,8 @@ test_number = 11
 # path to the folder, where the txt files are saved:
 ###path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_{0}/" \
 ###             "analysis_mcmc_test{1}/".format(DM_mass, test_number)
-path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor/dataset_output_30/" \
-             "analysis_mcmc_fixBkg/"
+path_files = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor/dataset_output_{0}/" \
+             "analysis_mcmc/".format(DM_mass)
 
 # variable, that includes, for how many datasets the autocorrelation time could be calculated (integer):
 number_acor_calculated = 0
@@ -29,7 +29,7 @@ acor_time_calculated = np.array([])
 number_acor_failed = 0
 
 # loop over the txt files:
-for index in np.arange(1, 5000, 100):
+for index in np.arange(1, 10000, 100):
 
     # load the mean autocorrelation time from the txt files (np.array of float):
     autocorr_time = np.loadtxt(path_files + "autocorrelation_time_{0}_{1}.txt".format(index, index+99))
@@ -53,7 +53,7 @@ for index in np.arange(1, 5000, 100):
           .format(number_acor_calculated, index, index + 99))
 
 print("number of AutocorrErrors for 10000 datasets = {0}".format(number_acor_failed))
-print("number of dataset, where autocorr. time was calculated = {0} (for 10000 datasets)".format(number_acor_calculated))
+print("number of dataset, where autocorr. time was calculated = {0} (for 5000 datasets)".format(number_acor_calculated))
 
 # mean of the calculated autocorr. times (float):
 mean_acor_time_calculated = np.mean(acor_time_calculated)
@@ -67,8 +67,10 @@ n1, bins1, patches1 = plt.hist(acor_time_calculated, bins=Bins1, histtype='step'
                                label="number of entries = {0}".format(number_acor_calculated))
 plt.xlabel("calculated mean autocorrelation time")
 plt.ylabel("counts")
-plt.title("Mean autocorrelation time for 5000 datasets in dataset_output_{0}".format(DM_mass))
+plt.title("Mean autocorrelation time for 10000 datasets in dataset_output_{0}".format(DM_mass))
 plt.legend()
+plt.savefig("/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor/dataset_output_{0}/result_mcmc/"
+            "result_autocorr.png".format(DM_mass))
 plt.show()
 
 

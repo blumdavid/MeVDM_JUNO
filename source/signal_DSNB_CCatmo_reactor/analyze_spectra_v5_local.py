@@ -37,8 +37,6 @@ import corner
 import scipy.optimize as op
 from matplotlib import pyplot as plt
 
-# TODO-me: update the files: analyze_spectra_v5_server2.py
-
 # TODO: i have to cite the package 'emcee', when I use it to analyze
 
 # TODO-me: Check the sensitivity of the results depending on the prior probabilities
@@ -121,8 +119,7 @@ spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 
 
 """ 'true' values of the parameters: """
 # expected number of signal events in the energy window (float):
-# S_true = np.sum(spectrum_Signal_per_bin)
-S_true = 0
+S_true = np.sum(spectrum_Signal_per_bin)
 # maximum value of signal events consistent with existing limits (assuming the 90 % upper limit for the annihilation
 # cross-section of Super-K from paper 0710.5420, for the description and calculation see limit_from_SuperK.py)
 # INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
@@ -448,7 +445,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     """ Now run the MCMC for 'number_of_steps' steps starting, where the sampler left off in the burnin-phase: 
         (run_mcmc iterates sample() for N iterations and returns the result of the final sample) """
-    # TODO-me: the number of steps should be large (greater than around 10000) to get a reproducible result
+    # INFO-me: the number of steps should be large (greater than around 10000) to get a reproducible result
     number_of_steps = 15000
     sampler.run_mcmc(pos, number_of_steps)
 
@@ -510,7 +507,6 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         produce independent samples of the target density. It is an estimate of the number of steps needed in the 
         chain in order to draw independent samples from the target density.
         """
-    # TODO-me: include the auto-correlation time to estimate the performance and reliability of the MCMC
     # (The longer the auto-correlation time, the larger the number of the samples we must generate to obtain the
     # desired sampling of the posterior PDF) (You should run the sampler for a few (e.g. 10) auto-correlation times.
     # After that, you are almost completely sure to have independent samples from the posterior PDF).
@@ -650,7 +646,8 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # NOTE: the quantile(0.5) is equal to the np.median() and is equal to np.percentile(50) -> NOT equal to np.mean()
     fig1 = corner.corner(samples, labels=["$S$", "$B_{DSNB}$", "$B_{CCatmo}$", "$B_{reactor}$"],
                          truths=[S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true], truth_color='b',
-                         show_titles=True, title_fmt='.4f', labels_args={"fontsize": 40})
+                         labels_args={"fontsize": 40})
+    plt.show(fig1)
     # save figure:
     if SAVE_DATA:
         fig1.savefig(path_analysis + "/Dataset{0}_fitresult.png".format(number))

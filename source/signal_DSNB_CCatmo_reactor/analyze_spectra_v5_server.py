@@ -56,11 +56,10 @@ path_analysis = str(sys.argv[2]) + str(sys.argv[4])
 
 """ Go through every dataset and perform the analysis: """
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-dataset_start = job_number*50 + 1 + 5000
+dataset_start = job_number*50 + 1
 
 #  define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = job_number*50 + 50 + 5000
-
+dataset_stop = job_number*50 + 50
 
 """ Load information about the generation of the datasets from file (np.array of float): """
 # TODO: Check, if info-files have the same parameter:
@@ -77,11 +76,11 @@ file_signal = str(sys.argv[2]) + "simu_spectra/signal_DMmass30_bin100keV.txt"
 Spectrum_signal = np.loadtxt(file_signal)
 file_info_signal = str(sys.argv[2]) + "simu_spectra/signal_info_DMmass30_bin100keV.txt"
 info_signal = np.loadtxt(file_info_signal)
-file_DSNB = str(sys.argv[2]) + "simu_spectra/DSNB_EmeanNuXbar22_bin100keV.txt"
+file_DSNB = str(sys.argv[2]) + "simu_spectra/DSNB_EmeanNuXbar22_bin100keV_40events.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
 file_reactor = str(sys.argv[2]) + "simu_spectra/Reactor_NH_power36_bin100keV.txt"
 Spectrum_reactor = np.loadtxt(file_reactor)
-file_CCatmo = str(sys.argv[2]) + "simu_spectra/CCatmo_Osc1_bin100keV.txt"
+file_CCatmo = str(sys.argv[2]) + "simu_spectra/CCatmo_Osc1_bin100keV_102events.txt"
 Spectrum_CCatmo = np.loadtxt(file_CCatmo)
 
 """ Variable, which defines the date and time of running the script: """
@@ -90,10 +89,10 @@ date = datetime.datetime.now()
 now = date.strftime("%Y-%m-%d %H:%M")
 
 """ Get Dark Matter mass from the info_signal file: """
-# DM_mass = info_signal[9]
+DM_mass = info_signal[9]
 
 # TODO-me: DM_mass has to be set to the correct value for "NO signal" case (corresponding to file_signal)
-DM_mass = 30
+# DM_mass = 30
 
 """ Define the energy window, where spectrum of virtual experiment and simulated spectrum is analyzed
     (from min_E_cut in MeV to max_E_cut in MeV): """
@@ -379,11 +378,11 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     # guess of the parameters (as guess, the total number of events from the simulated spectrum are used)
     # (np.array of float):
-    # parameter_guess = np.array([S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
+    parameter_guess = np.array([S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
 
     # TODO-me: Change the parameter guess in the "NO signal" case!!!
     # parameter guess, if there were NO signal events present in the simulated spectrum
-    parameter_guess = np.array([0, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
+    # parameter_guess = np.array([0, B_DSNB_true, B_CCatmo_true, B_Reactor_true])
 
     # bounds of the parameters (parameters have to be positive or zero) (tuple):
     bnds = ((0, None), (0, None), (0, None), (0, None))
@@ -442,7 +441,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     """ Now run the MCMC for 'number_of_steps' steps starting, where the sampler left off in the burnin-phase: 
         (run_mcmc iterates sample() for N iterations and returns the result of the final sample) """
-    # TODO-me: the number of steps should be large (greater than around 10000) to get a reproducible result
+    # INFO-me: the number of steps should be large (greater than around 10000) to get a reproducible result
     number_of_steps = 15000
     sampler.run_mcmc(pos, number_of_steps)
 
@@ -501,7 +500,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         produce independent samples of the target density. It is an estimate of the number of steps needed in the 
         chain in order to draw independent samples from the target density.
         """
-    # TODO-me: include the auto-correlation time to estimate the performance and reliability of the MCMC
+    # INFO-me: auto-correlation time to estimate the performance and reliability of the MCMC is included
     # (The longer the auto-correlation time, the larger the number of the samples we must generate to obtain the
     # desired sampling of the posterior PDF) (You should run the sampler for a few (e.g. 10) auto-correlation times.
     # After that, you are almost completely sure to have independent samples from the posterior PDF).

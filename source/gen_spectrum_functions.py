@@ -368,7 +368,7 @@ def darkmatter_signal_v2(energy_neutrino, energy_visible, binning_energy_visible
 
             List of assumptions or estimations made for the calculation of the signal spectrum:
             1. neutrino flux (phi_signal) is calculated as described in paper 0710.5420
-            1.1. #INFO-me: Assumption the branching ratio into neutrinos is dominant in DM self-annihilation
+            1.1. # INFO-me: Assumption the branching ratio into neutrinos is dominant in DM self-annihilation
                 (-> branching ratio into photons or electron-positron pairs is neglected)
             1.2. DM Halo profile uncertainties:
                 - the neutrino flux is averaged over the entire galaxy, because of the poor information on the direction
@@ -713,7 +713,7 @@ def dsnb_background_v2(energy_neutrino, energy_visible, binning_energy_visible, 
                                             c, h_0, f_star, h_70)
     # differential number flux of electron-antineutrinos in 1/(MeV*s*cm**2) at Earth -> Oscillation is considered,
     # about 70 percent of electron-antineutrinos survive (np.array of float64) (page 9, equ. 7):
-    # INFO-me: is correct for normal hierarchy
+    # INFO-me: is correct for normal hierarchy (for inverted hierarchy see section 6.1, page 21)
     number_flux__nu_e_bar = 0.7 * number_flux__nu_e_bar
 
     """ differential number flux for NON-electron-antineutrinos (muon- and tau-antineutrinos): """

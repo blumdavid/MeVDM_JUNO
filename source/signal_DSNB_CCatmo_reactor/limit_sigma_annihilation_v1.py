@@ -37,7 +37,7 @@ from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_annihilation_cro
 path_expected_spectrum = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
 
 # path of the directory, where the results of the analysis are saved (string):
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
 
 # mass of positron in MeV (float constant):
 MASS_POSITRON = 0.51099892
@@ -92,6 +92,7 @@ for mass in DM_mass:
         For masses divisible by ten, mean_limit_S90 = result[7] and std_limit_S90 = result[8].
         For masses NOT divisible by ten, mean_limit_S90 = result[8] and std_limit_S90 = result[9].
     """
+    """
     # if mass is divisible by ten:
     if (mass % 10) == 0:
         # mean of the 90% probability limit of the number of signal events (float):
@@ -103,6 +104,12 @@ for mass in DM_mass:
         mean_limit_S90 = result[8]
         # standard deviation of the 90% probability limit of the number of signal events (float):
         std_limit_S90 = result[9]
+    """
+
+    # mean of the 90% probability limit of the number of signal events (float):
+    mean_limit_S90 = result[8]
+    # standard deviation of the 90% probability limit of the number of signal events (float):
+    std_limit_S90 = result[9]
 
     # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
     # mass of "mass" MeV in cm**2 (float):
@@ -174,6 +181,25 @@ plt.axhline(sigma_anni_natural, linestyle=':', color='black',
 plt.fill_between(DM_mass_SuperK, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass_SuperK), np.max(DM_mass_SuperK))
 plt.ylim(y_min, y_max)
+plt.xlabel("Dark Matter mass in MeV")
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
+plt.legend()
+plt.grid()
+
+# Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K:
+h5 = plt.figure(5)
+plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
+         label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
+plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="red", alpha=0.4)
+plt.plot(DM_mass_SuperK, sigma_anni_SuperK, linestyle="--", color='black',
+         label="90% C.L. limit on $<\sigma_A v>$, obtained from Super-K data")
+plt.fill_between(DM_mass_SuperK, y_max, sigma_anni_SuperK, facecolor="gray", alpha=0.4)
+plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+            label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+plt.xlim(np.min(DM_mass), np.max(DM_mass))
+plt.ylim(y_min, 3*10**(-25))
 plt.xlabel("Dark Matter mass in MeV")
 plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")

@@ -22,7 +22,7 @@ from work.MeVDM_JUNO.source.gen_spectrum_functions import sigma_ibd, darkmatter_
 # generate signal from DM annihilation:
 DM_SIGNAL = False
 # generate DSNB background:
-DSNB_BACKGROUND = False
+DSNB_BACKGROUND = True
 # generate CC atmospheric background:
 CCATMOSPHERIC_BACKGROUND = True
 # generate reactor antineutrino background:

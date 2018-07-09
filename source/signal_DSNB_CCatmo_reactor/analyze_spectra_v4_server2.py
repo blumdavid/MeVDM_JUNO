@@ -5,7 +5,7 @@
 
     Use the script to analyze datasets corresponding to SEVERAL dark matter masses.
 
-    This script will be included to the auto_analysis.py script and to the auto_simu_analysis.sh script to
+    This script will be included to the auto_simu_analysis.sh script to
     automatically simulate datasets and analyze them for different DM masses.
 
     Script is based on the analyze_spectra_v4_local.py Script, but changed a bit to be able to run it on the cluster.
