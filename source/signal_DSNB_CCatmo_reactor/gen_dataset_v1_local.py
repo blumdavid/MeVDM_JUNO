@@ -10,16 +10,16 @@
 from work.MeVDM_JUNO.source.signal_DSNB_CCatmo_reactor.gen_dataset_v1 import gen_dataset
 
 """ Set the DM mass in MeV (float): """
-DM_mass = 30
+DM_mass = 0
 
 """ Define parameters for saving of the virtual experiments: 
     number_dataset (dataset_stop - dataset_start) defines, how many datasets (virtual experiments)
     are generated. """
 # INFO-me: 10000 datasets might be a good number for the analysis
 # dataset_start defines the start point (integer):
-dataset_start = 1
+dataset_start = 10001
 # dataset_stop defines the end point (integer):
-dataset_stop = 5000
+dataset_stop = 10001
 
 """ Set boolean variable, which controls, if the txt-file with the data are saved or not: """
 SAVE_DATA_TXT = True
@@ -35,7 +35,7 @@ SAVE_DATA_ALL = True
 DISPLAY_DATA = False
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
 
 """ set the path of the output folder: """
 path_output = path_folder + "/dataset_output_{0}".format(DM_mass)
@@ -45,12 +45,12 @@ path_dataset = path_output + "/datasets"
 
 """ Files, that are read in to generate data-sets (virtual experiments): """
 path_simu = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
-file_signal = path_simu + "/signal_DMmass{0}_bin100keV.txt".format(DM_mass)
-file_signal_info = path_simu + "/signal_info_DMmass{0}_bin100keV.txt".format(DM_mass)
-file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin100keV_40events.txt"
-file_DSNB_info = path_simu + "/DSNB_info_EmeanNuXbar22_bin100keV_40events.txt"
-file_CCatmo = path_simu + "/CCatmo_Osc1_bin100keV_102events.txt"
-file_CCatmo_info = path_simu + "/CCatmo_info_Osc1_bin100keV_102events.txt"
+file_signal = path_simu + "/{0}signal_bin100keV.txt".format(DM_mass)
+file_signal_info = path_simu + "/{0}signal_info_bin100keV.txt".format(DM_mass)
+file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin100keV.txt"
+file_DSNB_info = path_simu + "/DSNB_info_EmeanNuXbar22_bin100keV.txt"
+file_CCatmo = path_simu + "/CCatmo_Osc1_bin100keV.txt"
+file_CCatmo_info = path_simu + "/CCatmo_info_Osc1_bin100keV.txt"
 file_reactor = path_simu + "/Reactor_NH_power36_bin100keV.txt"
 file_reactor_info = path_simu + "/Reactor_info_NH_power36_bin100keV.txt"
 

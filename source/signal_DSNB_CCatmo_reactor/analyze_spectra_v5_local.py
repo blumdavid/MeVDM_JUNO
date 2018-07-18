@@ -45,25 +45,26 @@ from matplotlib import pyplot as plt
 """ Set boolean value to define, if the result of the analysis are saved: """
 # save the results and the plot of likelihood-function with fit parameters
 # (if data should be saved, SAVE_DATA must be True):
-SAVE_DATA = False
+SAVE_DATA = True
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/signal_DSNB_CCatmo_reactor"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
 
 """ set the path of the output folder: """
-path_output = path_folder + "/dataset_output_25"
+path_output = path_folder + "/dataset_output_20"
 
 """ set the path of the folder, where the datasets were saved: """
-path_dataset = path_output + "/datasets"
+# path_dataset = path_output + "/datasets"
+path_dataset = path_folder + "/dataset_output_0/datasets"
 
 """ set the path of the folder, where the results of the analysis should be saved: """
-path_analysis = path_output + "/analysis_mcmc_autocorr_test"
+path_analysis = path_output + "/analysis_mcmc"
 
 """ Go through every dataset and perform the analysis: """
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-dataset_start = 1
+dataset_start = 10001
 # define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = 1
+dataset_stop = 10001
 
 """ Load information about the generation of the datasets from file (np.array of float): """
 # TODO: Check, if info-files have the same parameter:
@@ -77,9 +78,9 @@ max_E_visible = info_dataset[2]
 
 """ Load simulated spectra in events/MeV from file (np.array of float): """
 path_simu = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
-file_signal = path_simu + "/signal_DMmass25_bin100keV.txt"
+file_signal = path_simu + "/signal_DMmass20_bin100keV.txt"
 Spectrum_signal = np.loadtxt(file_signal)
-file_info_signal = path_simu + "/signal_info_DMmass25_bin100keV.txt"
+file_info_signal = path_simu + "/signal_info_DMmass20_bin100keV.txt"
 info_signal = np.loadtxt(file_info_signal)
 file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin100keV.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
@@ -140,6 +141,8 @@ fraction_DSNB = spectrum_DSNB_per_bin / B_DSNB_true
 fraction_CCatmo = spectrum_CCatmo_per_bin / B_CCatmo_true
 # Fraction of reactor background (np.array of float):
 fraction_Reactor = spectrum_Reactor_per_bin / B_Reactor_true
+
+S_true = 0
 
 """ Preallocate the array, where the acceptance fraction of the actual sampling of each analysis is appended to 
 (empty np.array): """

@@ -1,4 +1,4 @@
-""" display_spectra.py:
+""" display_spectra_dataset.py:
     in this script the datasets and the fitted spectra are displayed.
     For each dataset, the dataset and the simulated spectrum with the values from MCMC sampling are displayed.
 

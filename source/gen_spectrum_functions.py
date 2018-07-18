@@ -1761,3 +1761,29 @@ def limit_annihilation_crosssection(s_90, dm_mass, j_avg, n_target, time_in_sec,
               (j_avg * r_solar * rho_0**2 * ibd_crosssection * n_target * time_in_sec * epsilon_ibd))
 
     return result
+
+
+def limit_neutrino_flux(s_90, dm_mass, n_target, time_in_sec, epsilon_ibd, mass_neutron, mass_proton, mass_positron):
+    """
+    Function to calculate the 90 percent upper probability limit of the electron-antineutrino flux from
+    DM annihilation in the Milky Way.
+
+    :param s_90: 90 percent upper probability limit of the signal contribution (from output_analysis_v1.py) (float)
+    :param dm_mass: Dark matter mass in MeV (float)
+    :param n_target: number of targets in the JUNO detector, equivalent to the number of free protons (float)
+    :param time_in_sec: exposure time in seconds (float)
+    :param epsilon_ibd: detection efficiency of the JUNO detector for Inverse Beta Decay (float)
+    :param mass_neutron: mass of the neutron in MeV (float)
+    :param mass_proton: mass of the proton in MeV (float)
+    :param mass_positron: mass of the positron in MeV (float)
+
+    :return: 90 % upper probability limit of the electron-antineutrino flux (float)
+    """
+    # Inverse Beta Decay cross-section in cm**2 (float):
+    ibd_crosssection = sigma_ibd(dm_mass, mass_neutron-mass_proton, mass_positron)
+
+    # calculate the 90 % upper limit of the electron-antineutrino flux from DM annihilation in the Milky Way in
+    # electron-antineutrinos/(cm**2 s) (float):
+    result = s_90 / (ibd_crosssection * n_target * time_in_sec * epsilon_ibd)
+
+    return result

@@ -289,7 +289,7 @@ def gen_dataset(mass_dm, save_data_txt, save_data_all, display_data, dataset_sta
             plt.step(e_visible, spectrum_dataset_per_bin, where='mid')
             plt.xlabel('Visible energy in MeV')
             plt.ylabel('Number of events per bin per {0:.0f}yr (bin={1:.2f}MeV)'.format(t_years, interval_e_visible))
-            plt.title('Spectrum, JUNO will measure after {0:.0f} years for DM of mass = {1:.0f} MeV'
+            plt.title('Spectrum that JUNO will measure after {0:.0f} years for DM of mass = {1:.0f} MeV'
                       .format(t_years, mass_dm))
             plt.ylim(ymin=0)
             plt.xticks(np.arange(min_e_visible, max_e_visible, 10))

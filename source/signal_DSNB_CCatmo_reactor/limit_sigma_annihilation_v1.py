@@ -24,7 +24,9 @@
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import rcParams
 from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_annihilation_crosssection
+from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_neutrino_flux
 
 # TODO-me: Interpretation of the limit on the annihilation cross-section according to the 'natural scale'
 # INFO-me: the self-annihilation cross-section (times the relative velocity) necessary to explain the observed
@@ -53,6 +55,8 @@ DM_mass = np.arange(20, 105, 5)
 limit_sigma_anni = np.array([])
 # Preallocate the array, where the mean of the 90% upper limit of the number of signal events is saved:
 limit_S_90 = np.array([])
+# Preallocate the array, where the 90 % upper limit of the electron-antineutrino flux is saved:
+limit_flux = np.array([])
 
 # Loop over the different DM masses:
 for mass in DM_mass:
@@ -123,6 +127,14 @@ for mass in DM_mass:
     # append the value of mean_limit_S90 of one DM mass to the array (np.array of float):
     limit_S_90 = np.append(limit_S_90, mean_limit_S90)
 
+    # Calculate the 90 % probability limit of the electron-antineutrino flux from DM self-annihilation in the entire
+    # Milky Way for DM with mass of "mass" MeV in electron-neutrinos/(cm**2 * s) (float):
+    flux_limit = limit_neutrino_flux(mean_limit_S90, mass, N_target, time_s, epsilon_IBD,
+                                     MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+
+    # append the value of flux_limit of one DM mass to the array (np.array of float):
+    limit_flux = np.append(limit_flux, flux_limit)
+
 
 """ 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
     (th have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 7 of the paper 
@@ -153,7 +165,10 @@ y_max = 10**(-22)
 y_min = 10**(-26)
 
 # Semi-logarithmic plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO:
-h1 = plt.figure(1)
+# increase distance between plot and title:
+rcParams["axes.titlepad"] = 20
+
+h1 = plt.figure(1, figsize=(15, 8))
 plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
              label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
 plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="red", alpha=0.4)
@@ -162,14 +177,16 @@ plt.axhline(sigma_anni_natural, linestyle=':', color='black',
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(y_min, y_max)
-plt.xlabel("Dark Matter mass in MeV")
-plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
-plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
-plt.legend()
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
+plt.legend(fontsize=12)
 plt.grid()
 
 # Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K:
-h2 = plt.figure(2)
+h2 = plt.figure(2, figsize=(15, 8))
 plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
              label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
 plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="red", alpha=0.4)
@@ -181,14 +198,16 @@ plt.axhline(sigma_anni_natural, linestyle=':', color='black',
 plt.fill_between(DM_mass_SuperK, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass_SuperK), np.max(DM_mass_SuperK))
 plt.ylim(y_min, y_max)
-plt.xlabel("Dark Matter mass in MeV")
-plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
-plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
-plt.legend()
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
+plt.legend(fontsize=12)
 plt.grid()
 
 # Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K:
-h5 = plt.figure(5)
+h5 = plt.figure(5, figsize=(15, 8))
 plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
          label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
 plt.fill_between(DM_mass, y_max, limit_sigma_anni, facecolor="red", alpha=0.4)
@@ -200,14 +219,16 @@ plt.axhline(sigma_anni_natural, linestyle=':', color='black',
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(y_min, 3*10**(-25))
-plt.xlabel("Dark Matter mass in MeV")
-plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
-plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend()
 plt.grid()
 
 # Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO:
-h3 = plt.figure(3)
+h3 = plt.figure(3, figsize=(15, 8))
 plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
          label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
 plt.fill_between(DM_mass, 3*10**(-25), limit_sigma_anni, facecolor="red", alpha=0.4)
@@ -216,22 +237,42 @@ plt.axhline(sigma_anni_natural, linestyle=':', color='black',
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(y_min, 3*10**(-25))
-plt.xlabel("Dark Matter mass in MeV")
-plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$")
-plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment")
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend()
 plt.grid()
 
 # Plot of the mean of the 90% probability limit of the number of signal events from JUNO:
-h4 = plt.figure(4)
+h4 = plt.figure(4, figsize=(15, 8))
 plt.plot(DM_mass, limit_S_90, marker='x', markersize='6.0', linestyle='-', color='blue',
          label='90% upper limit on number of signal events ($S_{90}$), simulated for JUNO')
 plt.fill_between(DM_mass, 10, limit_S_90, facecolor="red", alpha=0.4)
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(0, 10)
-plt.xlabel("Dark Matter mass in MeV")
-plt.ylabel("$S_{90}$ in events")
-plt.title("90% upper probability limit on the number of signal events from the JUNO experiment")
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("$S_{90}$ in events", fontsize=15)
+plt.title("90% upper probability limit on the number of signal events from the JUNO experiment", fontsize=20)
+plt.legend()
+plt.grid()
+
+# Plot of the 90% upper limit of the electron-antineutrino flux from DM annihilation in the Milky Way:
+h6 = plt.figure(6, figsize=(15, 8))
+plt.plot(DM_mass, limit_flux, marker='x', markersize='6.0', linestyle='-', color='blue',
+         label='90% upper limit on $\\bar{\\nu}_{e}$-flux')
+plt.fill_between(DM_mass, 0.4, limit_flux, facecolor="red", alpha=0.4)
+plt.xlim(np.min(DM_mass), np.max(DM_mass))
+plt.ylim(0, 0.4)
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("90% upper limit of $\phi_{\\bar{\\nu}_{e}}$ in $\\bar{\\nu}_{e}/(cm^{2}s)$", fontsize=15)
+plt.title("90% upper probability limit on electron-antineutrino flux from DM self-annihilation in the Milky Way",
+          fontsize=20)
 plt.legend()
 plt.grid()
 
