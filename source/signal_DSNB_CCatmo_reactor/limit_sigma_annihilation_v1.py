@@ -35,6 +35,9 @@ from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_neutrino_flux
 # TODO: make sure, that mean_limit_S90 and std_limit_s90 in the result_dataset_output_{}.txt files are
 # TODO: at the correct position! (index [7] and [8], OR index [8] and [9])
 
+# Define variable ASIMOV. If ASIMOV is True, also the results of the Asimov-approach is displayed:
+ASIMOV = False
+
 # path of the folder, where the simulated spectra are saved (string):
 path_expected_spectrum = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
 
@@ -57,6 +60,16 @@ limit_sigma_anni = np.array([])
 limit_S_90 = np.array([])
 # Preallocate the array, where the 90 % upper limit of the electron-antineutrino flux is saved:
 limit_flux = np.array([])
+# Preallocate the array, where the mean of the 90 % upper limit of the number of signal events from the Asimov-approach
+# is saved:
+limit_S_90_asimov = np.array([])
+# Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section from the Asimov-approach
+# is saved:
+limit_sigma_anni_asimov = np.array([])
+# Preallocate the array, where the 90 % upper limit of the electron_antineutrino flux from the Asimov-approach
+# is saved:
+limit_flux_asimov = np.array([])
+
 
 # Loop over the different DM masses:
 for mass in DM_mass:
@@ -136,6 +149,34 @@ for mass in DM_mass:
     limit_flux = np.append(limit_flux, flux_limit)
 
 
+if ASIMOV:
+
+    DM_mass_2 = np.arange(20, 110, 10)
+
+    for mass_2 in DM_mass_2:
+
+        result_2 = np.loadtxt("/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor/Asimov_dataset_output/"
+                              "analysis_mcmc_{0}MeV/Dataset1_mcmc_analysis.txt".format(mass_2))
+
+        # get the 90 % limit of the number of signal events
+        limit_S90_asimov = result_2[1]
+
+        # calculate the 90 % probability limit of the electron-antineutrino flux from DM self-annihilation in the entire
+        # Milky Way from DM with mass of "DM_mass_2" MeV in electron-antineutrinos/(cm**2 * s) (float):
+        flux_limit_asimov = limit_neutrino_flux(limit_S90_asimov, mass_2, N_target, time_s, epsilon_IBD,
+                                                MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+
+        # Calculate the 90 % probability limit of the averaged DM self-annihilation cross-section for DM with mass
+        # of "DM_mass_2" MeV in cm**2 (float):
+        limit_asimov = limit_annihilation_crosssection(limit_S90_asimov, mass_2, J_avg, N_target, time_s,
+                                                       epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+
+        # Append the values to the preallocated arrays:
+        limit_S_90_asimov = np.append(limit_S_90_asimov, limit_S90_asimov)
+        limit_flux_asimov = np.append(limit_flux_asimov, flux_limit_asimov)
+        limit_sigma_anni_asimov = np.append(limit_sigma_anni_asimov, limit_asimov)
+
+
 """ 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
     (th have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 7 of the paper 
     'Testing MeV Dark Matter with neutrino detectors', arXiv: 0710.5420v1)
@@ -206,7 +247,7 @@ plt.title("90% upper limit on the total DM self-annihilation cross-section from 
 plt.legend(fontsize=12)
 plt.grid()
 
-# Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K:
+# plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K:
 h5 = plt.figure(5, figsize=(15, 8))
 plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red',
          label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
@@ -275,5 +316,60 @@ plt.title("90% upper probability limit on electron-antineutrino flux from DM sel
           fontsize=20)
 plt.legend()
 plt.grid()
+
+if ASIMOV:
+    # Plot of the mean of the 90% probability limit of the number of signal events from JUNO:
+    h7 = plt.figure(7, figsize=(15, 8))
+    plt.plot(DM_mass, limit_S_90, marker='x', markersize='6.0', linestyle='-', color='blue',
+             label='90% upper limit on number of signal events ($S_{90}$), simulated for JUNO')
+    plt.plot(DM_mass_2, limit_S_90_asimov, marker="x", markersize="6.0", linestyle="-", color="red",
+             label="90% upper limit from Asimov approach test")
+    plt.xlim(np.min(DM_mass), np.max(DM_mass))
+    plt.ylim(0, 10)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+    plt.ylabel("$S_{90}$ in events", fontsize=15)
+    plt.title("90% upper probability limit on the number of signal events from the JUNO experiment\n (with Asimov test)",
+              fontsize=20)
+    plt.legend()
+    plt.grid()
+
+    # Plot of the 90% upper limit of the electron-antineutrino flux from DM annihilation in the Milky Way:
+    h8 = plt.figure(8, figsize=(15, 8))
+    plt.plot(DM_mass, limit_flux, marker='x', markersize='6.0', linestyle='-', color='blue',
+             label='90% upper limit on $\\bar{\\nu}_{e}$-flux')
+    plt.plot(DM_mass_2, limit_flux_asimov, marker='x', markersize='6.0', linestyle='-', color='red',
+             label='90% upper limit on $\\bar{\\nu}_{e}$-flux from Asimov test')
+    plt.xlim(np.min(DM_mass), np.max(DM_mass))
+    plt.ylim(0, 0.4)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+    plt.ylabel("90% upper limit of $\phi_{\\bar{\\nu}_{e}}$ in $\\bar{\\nu}_{e}/(cm^{2}s)$", fontsize=15)
+    plt.title("90% upper probability limit on electron-antineutrino flux from DM self-annihilation in the Milky Way\n "
+              "(with Asimov test)", fontsize=20)
+    plt.legend()
+    plt.grid()
+
+    # Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO:
+    h9 = plt.figure(9, figsize=(15, 8))
+    plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='blue',
+             label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
+    plt.plot(DM_mass_2, limit_sigma_anni_asimov, marker='x', markersize='6.0', linestyle='-', color='red',
+             label='90% upper limit on $<\sigma_A v>$, simulated for JUNO (from Asimov test)')
+    plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+                label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+    plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+    plt.xlim(np.min(DM_mass), np.max(DM_mass))
+    plt.ylim(y_min, 3 * 10 ** (-25))
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+    plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+    plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n (with Asimov "
+              "test)", fontsize=20)
+    plt.legend()
+    plt.grid()
 
 plt.show()

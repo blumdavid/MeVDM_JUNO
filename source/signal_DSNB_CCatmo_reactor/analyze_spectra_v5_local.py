@@ -51,24 +51,24 @@ SAVE_DATA = True
 path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor"
 
 """ set the path of the output folder: """
-path_output = path_folder + "/dataset_output_20"
+path_output = path_folder + "/Asimov_dataset_output"
 
 """ set the path of the folder, where the datasets were saved: """
-# path_dataset = path_output + "/datasets"
-path_dataset = path_folder + "/dataset_output_0/datasets"
+path_dataset = path_folder + "/dataset_output_0"
+## path_dataset = path_folder + "/dataset_output_0/datasets"
 
 """ set the path of the folder, where the results of the analysis should be saved: """
 path_analysis = path_output + "/analysis_mcmc"
 
 """ Go through every dataset and perform the analysis: """
 # define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-dataset_start = 10001
+dataset_start = 1
 # define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = 10001
+dataset_stop = 1
 
 """ Load information about the generation of the datasets from file (np.array of float): """
 # TODO: Check, if info-files have the same parameter:
-info_dataset = np.loadtxt(path_dataset + "/info_dataset_1_to_10000.txt")
+info_dataset = np.loadtxt(path_dataset + "/datasets" + "/info_dataset_1_to_10000.txt")
 # get the bin-width of the visible energy in MeV from the info-file (float):
 interval_E_visible = info_dataset[0]
 # get minimum of the visible energy in MeV from info-file (float):
@@ -78,9 +78,9 @@ max_E_visible = info_dataset[2]
 
 """ Load simulated spectra in events/MeV from file (np.array of float): """
 path_simu = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2"
-file_signal = path_simu + "/signal_DMmass20_bin100keV.txt"
+file_signal = path_simu + "/signal_DMmass90_bin100keV.txt"
 Spectrum_signal = np.loadtxt(file_signal)
-file_info_signal = path_simu + "/signal_info_DMmass20_bin100keV.txt"
+file_info_signal = path_simu + "/signal_info_DMmass90_bin100keV.txt"
 info_signal = np.loadtxt(file_info_signal)
 file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin100keV.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
@@ -378,7 +378,8 @@ def neg_ln_likelihood(*args):
 for number in np.arange(dataset_start, dataset_stop+1, 1):
     print("Analyze dataset_{0:d}".format(number))
     # load corresponding dataset (unit: events/bin) (np.array of float):
-    Data = np.loadtxt(path_dataset + "/Dataset_{0:d}.txt".format(number))
+    ### Data = np.loadtxt(path_dataset + "/Dataset_{0:d}.txt".format(number))
+    Data = np.loadtxt(path_dataset + "/spectrum_simulated.txt")
     # dataset in the 'interesting' energy range from min_E_cut to max_E_cut
     # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
     Data = Data[entry_min_E_cut: (entry_max_E_cut + 1)]
@@ -478,7 +479,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     ax4.set_ylabel('$B_{Reactor}$')
     ax4.set_xlabel('step number')
     plt.legend()
-    plt.show()
+    ## plt.show()
     if SAVE_DATA:
         fig.savefig(path_analysis + '/Dataset{0}_chain_traces.png'.format(number))
     plt.close(fig)
@@ -561,7 +562,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     plt.xlabel("S")
     plt.ylabel("counts")
     plt.title("p(S) from MCMC sampling for one dataset")
-    plt.show()
+    ##plt.show()
 
     # get the index of the bin, where hist_S is maximal (integer):
     index_S = np.argmax(hist_S)
@@ -650,7 +651,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     fig1 = corner.corner(samples, labels=["$S$", "$B_{DSNB}$", "$B_{CCatmo}$", "$B_{reactor}$"],
                          truths=[S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true], truth_color='b',
                          labels_args={"fontsize": 40})
-    plt.show(fig1)
+    ##plt.show(fig1)
     # save figure:
     if SAVE_DATA:
         fig1.savefig(path_analysis + "/Dataset{0}_fitresult.png".format(number))
