@@ -4,7 +4,7 @@
 
 import numpy as np
 from matplotlib import pyplot
-import gen_spectrum_functions as f1
+import work.MeVDM_JUNO.source.gen_spectrum_functions as f1
 
 # mass of positron in MeV (float constant):
 mass_positron = 0.51099892
@@ -43,7 +43,7 @@ e_measured = np.arange(10, 18+binning_e_measured, binning_e_measured)
 print("e_measured = {0}".format(e_measured))
 
 
-""" test 1: 
+""" test 1 ("Berechnung 1" in my notes): 
     1. calculate for every entry in e_neutrino the values of s_theo, e_visible and sigma. With these values 
     calculate for every entry in e_measured value for the measured spectrum
     2. then you have the measured spectrum as function of e_measured for every entry in e_neutrino
@@ -72,8 +72,7 @@ for index1 in np.arange(len(e_neutrino)):
 
 # print("total measured spectrum with test 1 = {0}".format(s_measured_test1))
 
-
-""" test 2 and 3:
+""" test 2 and 3 ("Berechnung 2, Test 2 und Test 3" in my notes):
     1. go through the entries of e_measured
     2. for every entry of e_measured, go through the entries of e_neutrino
     3. calculate the values of s_theo, e_visible, and sigma for this value of e_neutrino
@@ -121,7 +120,6 @@ for index2 in np.arange(len(e_measured)):
 # print("total measured spectrum with test2 = {0}".format(s_measured_test2))
 # print("total measured spectrum with test3 = {0}".format(s_measured_test3))
 
-
 """ test 4:
     Calculation like in gen_spectrum_v1.py
     Spectrum (theoretical spectrum is convolved with gaussian distribution): 
@@ -143,9 +141,9 @@ for index in np.arange(len(e_measured)):
 
 print("total measured spectrum with test 4 = {0}".format(s_measured_test4))
 
-
-""" New Calculation (is implemented in function convolution() of script gen_spectrum_functions.py and used 
-    in gen_spectrum_v2.py): 
+""" New Calculation ("Berechnung 3" in my notes):
+    Is implemented in function convolution() of script gen_spectrum_functions.py and used 
+    in gen_spectrum_v2.py.
     Calculation is similar to test 3, BUT: Integrate the values for 1 entry in e_measured and 1 entry in e_neutrino 
     over the whole bin-width of e_measured[1] to e_measured[2] and at the end divide by the bin-width of e_measured 
     to get the spectrum in units of 1/MeV.
@@ -185,9 +183,9 @@ for index2 in np.arange(len(e_measured)):
 print("total spectrum with the NEW calculation = {0}".format(s_measured_NEW))
 
 h1 = pyplot.figure(1)
-pyplot.step(e_neutrino, s_theo, where='mid', label='theo.spectrum as function of e_neutrino')
+pyplot.step(e_neutrino, s_theo, where='mid', label='theo. spectrum as function of e_neutrino')
 # pyplot.step(e_measured, s_measured_test1, where='mid', label='visible spectrum with test 1')
-pyplot.step(e_measured, s_measured_test3, where='mid', label='visible spectrum with test 4 (gen_spectrum_v1.py')
+# pyplot.step(e_measured, s_measured_test3, where='mid', label='visible spectrum with test 4 (gen_spectrum_v1.py')
 pyplot.step(e_measured, s_measured_NEW, where='mid', label='visible spectrum with NEW calculation (gen_spectrum_v2.py)')
 pyplot.ylim(ymin=0)
 pyplot.xlabel("energy in MeV")

@@ -64,16 +64,20 @@ S_50_minus_1sigma = S_50_mean - S_50_std
 S_50_plus_1sigma = S_50_mean + S_50_std
 # 2.5 % confidence level of the observed number of signal events (float):
 S_50_2_5 = np.percentile(S_mode, 2.5)
+print(S_50_2_5)
 # 97.5 % confidence level of the observed number of signal events (float):
 S_50_97_5 = np.percentile(S_mode, 97.5)
+print(S_50_97_5)
 # -2 sigma value of the observed number of signal events (float):
 S_50_minus_2sigma = S_50_mean - 2*S_50_std
 # +2 sigma value of the observed number of signal events (float):
 S_50_plus_2sigma = S_50_mean + 2*S_50_std
 # 0.15 % confidence level of the observed number of signal events (float):
 S_50_0_15 = np.percentile(S_mode, 0.15)
+print(S_50_0_15)
 # 99.85 % confidence level of the observed number of signal events (float):
 S_50_99_85 = np.percentile(S_mode, 99.85)
+print(S_50_99_85)
 # -3 sigma value of the observed number of signal events (float):
 S_50_minus_3sigma = S_50_mean - 3*S_50_std
 # +3 sigma value of the observed number of signal events (float):
@@ -94,16 +98,20 @@ S_90_minus_1sigma = S_90_mean - S_90_std
 S_90_plus_1sigma = S_90_mean + S_90_std
 # 2.5 % confidence level of the 90% probability limit of the observed number of signal events (float):
 S_90_2_5 = np.percentile(S_90_limit, 2.5)
+print(S_90_2_5)
 # 97.5 % confidence level of the 90% probability limit of the observed number of signal events (float):
 S_90_97_5 = np.percentile(S_90_limit, 97.5)
+print(S_90_97_5)
 # -2 sigma value of the 90% probability limit of the observed number of signal events (float):
 S_90_minus_2sigma = S_90_mean - 2*S_90_std
 # +2 sigma value of the 90% probability limit of the observed number of signal events (float):
 S_90_plus_2sigma = S_90_mean + 2*S_90_std
 # 0.15 % confidence level of the 90% probability limit of the observed number of signal events (float):
 S_90_0_15 = np.percentile(S_90_limit, 0.15)
+print(S_90_0_15)
 # 99.85 % confidence level of the 90% probability limit of the observed number of signal events (float):
 S_90_99_85 = np.percentile(S_90_limit, 99.85)
+print(S_90_99_85)
 # -3 sigma value of the observed number of the 90% probability limit of the signal events (float):
 S_90_minus_3sigma = S_90_mean - 3*S_90_std
 # +3 sigma value of the observed number of the 90% probability limit of the signal events (float):
@@ -224,7 +232,7 @@ plt.title("Distribution of the observed number of signal events from DM with mas
           "\n(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_signal.png")
+# plt.savefig(path_result + "/result_signal.png")
 
 
 """ Display S_mean with 68% and 95% C.L. limits: """
@@ -262,7 +270,7 @@ plt.title("Distribution of the observed number of signal events from DM with mas
           "\n(in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_signal_CL.png")
+# plt.savefig(path_result + "/result_signal_CL.png")
 
 
 """ Display S_90_limit in histogram: """
@@ -278,7 +286,7 @@ plt.ylabel("counts")
 plt.title("Distribution of the 90 % upper limit of the signal contribution for DM with mass = {0:.1f} MeV"
           .format(DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_S90.png")
+# plt.savefig(path_result + "/result_S90.png")
 
 
 """ Display S_90_limit with 68 % and 95% limit in histogram: """
@@ -314,7 +322,7 @@ plt.ylabel("counts")
 plt.title("Distribution of the 90 % upper limit of the signal contribution for DM with mass = {0:.1f} MeV"
           .format(DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_S90_CL.png")
+# plt.savefig(path_result + "/result_S90_CL.png")
 
 
 """ Display DSNB_mean in histogram: """
@@ -355,7 +363,7 @@ plt.title("Distribution of the observed number of DSNB background events in virt
           "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_DSNB.png")
+# plt.savefig(path_result + "/result_DSNB.png")
 
 
 """ Display CCatmo_mean in histogram: """
@@ -397,7 +405,7 @@ plt.title("Distribution of the observed number of atmospheric CC background even
           "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_CCatmo.png")
+# plt.savefig(path_result + "/result_CCatmo.png")
 
 
 """ Display Reactor_mean in histogram: """
@@ -441,6 +449,6 @@ plt.title("Distribution of the observed number of reactor background events in v
           "\n(for DM mass of {2:.1f} MeV and in the energy window from {0:.1f} MeV to {1:.1f} MeV)"
           .format(lower_energy_bound, upper_energy_bound, DM_mass))
 plt.legend()
-plt.savefig(path_result + "/result_reactor.png")
+# plt.savefig(path_result + "/result_reactor.png")
 
 # plt.show()

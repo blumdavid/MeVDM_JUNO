@@ -20,15 +20,15 @@ from work.MeVDM_JUNO.source.gen_spectrum_functions import sigma_ibd, darkmatter_
 
 """ Set boolean values to define, what is simulated in the code, if the data is saved and if spectra are displayed: """
 # generate signal from DM annihilation:
-DM_SIGNAL = False
+DM_SIGNAL = True
 # generate DSNB background:
-DSNB_BACKGROUND = True
+DSNB_BACKGROUND = False
 # generate CC atmospheric background:
-CCATMOSPHERIC_BACKGROUND = True
+CCATMOSPHERIC_BACKGROUND = False
 # generate reactor antineutrino background:
 REACTOR_BACKGROUND = False
 # save the data:
-SAVE_DATA = True
+SAVE_DATA = False
 # display the generated spectra:
 DISPLAY_SPECTRA = True
 
@@ -118,6 +118,10 @@ if DM_SIGNAL:
      sigma_Anni, J_avg, Flux_signal) = \
         darkmatter_signal_v2(E_neutrino, E_visible, interval_E_visible, mass_DM, sigma_IBD_signal, N_target, time,
                              detection_eff, MASS_PROTON, MASS_NEUTRON, MASS_POSITRON)
+
+    print(N_neutrino_signal_vis)
+    print(N_neutrino_signal_theo)
+    
 
     if SAVE_DATA:
         # save Spectrum_signal to txt-spectrum-file and information about simulation in txt-info-file:

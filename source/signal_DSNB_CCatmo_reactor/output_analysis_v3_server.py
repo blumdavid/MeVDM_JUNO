@@ -55,7 +55,8 @@ file_number_stop = int(sys.argv[6])
 (number_of_entries, lower_energy_bound, upper_energy_bound, S_mode, S_50, S_50_sigma, S_50_16, S_50_84, signal_expected,
  S_90_limit, S_90, S_90_sigma, S_90_16, S_90_84, DSNB_mode, DSNB_50, DSNB_50_sigma, DSNB_50_16, DSNB_50_84,
  DSNB_expected, CCatmo_mode, CCatmo_50, CCatmo_50_sigma, CCatmo_50_16, CCatmo_50_84, CCatmo_expected, Reactor_mode,
- Reactor_50, Reactor_50_sigma, Reactor_50_16, Reactor_50_84, Reactor_expected) \
+ Reactor_50, Reactor_50_sigma, Reactor_50_16, Reactor_50_84, Reactor_expected, S_50_2_5, S_50_97_5, S_50_0_15,
+ S_50_99_85, S_90_2_5, S_90_97_5, S_90_0_15, S_90_99_85) \
     = output_analysis(SAVE_DATA, DM_mass, path_output, path_analysis, file_info_analysis, file_number_start,
                       file_number_stop)
 

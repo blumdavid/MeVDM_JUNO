@@ -38,12 +38,20 @@ def output_analysis(save_data, dm_mass, path_output, path_analysis, file_info_an
     s_50_sigma: standard deviation of the array s_mode (float)
     s_50_16: 16% confidence level of the array s_mode (float)
     s_50_84: 84% confidence level of the array s_mode (float)
+    s_50_2_5: 2.5% confidence level of the array s_mode (float)
+    s_50_97_5: 97.5% confidence level of the array s_mode (float)
+    s_50_0_15: 0.15% confidence level of the array s_mode (float)
+    s_50_99_85: 99.85% confidence level of the array s_mode (float)
     signal_expected: number of expected signal events in the energy window (float)
     s_90_limit: values of upper 90 percent limit of the number of signal events (np.array of float)
     s_90: mean of s_90_limit (float)
     s_90_sigma: std of s_90_limit (float)
     s_90_16: 16% confidence level of s_90_limit (float)
     s_90_84: 84% confidence level of s_90_limit (float)
+    s_90_2_5: 2.5% confidence level of s_90_limit (float)
+    s_90_97.5: 97.5% confidence level of s_90_limit (float)
+    s_90_0_15: 0.15% confidence level of s_90_limit (float)
+    s_90_99_85: 99.85% confidence level of s_90_limit (float)
     dsnb_mode: mode of the total number of DSNB background events (np.array of float)
     dsnb_50: mean of dsnb_mode (float)
     dsnb_50_sigma: std of dsnb_mode (float)
@@ -109,15 +117,20 @@ def output_analysis(save_data, dm_mass, path_output, path_analysis, file_info_an
         reactor_mode = np.append(reactor_mode, value_mode_reactor)
 
     """ Calculate the mean and probability interval: """
-    # calculate the mean and 16% and 84% confidence level of the array S_mode (float):
+    # calculate the mean and 16% and 84% confidence level and 2.5% and 97.5% CL and 0.15% and 99.85% CL of the
+    # array S_mode (float):
     s_50 = np.mean(s_mode)
     s_50_sigma = np.std(s_mode)
     s_50_16, s_50_84 = np.percentile(s_mode, [16, 84])
+    s_50_2_5, s_50_97_5 = np.percentile(s_mode, [2.5, 97.5])
+    s_50_0_15, s_50_99_85 = np.percentile(s_mode, [0.15, 99.85])
 
     # calculate the mean and 16% and 84% confidence level of the array s_90_limit (float):
     s_90 = np.mean(s_90_limit)
     s_90_sigma = np.std(s_90_limit)
     s_90_16, s_90_84 = np.percentile(s_90_limit, [16, 84])
+    s_90_2_5, s_90_97_5 = np.percentile(s_90_limit, [2.5, 97.5])
+    s_90_0_15, s_90_99_85 = np.percentile(s_90_limit, [0.15, 99.85])
 
     # calculate the mean and 16% and 84% confidence level of the array DSNB_mean (float):
     dsnb_50 = np.mean(dsnb_mode)
@@ -158,7 +171,9 @@ def output_analysis(save_data, dm_mass, path_output, path_analysis, file_info_an
                              s_90, s_90_sigma, s_90_16, s_90_84,
                              dsnb_expected, dsnb_50, dsnb_50_sigma, dsnb_50_16, dsnb_50_84,
                              ccatmo_expected, ccatmo_50, ccatmo_50_sigma, ccatmo_50_16, ccatmo_50_84,
-                             reactor_expected, reactor_50, reactor_50_sigma, reactor_50_16, reactor_50_84]),
+                             reactor_expected, reactor_50, reactor_50_sigma, reactor_50_16, reactor_50_84,
+                             s_50_2_5, s_50_97_5, s_50_0_15, s_50_99_85,
+                             s_90_2_5, s_90_97_5, s_90_0_15, s_90_99_85]),
                    fmt="%4.5f",
                    header="Results of the analysis of the spectra in dataset_output_{3} "
                           "(with output_analysis_v3.py, {0}):\n"
@@ -191,7 +206,19 @@ def output_analysis(save_data, dm_mass, path_output, path_analysis, file_info_an
                           "Mean of the observed number of Reactor background events,\n"
                           "Standard deviation of the observed number of Reactor background events,\n"
                           "16 % confidence level of the observed number of Reactor background events,\n"
-                          "84 % confidence level of the observed number of Reactor background events:"
+                          "84 % confidence level of the observed number of Reactor background events,\n"
+                          "2.5 % confidence level of the observed number of signal events,\n"
+                          "97.5 % confidence level of the observed number of signal events,\n"
+                          "0.15 % confidence level of the observed number of signal events,\n"
+                          "99.85 % confidence level of the observed number of signal events,\n"
+                          "2.5 % confidence level of the 90% probability limit of the observed number of signal "
+                          "events,\n"
+                          "97.5 % confidence level of the 90% probability limit of the observed number of signal "
+                          "events,\n"
+                          "0.15 % confidence level of the 90% probability limit of the observed number of signal "
+                          "events,\n"
+                          "99.85 % confidence level of the 90% probability limit of the observed number of signal "
+                          "events,\n:"
                    .format(now, file_number_start, file_number_stop, dm_mass))
 
         # print message, that result data is saved in file:
@@ -202,4 +229,5 @@ def output_analysis(save_data, dm_mass, path_output, path_analysis, file_info_an
             s_90_limit, s_90, s_90_sigma, s_90_16, s_90_84,
             dsnb_mode, dsnb_50, dsnb_50_sigma, dsnb_50_16, dsnb_50_84, dsnb_expected,
             ccatmo_mode, ccatmo_50, ccatmo_50_sigma, ccatmo_50_16, ccatmo_50_84, ccatmo_expected,
-            reactor_mode, reactor_50, reactor_50_sigma, reactor_50_16, reactor_50_84, reactor_expected)
+            reactor_mode, reactor_50, reactor_50_sigma, reactor_50_16, reactor_50_84, reactor_expected,
+            s_50_2_5, s_50_97_5, s_50_0_15, s_50_99_85, s_90_2_5, s_90_97_5, s_90_0_15, s_90_99_85)
