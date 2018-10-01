@@ -14,7 +14,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-# TODO-me: CHECK the neutrino flux at JUNO from HONDA and include it into the simulation
 # TODO-me: Why do the flux differs from Julia's one????
 
 # define the neutrino energy in MeV:

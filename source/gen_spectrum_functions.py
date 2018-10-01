@@ -997,7 +997,7 @@ def reactor_background_v2(energy_neutrino, energy_visible, binning_energy_visibl
         # INFO-me: (for DM mass = 20 MeV and energy window from 15 to 25 MeV, only 0.00003 reactor background events
         # INFO-me: are expected)
 
-        # TODO-me: the reactor flux and its uncertainties becomes interesting for DM masses below 20 MeV
+        # TODO-me: the reactor flux and its uncertainties become interesting for DM masses below 20 MeV
 
         :param energy_neutrino: energy corresponding to the electron-antineutrino energy in MeV (np.array of float)
         :param energy_visible: energy corresponding to the visible energy in MeV (np.array of float)
