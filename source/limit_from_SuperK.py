@@ -6,7 +6,7 @@
 
 """
 import numpy as np
-from MeVDM_JUNO.source.gen_spectrum_functions import sigma_ibd
+from work.MeVDM_JUNO.source.gen_spectrum_functions import sigma_ibd
 
 # define the DM masses in MeV:
 DM_mass = np.array([20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])

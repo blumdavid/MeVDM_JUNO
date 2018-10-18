@@ -6,7 +6,7 @@
     done with analyze_spectra_v4_server2.py!
 
     Script uses the function output_analysis() from output_analysis_v3.py,
-    but is optimized to run on the local computer.
+    but is optimized to run on the IHEP cluster.
 
     In analyze_spectra_v4_server2.py the dataset and the simulated spectrum were analyzed with
     Markov Chain Monte Carlo (MCMC) sampling and the results of the analysis are saved in the

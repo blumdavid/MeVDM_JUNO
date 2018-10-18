@@ -1,4 +1,8 @@
-""" Script to calculate the 90 percent dark matter self-annihilation cross-section for different dark matter masses
+""" This script is a copy of the script "limit_sigma_annihilation_v1.py" from 28.09.2018.
+    It was used for simulation and analysis of "S90_DSNB_CCatmo_reactor".
+
+
+    Script to calculate the 90 percent dark matter self-annihilation cross-section for different dark matter masses
     and display the results.
 
     Results of the simulation and analysis saved in folder "S90_DSNB_CCatmo_reactor"
@@ -74,18 +78,27 @@ if JAVG:
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_NFW_min is
     # saved:
     limit_sigma_anni_Javg_NFW_min = np.array([])
+    # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_NFW is
+    # saved:
+    limit_sigma_anni_Javg_NFW = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_NFW_max is
     # saved:
     limit_sigma_anni_Javg_NFW_max = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_MQGSL_min is
     # saved:
     limit_sigma_anni_Javg_MQGSL_min = np.array([])
+    # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_MQGSL is
+    # saved:
+    limit_sigma_anni_Javg_MQGSL = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_MQGSL_max is
     # saved:
     limit_sigma_anni_Javg_MQGSL_max = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_KKBP_min is
     # saved:
     limit_sigma_anni_Javg_KKBP_min = np.array([])
+    # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_KKBP is
+    # saved:
+    limit_sigma_anni_Javg_KKBP = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_KKBP_max is
     # saved:
     limit_sigma_anni_Javg_KKBP_max = np.array([])
@@ -137,13 +150,12 @@ limit_sigma_anni_asimov = np.array([])
 # is saved:
 limit_flux_asimov = np.array([])
 
-
 # Loop over the different DM masses:
 for mass in DM_mass:
 
     """ Information about the work saved in dataset_output_{}: 
         Dark matter with mass = "mass" MeV
-        
+
         Neutrino signal from Dark Matter annihilation in the Milky Way:
         - expected spectrum of the signal is saved in file: signal_DMmass{}_bin100keV.txt
         - information about the signal spectrum is saved in file: signal_info_DMmass{}_bin100keV.txt
@@ -163,21 +175,30 @@ for mass in DM_mass:
     if JAVG:
         # canonical value of J_avg (float)
         J_avg_canonical = 5.0
+
         # minimum of J_avg corresponding to NFW profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_NFW_min = 1.3
+        # average of J corresponding to NFW profile (float):
+        J_avg_NFW = 3.0
         # maximum of J_avg corresponding to NFW profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_NFW_max = 41.0
+
         # minimum of J_avg corresponding to MQGSL profile and to maximum density allowed for this profile by
         # observational constraints (float):
         J_avg_MQGSL_min = 5.2
+        # average of J corresponding to MQGSL profile (float):
+        J_avg_MQGSL = 8
         # maximum of J_avg corresponding to MQGSL profile and to maximum density allowed for this profile by
         # observational constraints (float):
         J_avg_MQGSL_max = 104
+
         # minimum of J_avg corresponding to KKBP profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_KKBP_min = 1.9
+        # average of J corresponding to KKBP profile (float):
+        J_avg_KKBP = 2.6
         # maximum of J_avg corresponding to KKBP profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_KKBP_max = 8.5
@@ -270,6 +291,13 @@ for mass in DM_mass:
         limit_sigma_anni_Javg_NFW_min = np.append(limit_sigma_anni_Javg_NFW_min, limit_Javg_NFW_min)
 
         # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+        # mass of "mass" MeV in cm**2 and for J_avg_NFW (float):
+        limit_Javg_NFW = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_NFW, N_target, time_s,
+                                                         epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+        # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
+        limit_sigma_anni_Javg_NFW = np.append(limit_sigma_anni_Javg_NFW, limit_Javg_NFW)
+
+        # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
         # mass of "mass" MeV in cm**2 and for J_avg_NFW_max (float):
         limit_Javg_NFW_max = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_NFW_max, N_target, time_s,
                                                              epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
@@ -285,6 +313,13 @@ for mass in DM_mass:
         limit_sigma_anni_Javg_MQGSL_min = np.append(limit_sigma_anni_Javg_MQGSL_min, limit_Javg_MQGSL_min)
 
         # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+        # mass of "mass" MeV in cm**2 and for J_avg_MQGSL (float):
+        limit_Javg_MQGSL = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_MQGSL, N_target, time_s,
+                                                           epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+        # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
+        limit_sigma_anni_Javg_MQGSL = np.append(limit_sigma_anni_Javg_MQGSL, limit_Javg_MQGSL)
+
+        # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
         # mass of "mass" MeV in cm**2 and for J_avg_MQGSL_max (float):
         limit_Javg_MQGSL_max = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_MQGSL_max, N_target, time_s,
                                                                epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
@@ -298,6 +333,13 @@ for mass in DM_mass:
                                                               epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
         # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
         limit_sigma_anni_Javg_KKBP_min = np.append(limit_sigma_anni_Javg_KKBP_min, limit_Javg_KKBP_min)
+
+        # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+        # mass of "mass" MeV in cm**2 and for J_avg_KKBP (float):
+        limit_Javg_KKBP = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_KKBP, N_target, time_s,
+                                                          epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+        # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
+        limit_sigma_anni_Javg_KKBP = np.append(limit_sigma_anni_Javg_KKBP, limit_Javg_KKBP)
 
         # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
         # mass of "mass" MeV in cm**2 and for J_avg_KKBP_max (float):
@@ -362,13 +404,11 @@ for mass in DM_mass:
     limit_sigma_anni_2_5 = np.append(limit_sigma_anni_2_5, limit_2_5)
     limit_sigma_anni_97_5 = np.append(limit_sigma_anni_97_5, limit_97_5)
 
-
 if ASIMOV:
 
     DM_mass_2 = np.arange(20, 110, 10)
 
     for mass_2 in DM_mass_2:
-
         result_2 = np.loadtxt("/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor/Asimov_dataset_output/"
                               "analysis_mcmc_{0}MeV/Dataset1_mcmc_analysis.txt".format(mass_2))
 
@@ -389,7 +429,6 @@ if ASIMOV:
         limit_S_90_asimov = np.append(limit_S_90_asimov, limit_S90_asimov)
         limit_flux_asimov = np.append(limit_flux_asimov, flux_limit_asimov)
         limit_sigma_anni_asimov = np.append(limit_sigma_anni_asimov, limit_asimov)
-
 
 """ 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
     (th have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 7 of the paper 
@@ -415,9 +454,9 @@ sigma_anni_SuperK = np.array([4.74756E-23, 4.21697E-23, 2.7617E-23, 3.68279E-23,
                               7.00791E-23, 8.30076E-23, 9.83212E-23])
 
 # maximum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
-y_max = 10**(-22)
+y_max = 10 ** (-22)
 # minimum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
-y_min = 10**(-26)
+y_min = 10 ** (-26)
 
 # increase distance between plot and title:
 rcParams["axes.titlepad"] = 20
@@ -431,12 +470,12 @@ plt.semilogy(DM_mass, limit_sigma_anni_16, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_16, limit_sigma_anni, facecolor="green", alpha=1)
 plt.semilogy(DM_mass, limit_sigma_anni_84, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni, limit_sigma_anni_84, facecolor='green', alpha=1,
-                 label="16 % and 84 % probability interval")
+                 label="68 % probability interval")
 plt.semilogy(DM_mass, limit_sigma_anni_2_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_2_5, limit_sigma_anni_16, facecolor='yellow', alpha=1)
 plt.semilogy(DM_mass, limit_sigma_anni_97_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_84, limit_sigma_anni_97_5, facecolor='yellow', alpha=1,
-                 label='2.5 % and 97.5 % probability interval')
+                 label='95 % probability interval')
 plt.axhline(sigma_anni_natural, linestyle=':', color='black',
             label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
@@ -449,7 +488,6 @@ plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Semi-logarithmic plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO: """
 h2 = plt.figure(2, figsize=(15, 8))
@@ -468,7 +506,6 @@ plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K: """
 h3 = plt.figure(3, figsize=(15, 8))
@@ -491,7 +528,6 @@ plt.title("90% upper limit on the total DM self-annihilation cross-section from 
 plt.legend(fontsize=13)
 plt.grid()
 
-
 """ plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO AND Super-K: """
 h4 = plt.figure(4, figsize=(15, 8))
 plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red', linewidth=2.0,
@@ -504,7 +540,7 @@ plt.axhline(sigma_anni_natural, linestyle=':', color='black',
             label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
-plt.ylim(y_min, 3*10**(-25))
+plt.ylim(y_min, 3 * 10 ** (-25))
 plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 plt.xlabel("Dark Matter mass in MeV", fontsize=15)
@@ -512,7 +548,6 @@ plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO with probability intervals: """
 h5 = plt.figure(5, figsize=(15, 8))
@@ -522,17 +557,17 @@ plt.plot(DM_mass, limit_sigma_anni_16, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_16, limit_sigma_anni, facecolor="green", alpha=1)
 plt.plot(DM_mass, limit_sigma_anni_84, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni, limit_sigma_anni_84, facecolor='green', alpha=1,
-                 label="16 % and 84 % probability interval")
+                 label="68 % probability interval")
 plt.plot(DM_mass, limit_sigma_anni_2_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_2_5, limit_sigma_anni_16, facecolor='yellow', alpha=1)
 plt.plot(DM_mass, limit_sigma_anni_97_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_84, limit_sigma_anni_97_5, facecolor='yellow', alpha=1,
-                 label='2.5 % and 97.5 % probability interval')
+                 label='95 % probability interval')
 plt.axhline(sigma_anni_natural, linestyle=':', color='black',
             label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
-plt.ylim(y_min, 3*10**(-25))
+plt.ylim(y_min, 3 * 10 ** (-25))
 plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 plt.xlabel("Dark Matter mass in MeV", fontsize=15)
@@ -540,18 +575,17 @@ plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO: """
 h6 = plt.figure(6, figsize=(15, 8))
 plt.plot(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='red', linewidth=2.0,
          label='90% upper limit on $<\sigma_A v>$, simulated for JUNO')
-plt.fill_between(DM_mass, 3*10**(-25), limit_sigma_anni, facecolor="red", alpha=0.4)
+plt.fill_between(DM_mass, 3 * 10 ** (-25), limit_sigma_anni, facecolor="red", alpha=0.4)
 plt.axhline(sigma_anni_natural, linestyle=':', color='black',
             label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
 plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
-plt.ylim(y_min, 3*10**(-25))
+plt.ylim(y_min, 3 * 10 ** (-25))
 plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 plt.xlabel("Dark Matter mass in MeV", fontsize=15)
@@ -559,7 +593,6 @@ plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
 plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment", fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Plot of the mean of the 90% probability limit of the number of signal events from JUNO 
     with probability intervals: """
@@ -570,12 +603,12 @@ plt.plot(DM_mass, limit_S_90_16, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_S_90_16, limit_S_90, facecolor="green", alpha=1)
 plt.plot(DM_mass, limit_S_90_84, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_S_90, limit_S_90_84, facecolor='green', alpha=1,
-                 label="16 % and 84 % probability interval")
+                 label="68 % probability interval")
 plt.plot(DM_mass, limit_S_90_2_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_S_90_2_5, limit_S_90_16, facecolor='yellow', alpha=1)
 plt.plot(DM_mass, limit_S_90_97_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_S_90_84, limit_S_90_97_5, facecolor='yellow', alpha=1,
-                 label='2.5 % and 97.5 % probability interval')
+                 label='95 % probability interval')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(0, 10)
 plt.xticks(fontsize=12)
@@ -585,7 +618,6 @@ plt.ylabel("$S_{90}$ in events", fontsize=15)
 plt.title("90% upper probability limit on the number of signal events from the JUNO experiment", fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Plot of the mean of the 90% probability limit of the number of signal events from JUNO: """
 h8 = plt.figure(8, figsize=(15, 8))
@@ -602,7 +634,6 @@ plt.title("90% upper probability limit on the number of signal events from the J
 plt.legend(fontsize=13)
 plt.grid()
 
-
 """ Plot of the 90% upper limit of the electron-antineutrino flux from DM annihilation in the Milky Way with 
     probability intervals: """
 h9 = plt.figure(9, figsize=(15, 8))
@@ -612,12 +643,12 @@ plt.plot(DM_mass, limit_flux_16, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_flux_16, limit_flux, facecolor="green", alpha=1)
 plt.plot(DM_mass, limit_flux_84, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_flux, limit_flux_84, facecolor='green', alpha=1,
-                 label="16 % and 84 % probability interval")
+                 label="68 % probability interval")
 plt.plot(DM_mass, limit_flux_2_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_flux_2_5, limit_flux_16, facecolor='yellow', alpha=1)
 plt.plot(DM_mass, limit_flux_97_5, linestyle='-.', color='blue')
 plt.fill_between(DM_mass, limit_flux_84, limit_flux_97_5, facecolor='yellow', alpha=1,
-                 label='2.5 % and 97.5 % probability interval')
+                 label='95 % probability interval')
 plt.xlim(np.min(DM_mass), np.max(DM_mass))
 plt.ylim(0, 0.6)
 plt.xticks(fontsize=12)
@@ -628,7 +659,6 @@ plt.title("90% upper probability limit on electron-antineutrino flux from DM sel
           fontsize=20)
 plt.legend(fontsize=13)
 plt.grid()
-
 
 """ Plot of the 90% upper limit of the electron-antineutrino flux from DM annihilation in the Milky Way: """
 h10 = plt.figure(10, figsize=(15, 8))
@@ -646,6 +676,7 @@ plt.title("90% upper probability limit on electron-antineutrino flux from DM sel
 plt.legend(fontsize=13)
 plt.grid()
 
+
 if ASIMOV:
     # Plot of the mean of the 90% probability limit of the number of signal events from JUNO:
     h11 = plt.figure(11, figsize=(15, 8))
@@ -659,8 +690,9 @@ if ASIMOV:
     plt.yticks(fontsize=12)
     plt.xlabel("Dark Matter mass in MeV", fontsize=15)
     plt.ylabel("$S_{90}$ in events", fontsize=15)
-    plt.title("90% upper probability limit on the number of signal events from the JUNO experiment\n (with Asimov test)",
-              fontsize=20)
+    plt.title(
+        "90% upper probability limit on the number of signal events from the JUNO experiment\n (with Asimov test)",
+        fontsize=20)
     plt.legend()
     plt.grid()
 
@@ -703,77 +735,28 @@ if ASIMOV:
 
 if JAVG:
     # minimum of y axis:
-    y_min_1 = 10**(-27)
-    # maximum of y axis:
-    y_max_1 = 70*10**(-24)
-
-    """ Semi-logarithmic plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for 
-        three different values of J_avg: """
-    h14 = plt.figure(14, figsize=(15, 8))
-    # plot canonical:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_canonical))
-    # plot NFW:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='--', color='red',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_NFW_min))
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle='-', color='red',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_NFW_max))
-    # plot MQGSL:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='blue',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_MQGSL_min))
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle='-', color='blue',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_MQGSL_max))
-    # plot KKBP:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='green',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_KKBP_min))
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle='-', color='green',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_KKBP_max))
-    # natural scale:
-    plt.axhline(sigma_anni_natural, linestyle=':', color='black',
-                label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
-    plt.fill_between(DM_mass, y_min_1, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
-    plt.xlim(np.min(DM_mass), np.max(DM_mass))
-    plt.ylim(y_min_1, y_max_1)
-    plt.xticks(fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.xlabel("Dark Matter mass in MeV", fontsize=15)
-    plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
-    plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
-              "for different angular-averaged DM intensities $J_{avg}$ over the whole Milky Way", fontsize=20)
-    plt.legend(fontsize=13)
-    plt.grid()
-
-    # minimum of y axis:
-    # y_min_2 = 0.7*10**(-27)
     y_min_2 = 0
     # maximum of y axis:
-    y_max_2 = 0.6*10**(-24)
+    y_max_2 = 4.5 * 10 ** (-25)
 
-    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for three different values 
-    of J_avg: """
-    h15 = plt.figure(15, figsize=(15, 8))
+    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for different values of J_avg 
+    from the NFW profile: """
+    h14 = plt.figure(14, figsize=(15, 8))
     # plot canonical:
     plt.plot(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_canonical))
+             linewidth=2.0, label='canonical value $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
     # plot NFW:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='--', color='red',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_NFW_min))
-    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle='-', color='red',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_NFW_max))
-    # plot MQGSL:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='blue',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_MQGSL_min))
-    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle='-', color='blue',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_MQGSL_max))
-    # plot KKBP:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='green',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_KKBP_min))
-    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle='-', color='green',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$'+'={0:.1f}'.format(J_avg_KKBP_max))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='--', color='blue',
+             linewidth=2.0, label='minimum of $J_{avg, NFW}$' + '={0:.1f}'.format(J_avg_NFW_min))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW, marker='x', markersize='6.0', linestyle='-', color='blue',
+             linewidth=2.0, label='average of $J_{avg, NFW}$' + '={0:.1f}'.format(J_avg_NFW))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle=':', color='blue',
+             linewidth=2.0, label='maximum of $J_{avg, NFW}$' + '={0:.1f}'.format(J_avg_NFW_max))
+    plt.fill_between(DM_mass, limit_sigma_anni_Javg_NFW_min, limit_sigma_anni_Javg_NFW_max, facecolor='blue', alpha=0.5)
     # natural scale:
     plt.axhline(sigma_anni_natural, linestyle=':', color='black',
                 label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
-    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.5, hatch='/')
     plt.xlim(np.min(DM_mass), np.max(DM_mass))
     plt.ylim(y_min_2, y_max_2)
     plt.xticks(fontsize=12)
@@ -781,9 +764,68 @@ if JAVG:
     plt.xlabel("Dark Matter mass in MeV", fontsize=15)
     plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
     plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
-              "for different angular-averaged DM intensities $J_{avg}$ over the whole Milky Way", fontsize=20)
+              "for the NFW halo profile", fontsize=20)
     plt.legend(fontsize=13)
     plt.grid()
 
+    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for different values of J_avg 
+    from the MQGSL profile: """
+    h15 = plt.figure(15, figsize=(15, 8))
+    # plot canonical:
+    plt.plot(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
+             linewidth=2.0, label='canonical value $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
+    # plot MQGSL:
+    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='red',
+             linewidth=2.0, label='minimum of $J_{avg, MQGSL}$' + '={0:.1f}'.format(J_avg_MQGSL_min))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL, marker='x', markersize='6.0', linestyle='-', color='red',
+             linewidth=2.0, label='average of $J_{avg, MQGSL}$' + '={0:.1f}'.format(J_avg_MQGSL))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle=':', color='red',
+             linewidth=2.0, label='maximum of $J_{avg, MQGSL}$' + '={0:.1f}'.format(J_avg_MQGSL_max))
+    plt.fill_between(DM_mass, limit_sigma_anni_Javg_MQGSL_min, limit_sigma_anni_Javg_MQGSL_max, facecolor='red',
+                     alpha=0.5)
+    # natural scale:
+    plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+                label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.5, hatch='/')
+    plt.xlim(np.min(DM_mass), np.max(DM_mass))
+    plt.ylim(y_min_2, y_max_2)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+    plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+    plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
+              "for the MQGSL halo profile", fontsize=20)
+    plt.legend(fontsize=13)
+    plt.grid()
+
+    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for different values of J_avg 
+    from the KKBP profile: """
+    h16 = plt.figure(16, figsize=(15, 8))
+    # plot canonical:
+    plt.plot(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
+             linewidth=2.0, label='canonical value $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
+    # plot MQGSL:
+    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='green',
+             linewidth=2.0, label='minimum of $J_{avg, KKBP}$' + '={0:.1f}'.format(J_avg_KKBP_min))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP, marker='x', markersize='6.0', linestyle='-', color='green',
+             linewidth=2.0, label='average of $J_{avg, KKBP}$' + '={0:.1f}'.format(J_avg_KKBP))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle=':', color='green',
+             linewidth=2.0, label='maximum of $J_{avg, KKBP}$' + '={0:.1f}'.format(J_avg_KKBP_max))
+    plt.fill_between(DM_mass, limit_sigma_anni_Javg_KKBP_min, limit_sigma_anni_Javg_KKBP_max, facecolor='green',
+                     alpha=0.5)
+    # natural scale:
+    plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+                label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.5, hatch='/')
+    plt.xlim(np.min(DM_mass), np.max(DM_mass))
+    plt.ylim(y_min_2, y_max_2)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+    plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+    plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
+              "for the KKBP halo profile", fontsize=20)
+    plt.legend(fontsize=13)
+    plt.grid()
 
 plt.show()

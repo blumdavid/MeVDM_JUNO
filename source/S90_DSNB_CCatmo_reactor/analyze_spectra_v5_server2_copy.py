@@ -14,6 +14,31 @@
 
     Script is based on the analyze_spectra_v5_local.py Script, but changed a bit to be able to run it on the cluster.
 
+    Version 5:  MCMC sampling is implemented differently to version4:
+                - burnin-phase is implemented differently -> first burnin-phase, than reset of the sampler, then new
+                sampling with the positions of the walkers from the end of burnin-phase
+
+                Advantage: burnin-phase and actual sampling can be treated separately
+
+                New Implementation of the estimation of the autocorrelation time:
+                - calculated with sampler.get_autocorr_time
+                - implementation of try / except to avoid a crash when there is an AutocorrError
+
+                !!NO Calculation of the conditional probability for the hypothesis H to be true or not!!
+
+                The fitting of the datasets to the model (simulated spectrum) is based on the python package emcee:
+                -  emcee is an MIT licensed pure-Python implementation of Goodman & Weare’s Affine Invariant
+                Markov chain Monte Carlo (MCMC) Ensemble sampler
+                - it's designed for Bayesian parameter estimation (marginalization of the posterior probability)
+                - based on Markov Chain Monte Carlo (MCMC) sampling
+                - more information about the algorithm in the paper emcee_1202.3665.pdf
+                - the code here is based on the example described in the link http://dfm.io/emcee/current/user/line/
+                - on the homepage http://dfm.io/emcee/current/ there are lots of information and also the documentation
+
+    Dataset (virtual experiments) are generated with gen_dataset_v1_local.py
+    Simulated spectra are generated with gen_spectrum_v2.py
+    
+
     to run the script:
 
     python /junofs/users/dblum/work/code/analyze_spectra_v5_server2.py 0 DM_mass

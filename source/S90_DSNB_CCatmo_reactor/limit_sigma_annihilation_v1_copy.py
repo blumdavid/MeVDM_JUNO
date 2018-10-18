@@ -1,4 +1,4 @@
-""" This script is a copy of the script "limit_sigma_annihilation_v1.py" from 28.09.2018.
+""" This script is a copy of the script "limit_sigma_annihilation_v1.py" from 04.10.2018.
     It was used for simulation and analysis of "S90_DSNB_CCatmo_reactor".
 
 
@@ -78,18 +78,27 @@ if JAVG:
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_NFW_min is
     # saved:
     limit_sigma_anni_Javg_NFW_min = np.array([])
+    # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_NFW is
+    # saved:
+    limit_sigma_anni_Javg_NFW = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_NFW_max is
     # saved:
     limit_sigma_anni_Javg_NFW_max = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_MQGSL_min is
     # saved:
     limit_sigma_anni_Javg_MQGSL_min = np.array([])
+    # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_MQGSL is
+    # saved:
+    limit_sigma_anni_Javg_MQGSL = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_MQGSL_max is
     # saved:
     limit_sigma_anni_Javg_MQGSL_max = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_KKBP_min is
     # saved:
     limit_sigma_anni_Javg_KKBP_min = np.array([])
+    # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_KKBP is
+    # saved:
+    limit_sigma_anni_Javg_KKBP = np.array([])
     # Preallocate the array, where the 90 % upper limit of the DM self-annihilation cross-section for J_avg_KKBP_max is
     # saved:
     limit_sigma_anni_Javg_KKBP_max = np.array([])
@@ -166,21 +175,30 @@ for mass in DM_mass:
     if JAVG:
         # canonical value of J_avg (float)
         J_avg_canonical = 5.0
+
         # minimum of J_avg corresponding to NFW profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_NFW_min = 1.3
+        # average of J corresponding to NFW profile (float):
+        J_avg_NFW = 3.0
         # maximum of J_avg corresponding to NFW profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_NFW_max = 41.0
+
         # minimum of J_avg corresponding to MQGSL profile and to maximum density allowed for this profile by
         # observational constraints (float):
         J_avg_MQGSL_min = 5.2
+        # average of J corresponding to MQGSL profile (float):
+        J_avg_MQGSL = 8
         # maximum of J_avg corresponding to MQGSL profile and to maximum density allowed for this profile by
         # observational constraints (float):
         J_avg_MQGSL_max = 104
+
         # minimum of J_avg corresponding to KKBP profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_KKBP_min = 1.9
+        # average of J corresponding to KKBP profile (float):
+        J_avg_KKBP = 2.6
         # maximum of J_avg corresponding to KKBP profile and to minimum density allowed for this profile by
         # observational constraints (float):
         J_avg_KKBP_max = 8.5
@@ -273,6 +291,13 @@ for mass in DM_mass:
         limit_sigma_anni_Javg_NFW_min = np.append(limit_sigma_anni_Javg_NFW_min, limit_Javg_NFW_min)
 
         # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+        # mass of "mass" MeV in cm**2 and for J_avg_NFW (float):
+        limit_Javg_NFW = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_NFW, N_target, time_s,
+                                                         epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+        # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
+        limit_sigma_anni_Javg_NFW = np.append(limit_sigma_anni_Javg_NFW, limit_Javg_NFW)
+
+        # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
         # mass of "mass" MeV in cm**2 and for J_avg_NFW_max (float):
         limit_Javg_NFW_max = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_NFW_max, N_target, time_s,
                                                              epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
@@ -288,6 +313,13 @@ for mass in DM_mass:
         limit_sigma_anni_Javg_MQGSL_min = np.append(limit_sigma_anni_Javg_MQGSL_min, limit_Javg_MQGSL_min)
 
         # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+        # mass of "mass" MeV in cm**2 and for J_avg_MQGSL (float):
+        limit_Javg_MQGSL = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_MQGSL, N_target, time_s,
+                                                           epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+        # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
+        limit_sigma_anni_Javg_MQGSL = np.append(limit_sigma_anni_Javg_MQGSL, limit_Javg_MQGSL)
+
+        # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
         # mass of "mass" MeV in cm**2 and for J_avg_MQGSL_max (float):
         limit_Javg_MQGSL_max = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_MQGSL_max, N_target, time_s,
                                                                epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
@@ -301,6 +333,13 @@ for mass in DM_mass:
                                                               epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
         # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
         limit_sigma_anni_Javg_KKBP_min = np.append(limit_sigma_anni_Javg_KKBP_min, limit_Javg_KKBP_min)
+
+        # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+        # mass of "mass" MeV in cm**2 and for J_avg_KKBP (float):
+        limit_Javg_KKBP = limit_annihilation_crosssection(mean_limit_S90, mass, J_avg_KKBP, N_target, time_s,
+                                                          epsilon_IBD, MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+        # append the value of limit_sigma_anni_90 of one DM mass to the array (np.array of float):
+        limit_sigma_anni_Javg_KKBP = np.append(limit_sigma_anni_Javg_KKBP, limit_Javg_KKBP)
 
         # Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
         # mass of "mass" MeV in cm**2 and for J_avg_KKBP_max (float):
@@ -637,6 +676,7 @@ plt.title("90% upper probability limit on electron-antineutrino flux from DM sel
 plt.legend(fontsize=13)
 plt.grid()
 
+
 if ASIMOV:
     # Plot of the mean of the 90% probability limit of the number of signal events from JUNO:
     h11 = plt.figure(11, figsize=(15, 8))
@@ -695,77 +735,58 @@ if ASIMOV:
 
 if JAVG:
     # minimum of y axis:
-    y_min_1 = 10 ** (-27)
+    y_min_2 = 0
     # maximum of y axis:
-    y_max_1 = 70 * 10 ** (-24)
+    y_max_2 = 4.5 * 10 ** (-25)
 
-    """ Semi-logarithmic plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for 
-        three different values of J_avg: """
+    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for different values of J_avg 
+    from the NFW profile: """
     h14 = plt.figure(14, figsize=(15, 8))
     # plot canonical:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
+             linewidth=2.0, label='canonical value $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
     # plot NFW:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='--', color='red',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_NFW_min))
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle='-', color='red',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_NFW_max))
-    # plot MQGSL:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='blue',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_MQGSL_min))
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle='-', color='blue',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_MQGSL_max))
-    # plot KKBP:
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='green',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_KKBP_min))
-    plt.semilogy(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle='-', color='green',
-                 linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_KKBP_max))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='--', color='blue',
+             linewidth=2.0, label='minimum of $J_{avg, NFW}$' + '={0:.1f}'.format(J_avg_NFW_min))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW, marker='x', markersize='6.0', linestyle='-', color='blue',
+             linewidth=2.0, label='average of $J_{avg, NFW}$' + '={0:.1f}'.format(J_avg_NFW))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle=':', color='blue',
+             linewidth=2.0, label='maximum of $J_{avg, NFW}$' + '={0:.1f}'.format(J_avg_NFW_max))
+    plt.fill_between(DM_mass, limit_sigma_anni_Javg_NFW_min, limit_sigma_anni_Javg_NFW_max, facecolor='blue', alpha=0.5)
     # natural scale:
     plt.axhline(sigma_anni_natural, linestyle=':', color='black',
                 label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
-    plt.fill_between(DM_mass, y_min_1, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.5, hatch='/')
     plt.xlim(np.min(DM_mass), np.max(DM_mass))
-    plt.ylim(y_min_1, y_max_1)
+    plt.ylim(y_min_2, y_max_2)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
     plt.xlabel("Dark Matter mass in MeV", fontsize=15)
     plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
     plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
-              "for different angular-averaged DM intensities $J_{avg}$ over the whole Milky Way", fontsize=20)
+              "for the NFW halo profile", fontsize=20)
     plt.legend(fontsize=13)
     plt.grid()
 
-    # minimum of y axis:
-    # y_min_2 = 0.7*10**(-27)
-    y_min_2 = 0
-    # maximum of y axis:
-    y_max_2 = 0.6 * 10 ** (-24)
-
-    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for three different values 
-    of J_avg: """
+    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for different values of J_avg 
+    from the MQGSL profile: """
     h15 = plt.figure(15, figsize=(15, 8))
     # plot canonical:
     plt.plot(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
-    # plot NFW:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='--', color='red',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_NFW_min))
-    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle='-', color='red',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_NFW_max))
+             linewidth=2.0, label='canonical value $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
     # plot MQGSL:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='blue',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_MQGSL_min))
-    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle='-', color='blue',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_MQGSL_max))
-    # plot KKBP:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='green',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_KKBP_min))
-    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle='-', color='green',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_KKBP_max))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='red',
+             linewidth=2.0, label='minimum of $J_{avg, MQGSL}$' + '={0:.1f}'.format(J_avg_MQGSL_min))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL, marker='x', markersize='6.0', linestyle='-', color='red',
+             linewidth=2.0, label='average of $J_{avg, MQGSL}$' + '={0:.1f}'.format(J_avg_MQGSL))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle=':', color='red',
+             linewidth=2.0, label='maximum of $J_{avg, MQGSL}$' + '={0:.1f}'.format(J_avg_MQGSL_max))
+    plt.fill_between(DM_mass, limit_sigma_anni_Javg_MQGSL_min, limit_sigma_anni_Javg_MQGSL_max, facecolor='red',
+                     alpha=0.5)
     # natural scale:
     plt.axhline(sigma_anni_natural, linestyle=':', color='black',
                 label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
-    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.5, hatch='/')
     plt.xlim(np.min(DM_mass), np.max(DM_mass))
     plt.ylim(y_min_2, y_max_2)
     plt.xticks(fontsize=12)
@@ -773,41 +794,29 @@ if JAVG:
     plt.xlabel("Dark Matter mass in MeV", fontsize=15)
     plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
     plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
-              "for different angular-averaged DM intensities $J_{avg}$ over the whole Milky Way", fontsize=20)
+              "for the MQGSL halo profile", fontsize=20)
     plt.legend(fontsize=13)
     plt.grid()
 
-    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for three different values 
-    of J_avg: """
+    """ Plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO for different values of J_avg 
+    from the KKBP profile: """
     h16 = plt.figure(16, figsize=(15, 8))
     # plot canonical:
     plt.plot(DM_mass, limit_sigma_anni_Javg_canonical, marker='x', markersize='6.0', linestyle='-', color='black',
-             linewidth=2.0, label='90% limit of $<\sigma_A v>$ for $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
-    # plot NFW:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_min, marker='x', markersize='6.0', linestyle='-', color='red')
-    plt.plot(DM_mass, limit_sigma_anni_Javg_NFW_max, marker='x', markersize='6.0', linestyle='-', color='red')
-    plt.fill_between(DM_mass, limit_sigma_anni_Javg_NFW_min, limit_sigma_anni_Javg_NFW_max, facecolor='red', alpha=0.6,
-                     label='NFW profile: $J_{avg,min}$' + '={0:.1f}'.format(J_avg_NFW_min) + ', $J_{avg,max}$' +
-                           '={0:.1f}'.format(J_avg_NFW_max))
+             linewidth=2.0, label='canonical value $J_{avg}$' + '={0:.1f}'.format(J_avg_canonical))
     # plot MQGSL:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_min, marker='x', markersize='6.0', linestyle='--', color='blue')
-    plt.plot(DM_mass, limit_sigma_anni_Javg_MQGSL_max, marker='x', markersize='6.0', linestyle='-', color='blue')
-    plt.fill_between(DM_mass, limit_sigma_anni_Javg_MQGSL_min, limit_sigma_anni_Javg_MQGSL_max, facecolor='blue',
-                     alpha=0.4,
-                     label='MQGSL profile: $J_{avg,min}$' + '={0:.1f}'.format(J_avg_MQGSL_min) + ', $J_{avg,max}$' +
-                           '={0:.1f}'.format(J_avg_MQGSL_max))
-    # plot KKBP:
-    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='yellow')
-    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle='-', color='yellow')
-    plt.fill_between(DM_mass, limit_sigma_anni_Javg_KKBP_min, limit_sigma_anni_Javg_KKBP_max, facecolor='yellow',
-                     alpha=0.2,
-                     label='KKBP profile: $J_{avg,min}$' + '={0:.1f}'.format(J_avg_KKBP_min) + ', $J_{avg,max}$' +
-                           '={0:.1f}'.format(J_avg_KKBP_max))
-
+    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_min, marker='x', markersize='6.0', linestyle='--', color='green',
+             linewidth=2.0, label='minimum of $J_{avg, KKBP}$' + '={0:.1f}'.format(J_avg_KKBP_min))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP, marker='x', markersize='6.0', linestyle='-', color='green',
+             linewidth=2.0, label='average of $J_{avg, KKBP}$' + '={0:.1f}'.format(J_avg_KKBP))
+    plt.plot(DM_mass, limit_sigma_anni_Javg_KKBP_max, marker='x', markersize='6.0', linestyle=':', color='green',
+             linewidth=2.0, label='maximum of $J_{avg, KKBP}$' + '={0:.1f}'.format(J_avg_KKBP_max))
+    plt.fill_between(DM_mass, limit_sigma_anni_Javg_KKBP_min, limit_sigma_anni_Javg_KKBP_max, facecolor='green',
+                     alpha=0.5)
     # natural scale:
     plt.axhline(sigma_anni_natural, linestyle=':', color='black',
                 label='natural scale of the annihilation cross-section\n($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
-    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+    plt.fill_between(DM_mass, y_min_2, sigma_anni_natural, facecolor="grey", alpha=0.5, hatch='/')
     plt.xlim(np.min(DM_mass), np.max(DM_mass))
     plt.ylim(y_min_2, y_max_2)
     plt.xticks(fontsize=12)
@@ -815,7 +824,7 @@ if JAVG:
     plt.xlabel("Dark Matter mass in MeV", fontsize=15)
     plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
     plt.title("90% upper limit on the total DM self-annihilation cross-section from the JUNO experiment\n"
-              "for different angular-averaged DM intensities $J_{avg}$ over the whole Milky Way", fontsize=20)
+              "for the KKBP halo profile", fontsize=20)
     plt.legend(fontsize=13)
     plt.grid()
 

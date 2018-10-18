@@ -68,7 +68,7 @@ DELTA = MASS_NEUTRON - MASS_PROTON
 """ Constants depending on JUNO: """
 # total exposure time in years (float):
 t_years = 10
-# total time-exposure in seconds, 10 years (float):
+# total time-exposure in seconds (1yr = 365.2425 * 24 * 60 * 60 sec = 3.1556952 * 10^7 sec), 10 years (float):
 time = t_years * 3.156 * 10 ** 7
 # Number of free protons (target particles) for IBD in JUNO (page 18 of JUNO DesignReport) (float):
 # INFO-me: for a fiducial volume of 20 kton, you get 1.45 * 10**33 free protons

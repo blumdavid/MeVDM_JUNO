@@ -23,7 +23,7 @@ DELTA = MASS_NEUTRON - MASS_PROTON
 # Neutrino energy in MeV:
 E_neutrino = np.arange(5, 130, 5)
 # E_neutrino = 20
-theta = 0
+theta = np.pi
 # theta = np.arange(0, np.pi, 0.1)
 cos_theta = np.cos(theta)
 

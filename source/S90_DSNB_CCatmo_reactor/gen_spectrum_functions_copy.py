@@ -1776,7 +1776,7 @@ def limit_neutrino_flux(s_90, dm_mass, n_target, time_in_sec, epsilon_ibd, mass_
     Function to calculate the 90 percent upper probability limit of the electron-antineutrino flux from
     DM annihilation in the Milky Way.
 
-    :param s_90: 90 percent upper probability limit of the signal contribution (from output_analysis_v1.py) (float)
+    :param s_90: 90 percent upper probability limit of the signal contribution (from output_analysis_v3.py) (float)
     :param dm_mass: Dark matter mass in MeV (float)
     :param n_target: number of targets in the JUNO detector, equivalent to the number of free protons (float)
     :param time_in_sec: exposure time in seconds (float)
