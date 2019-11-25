@@ -1,0 +1,14 @@
+# Description file to submit jobs for S90_DSNB_CCatmo_reactor_NCatmo_FN:
+# name: condor_desc_file_40
+# use to analyze the NO signal case.
+# corresponding to DM mass = 40 MeV
+
+Universe = vanilla
+Executable = /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/analyze_spectra_v6_server2.py
+Arguments = $(Process) 40
+Output = /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_40/out$(Process)
+Error = /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_40/err$(Process)
+Log = /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_40/log$(Process)
+Accounting_Group = juno
+Requirements = Target.OpSysAndVer =?= "SL6"
+Queue 100
