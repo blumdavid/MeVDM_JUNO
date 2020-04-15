@@ -40,8 +40,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
-from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_annihilation_crosssection
-from work.MeVDM_JUNO.source.gen_spectrum_functions import limit_neutrino_flux
+from gen_spectrum_functions import limit_annihilation_crosssection
+from gen_spectrum_functions import limit_neutrino_flux
 
 # TODO-me: Interpretation of the limit on the annihilation cross-section according to the 'natural scale'
 # INFO-me: the self-annihilation cross-section (times the relative velocity) necessary to explain the observed
@@ -61,7 +61,7 @@ JAVG = False
 path_expected_spectrum = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/S90_DSNB_CCatmo_reactor_NCatmo_FN"
 
 # path of the directory, where the results of the analysis are saved (string):
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN/simulation_1"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN_newIBD/simulation_3"
 
 # mass of positron in MeV (float constant):
 MASS_POSITRON = 0.51099892
@@ -181,11 +181,13 @@ for mass in DM_mass:
     N_target = info_signal[7]
     # IBD detection efficiency in JUNO (without muon veto cut) (float):
     deteff_IBD = info_signal[8]
+    # PSD IBD suppression in JUNO (float):
+    PSD_IBD_suppression = info_signal[9]
     # exposure ratio of muon veto cut (float):
     exposure_ratio_muon_veto = info_signal[17]
 
-    # total detection efficiency in JUNO (deteff_IBD * exposure_ratio_muon_veto) (float):
-    epsilon_IBD = deteff_IBD * exposure_ratio_muon_veto
+    # total detection efficiency in JUNO (deteff_IBD * exposure_ratio_muon_veto * (1 - PSD_IBD_suppression)) (float):
+    epsilon_IBD = deteff_IBD * exposure_ratio_muon_veto * (1 - PSD_IBD_suppression)
 
     # For different values of angular-averaged DM intensity over whole Milky Way (float):
     if JAVG:
@@ -514,8 +516,12 @@ rcParams["axes.titlepad"] = 20
 """ Semi-logarithmic plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO with 
     probability intervals: """
 h1 = plt.figure(1, figsize=(15, 8))
+plt.semilogy(DM_mass_SuperK, sigma_anni_SuperK, linestyle="--", color='black', linewidth=2.0,
+             label="90% C.L. limit from Super-K data (7.82 years)")
+plt.semilogy(DM_mass_HyperK, sigma_anni_HyperK, linestyle=":", color='black', linewidth=2.0,
+             label="90% C.L. limit simulated for Hyper-K (10 years)")
 plt.semilogy(DM_mass, limit_sigma_anni, marker='x', markersize='6.0', linestyle='-', color='blue', linewidth=2.0,
-             label='90% upper limitsimulated for JUNO')
+             label='90% upper limit simulated for JUNO')
 plt.semilogy(DM_mass, limit_sigma_anni_16, linestyle=':', color='blue')
 plt.fill_between(DM_mass, limit_sigma_anni_16, limit_sigma_anni, facecolor="green", alpha=1)
 plt.semilogy(DM_mass, limit_sigma_anni_84, linestyle=':', color='blue')
@@ -568,7 +574,7 @@ plt.semilogy(DM_mass_SuperK, sigma_anni_SuperK, linestyle="--", color='black', l
 plt.semilogy(DM_mass_HyperK, sigma_anni_HyperK, linestyle=":", color='black', linewidth=2.0,
              label="90% C.L. limit simulated for Hyper-K (10 years)")
 plt.semilogy(DM_mass_Kamland, sigma_anni_Kamland, linestyle="-", color='black', linewidth=2.0,
-             label="90% C.L. limit from KamLAND (6.42 years)")
+             label="90% C.L. limit from KamLAND data (6.42 years)")
 plt.axhline(sigma_anni_natural, linestyle=':', color='black',
             label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
 plt.fill_between(DM_mass_SuperK, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
@@ -592,7 +598,7 @@ plt.grid()
 # plt.plot(DM_mass_HyperK, sigma_anni_HyperK, linestyle=":", color='black', linewidth=2.0,
 #          label="90% C.L. limit simulated for Hyper-K (arXiv:1805.09830)")
 # plt.plot(DM_mass_Kamland, sigma_anni_Kamland, linestyle="-", color='black', linewidth=2.0,
-#          label="90% C.L. limit from KamLAND (arXiv:1105.3516)")
+#          label="90% C.L. limit from KamLAND data (arXiv:1105.3516)")
 # plt.axhline(sigma_anni_natural, linestyle=':', color='black',
 #             label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
 # plt.fill_between(DM_mass, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')

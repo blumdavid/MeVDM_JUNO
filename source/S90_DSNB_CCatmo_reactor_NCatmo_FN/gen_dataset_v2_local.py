@@ -11,7 +11,7 @@
 """
 
 # import of the necessary packages:
-from work.MeVDM_JUNO.source.S90_DSNB_CCatmo_reactor_NCatmo_FN.gen_dataset_v2 import gen_dataset_v2
+from S90_DSNB_CCatmo_reactor_NCatmo_FN.gen_dataset_v2 import gen_dataset_v2
 
 """ Set the DM mass in MeV (float): """
 DM_mass = 0
@@ -23,7 +23,7 @@ DM_mass = 0
 # dataset_start defines the start point (integer):
 dataset_start = 0
 # dataset_stop defines the end point (integer):
-dataset_stop = 9
+dataset_stop = 0
 
 """ Set boolean variable, which controls, if the txt-file with the data are saved or not: """
 SAVE_DATA_TXT = True
@@ -39,7 +39,7 @@ SAVE_DATA_ALL = True
 DISPLAY_DATA = False
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN_newIBD"
 
 """ set the path of the output folder: """
 path_output = path_folder + "/dataset_output_{0}".format(DM_mass)
@@ -53,12 +53,12 @@ path_simu_NC = "/home/astro/blum/juno/atmoNC/data_NC/output_detsim_v2/" \
                "DCR_results_16000mm_10MeVto100MeV_500nsto1ms_mult1_2400PEto3400PE_dist500mm_R17700mm_PSD99/"
 file_signal = path_simu + "/{0}signal_bin500keV.txt".format(DM_mass)
 file_signal_info = path_simu + "/{0}signal_info_bin500keV.txt".format(DM_mass)
-file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin500keV_PSD.txt"
-file_DSNB_info = path_simu + "/DSNB_info_EmeanNuXbar22_bin500keV_PSD.txt"
-file_CCatmo = path_simu + "/CCatmo_total_Osc1_bin500keV_PSD.txt"
-file_CCatmo_info = path_simu + "/CCatmo_total_info_Osc1_bin500keV_PSD.txt"
-file_reactor = path_simu + "/Reactor_NH_power36_bin500keV_PSD.txt"
-file_reactor_info = path_simu + "/Reactor_info_NH_power36_bin500keV_PSD.txt"
+file_DSNB = path_simu + "_newIBD/DSNB_EmeanNuXbar22_bin500keV_PSD.txt"
+file_DSNB_info = path_simu + "_newIBD/DSNB_info_EmeanNuXbar22_bin500keV_PSD.txt"
+file_CCatmo = path_simu + "_newIBD/CCatmo_total_Osc1_bin500keV_PSD.txt"
+file_CCatmo_info = path_simu + "_newIBD/CCatmo_total_info_Osc1_bin500keV_PSD.txt"
+file_reactor = path_simu + "_newIBD/Reactor_NH_power36_bin500keV_PSD.txt"
+file_reactor_info = path_simu + "_newIBD/Reactor_info_NH_power36_bin500keV_PSD.txt"
 file_NCatmo = path_simu_NC + "/NCatmo_onlyC12_wPSD99_bin500keV.txt"
 file_NCatmo_info = path_simu_NC + "/NCatmo_info_onlyC12_wPSD99_bin500keV.txt"
 file_fastN = path_simu + "/fast_neutron_33events_bin500keV_PSD.txt"

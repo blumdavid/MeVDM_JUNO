@@ -130,15 +130,15 @@ Spectrum_signal = np.loadtxt(file_signal)
 file_info_signal = path_simu + "/signal_info_DMmass{0}_bin500keV_PSD.txt".format(DM_mass)
 info_signal = np.loadtxt(file_info_signal)
 
-# DSNB spectrum in events/MeV:
+# DSNB spectrum in events/bin:
 file_DSNB = path_simu + "/DSNB_EmeanNuXbar22_bin500keV_PSD.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
 
-# reactor spectrum in events/MeV:
+# reactor spectrum in events/bin:
 file_reactor = path_simu + "/Reactor_NH_power36_bin500keV_PSD.txt"
 Spectrum_reactor = np.loadtxt(file_reactor)
 
-# atmo. CC background in events/MeV:
+# atmo. CC background in events/bin:
 file_CCatmo = path_simu + "/CCatmo_total_Osc1_bin500keV_PSD.txt"
 Spectrum_CCatmo = np.loadtxt(file_CCatmo)
 
@@ -172,9 +172,9 @@ entry_max_E_cut = int((max_E_cut - min_E_visible) / interval_E_visible)
 # spectrum per bin in the 'interesting' energy range from min_E_cut to max_E_cut
 # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
 spectrum_Signal_per_bin = Spectrum_signal[entry_min_E_cut: (entry_max_E_cut + 1)]
-spectrum_DSNB_per_bin = Spectrum_DSNB[entry_min_E_cut: (entry_max_E_cut + 1)] * interval_E_visible
-spectrum_CCatmo_per_bin = Spectrum_CCatmo[entry_min_E_cut: (entry_max_E_cut + 1)] * interval_E_visible
-spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 1)] * interval_E_visible
+spectrum_DSNB_per_bin = Spectrum_DSNB[entry_min_E_cut: (entry_max_E_cut + 1)]
+spectrum_CCatmo_per_bin = Spectrum_CCatmo[entry_min_E_cut: (entry_max_E_cut + 1)]
+spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 1)]
 spectrum_NCatmo_per_bin = Spectrum_NCatmo[entry_min_E_cut: (entry_max_E_cut + 1)]
 spectrum_FN_per_bin = Spectrum_FN[entry_min_E_cut: (entry_max_E_cut + 1)]
 
@@ -326,6 +326,24 @@ def ln_priorprob(param):
         # if s < 0 or s > S_max, the prior probability p_0_s is set to 0 -> ln(0) = -infinity (float):
         ln_prior_s = -np.inf
 
+    # # define the ln of the prior probability for the expected signal contribution (Iris-prior, 'pessimistic-prior'),
+    # # that is also defined in GERDA paper:
+    # if 0.0 <= s <= S_max:
+    #     # between 0 and S_max, the prior probability is defined by p_0_s = X * exp(-s/10), where X is the normalization
+    #     # factor. X = 1 / (10 * (1 - exp(-S_max/10))). If taking ln(p_0_s), you get
+    #     # ln(p_0_s) = -s/10 - ln(10) - ln(1-exp(-S_max/10))
+    #     # first addend:
+    #     sum_1_signal = -s/10
+    #     # second addend:
+    #     sum_2_signal = np.log(10)
+    #     # third addend:
+    #     sum_3_signal = np.log(1 - np.exp(-S_max / 10))
+    #     # ln of prior probability:
+    #     ln_prior_s = sum_1_signal - sum_2_signal - sum_3_signal
+    # else:
+    #     # if s < 0 or s > S_max, the prior probability p_0_s is set to 0 -> ln(0) = -infinity (float):
+    #     ln_prior_s = -np.inf
+
     # define the ln of the prior probability for the expected DSNB background contribution (the background
     # contribution is assumed to be 'very poorly known' -> width = 2*B_DSNB_true (poorly known background corresponds
     # to a width = B_DSNB_true, fairly known background corresponds to a width = B_DSNB_true/2).
@@ -357,7 +375,7 @@ def ln_priorprob(param):
     if b_ccatmo >= 0.0:
         # define the mean and the width of the Gaussian function (float):
         mu_b_ccatmo = B_CCatmo_true
-        sigma_b_ccatmo = B_CCatmo_true / 2
+        sigma_b_ccatmo = B_CCatmo_true * 2
         # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
         # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
         sum_2_ccatmo = np.log(np.sqrt(np.pi/2) * (sigma_b_ccatmo *
@@ -379,7 +397,7 @@ def ln_priorprob(param):
     if b_reactor >= 0.0:
         # define the mean and the width of the Gaussian function (float):
         mu_b_reactor = B_Reactor_true
-        sigma_b_reactor = B_Reactor_true / 2
+        sigma_b_reactor = B_Reactor_true * 2
         # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
         # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
         sum_2_reactor = np.log(np.sqrt(np.pi/2) * (sigma_b_reactor *
@@ -401,7 +419,7 @@ def ln_priorprob(param):
     if b_ncatmo >= 0.0:
         # define the mean and the width of the Gaussian function (float):
         mu_b_ncatmo = B_NCatmo_true
-        sigma_b_ncatmo = B_NCatmo_true / 2
+        sigma_b_ncatmo = B_NCatmo_true * 2
         # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
         # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
         sum_2_ncatmo = np.log(np.sqrt(np.pi/2) * (sigma_b_ncatmo *
@@ -423,7 +441,7 @@ def ln_priorprob(param):
     if b_fn >= 0.0:
         # define the mean and the width of the Gaussian function (float):
         mu_b_fn = B_FN_true
-        sigma_b_fn = B_FN_true / 2
+        sigma_b_fn = B_FN_true * 2
         # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
         # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
         sum_2_fn = np.log(np.sqrt(np.pi/2) * (sigma_b_fn * (erf(mu_b_fn / (np.sqrt(2)*sigma_b_fn)) + 1)))
@@ -585,7 +603,7 @@ for number in np.arange(dataset_start, dataset_stop + 1, 1):
     """ Now run the MCMC for 'number_of_steps' steps starting, where the sampler left off in the burnin-phase: 
         (run_mcmc iterates sample() for N iterations and returns the result of the final sample) """
     # INFO-me: the number of steps should be large (greater than around 10000) to get a reproducible result
-    number_of_steps = 30000
+    number_of_steps = 40000
     sampler.run_mcmc(pos, number_of_steps)
 
     """ The best way to see this is to look at the time series of the parameters in the chain. 
@@ -851,14 +869,14 @@ if SAVE_DATA:
                       '{7},\n'
                       '{8},\n'
                       '{9},\n'
-                      'Prior Probability of Signal: flat_distribution (1/S_max) from 0 to S_max\n'
+                      'Prior Probability of Signal: flat_distribution (1/S_max) from 0 to S_max = 60\n'
                       'Prior Prob. of DSNB bkg: Gaussian with mean=B_DSNB_true and sigma = 2*B_DSNB_true\n'
                       'Corresponding to page 16 in the GERDA paper -> "very poorly known background"\n'
-                      'Prior Prob. of atmo. CC bkg: Gaussian with mean=B_CCatmo_true and sigma = B_CCatmo_true/2\n'
-                      'Prior Prob. of reactor bkg: Gaussian with mean=B_Reactor_true and sigma = B_Reactor_true/2\n'
-                      'Prior Prob. of atmo. NC bkg: Gaussian with mean=B_NCatmo_true and sigma = B_NCatmo_true/2\n'
-                      'Prior Prob. of fast neutron bkg: Gaussian with mean=B_FN_true and sigma = B_FN_true/2\n'
-                      'Equations 20 and 21 of GERDA paper ("fairly known background")\n'
+                      'Prior Prob. of atmo. CC bkg: Gaussian with mean=B_CCatmo_true and sigma = B_CCatmo_true * 2\n'
+                      'Prior Prob. of reactor bkg: Gaussian with mean=B_Reactor_true and sigma = B_Reactor_true * 2\n'
+                      'Prior Prob. of atmo. NC bkg: Gaussian with mean=B_NCatmo_true and sigma = B_NCatmo_true * 2\n'
+                      'Prior Prob. of fast neutron bkg: Gaussian with mean=B_FN_true and sigma = B_FN_true * 2\n'
+                      'Equations 20 and 21 of GERDA paper ("very poorly known background")\n'
                       'Values below:\n'
                       'Dark matter mass in MeV:\n'
                       'minimum E_cut in MeV, maximum E_cut in MeV, interval-width of the E_cut array in MeV,\n'

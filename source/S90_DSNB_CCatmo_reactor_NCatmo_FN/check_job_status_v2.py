@@ -11,6 +11,7 @@
 import numpy as np
 import os
 import time
+import subprocess
 
 # define the Dark matter masses in MeV (np.array of float):
 # TODO: set the DM masses that should be analyzed ("masses"):
@@ -64,6 +65,9 @@ for mass in DM_mass:
     Number_actual = 0
 
     while Number_actual < Stop_criterion:
+
+        # check the condor job submission:
+        # subprocess.run("hep_q -u")
 
         # calculate the actual number of files in the path (integer):
         Number_actual = check_file_number(path)

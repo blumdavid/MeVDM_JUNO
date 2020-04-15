@@ -40,88 +40,48 @@ import emcee
 import corner
 import scipy.optimize as op
 from matplotlib import pyplot as plt
+from gen_spectrum_functions import limit_annihilation_crosssection
 
 # TODO: i have to cite the package 'emcee', when I use it to analyze
 
 # TODO-me: Check the sensitivity of the results depending on the prior probabilities
 
-""" Set boolean value to define, if the result of the analysis are saved: """
-# save the results and the plot of likelihood-function with fit parameters
-# (if data should be saved, SAVE_DATA must be True):
-SAVE_DATA = True
-
 # set DM mass that should be investigated:
-mass_DM = 15.0
+# mass_DM = [15.0]
+mass_DM = np.arange(15, 100+5, 5)
 
-""" set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN_newIBD"
-
-""" set the path of the folder, where the datasets were saved: """
-path_dataset = path_folder + "/dataset_output_0"
-
-""" set the path of the output folder: """
-path_output = path_folder + "/simulation_3/dataset_output_{0:.0f}".format(mass_DM)
-
-""" set the path of the folder, where the results of the analysis should be saved: """
-path_analysis = path_output + "/analysis_mcmc"
-
-""" Go through every dataset and perform the analysis: """
-# define the first dataset, which will be analyzed (file: Dataset_dataset_start) (integer):
-dataset_start = 1
-# define the last dataset, which will be analyzed (file: Dataset_dataset_stop) (integer):
-dataset_stop = 1
-
-""" Load information about the generation of the datasets from file (np.array of float): """
-# TODO: Check, if info-files have the same parameter:
-info_dataset = np.loadtxt(path_dataset + "/datasets" + "/info_dataset_0_to_9999.txt")
-# get the bin-width of the visible energy in MeV from the info-file (float):
-interval_E_visible = info_dataset[0]
-# get minimum of the visible energy in MeV from info-file (float):
-min_E_visible = info_dataset[1]
-# get maximum of the visible energy in MeV from info-file (float):
-max_E_visible = info_dataset[2]
+# output path:
+path_analysis = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo/"
 
 """ Load simulated spectra from file (np.array of float): """
-path_simu = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/S90_DSNB_CCatmo_reactor_NCatmo_FN"
-path_simu_newIBD = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v2/S90_DSNB_CCatmo_reactor_NCatmo_FN_newIBD"
+# load bkg spectra:
+path_simu = "/home/astro/blum/PhD/work/MeVDM_JUNO/gen_spectrum_v4/S90_DSNB_CCatmo_reactor_NCatmo_FN/"
 path_simu_NC = "/home/astro/blum/juno/atmoNC/data_NC/output_detsim_v2/" \
-               "DCR_results_16000mm_10MeVto100MeV_500nsto1ms_mult1_2400PEto3400PE_dist500mm_R17700mm_PSD99/"
-# signal spectrum in events/bin:
-file_signal = path_simu + "/signal_DMmass{0:.0f}_bin500keV_PSD.txt".format(mass_DM)
-Spectrum_signal = np.loadtxt(file_signal)
-file_info_signal = path_simu + "/signal_info_DMmass{0:.0f}_bin500keV_PSD.txt".format(mass_DM)
-info_signal = np.loadtxt(file_info_signal)
+               "DCR_results_16000mm_10MeVto100MeV_1000nsto1ms_mult1_1800keVto2550keV_dist500mm_R17700mm_PSD99/" \
+               "test_10to20_20to30_30to40_40to100_final/"
 # DSNB spectrum in events/bin:
-file_DSNB = path_simu_newIBD + "/DSNB_EmeanNuXbar22_bin500keV_PSD.txt"
+file_DSNB = path_simu + "/DSNB_bin500keV_PSD.txt"
 Spectrum_DSNB = np.loadtxt(file_DSNB)
 # reactor spectrum in events/bin:
-file_reactor = path_simu_newIBD + "/Reactor_NH_power36_bin500keV_PSD.txt"
+file_reactor = path_simu + "/Reactor_NH_power36_bin500keV_PSD.txt"
 Spectrum_reactor = np.loadtxt(file_reactor)
 # atmo. CC background in events/bin:
-file_CCatmo = path_simu_newIBD + "/CCatmo_total_Osc1_bin500keV_PSD.txt"
+file_CCatmo = path_simu + "/CCatmo_total_Osc1_bin500keV_PSD.txt"
 Spectrum_CCatmo = np.loadtxt(file_CCatmo)
 # atmo. NC background in events/bin:
 file_NCatmo = path_simu_NC + "/NCatmo_onlyC12_wPSD99_bin500keV.txt"
 Spectrum_NCatmo = np.loadtxt(file_NCatmo)
-# fast neutron background in events/bin:
-file_FN = path_simu + "/fast_neutron_33events_bin500keV_PSD.txt"
-Spectrum_FN = np.loadtxt(file_FN)
 
 """ Variable, which defines the date and time of running the script: """
 # get the date and time, when the script was run:
 date = datetime.datetime.now()
 now = date.strftime("%Y-%m-%d %H:%M")
 
-""" Get Dark Matter mass from the info_signal file: """
-DM_mass = info_signal[10]
-
 """ Define the energy window, where spectrum of virtual experiment and simulated spectrum is analyzed
     (from min_E_cut in MeV to max_E_cut in MeV): """
-# INFO-me: when you use the whole energy window (from 10 to 100 MeV), the MCMC sampling works better, because then the
-# INFO-me: maxlikeli values are NOT around 0
-# TODO-me: also check the analysis for a smaller energy window
-# min_E_cut = DM_mass - 5
-# max_E_cut = DM_mass + 5
+min_E_visible = 10.0
+max_E_visible = 100.0
+interval_E_visible = 0.5
 min_E_cut = min_E_visible
 max_E_cut = max_E_visible
 # calculate the entry number of the array to define the energy window:
@@ -131,22 +91,12 @@ entry_max_E_cut = int((max_E_cut - min_E_visible) / interval_E_visible)
 """ Simulated spectra in events/bin (multiply with interval_E_visible): """
 # spectrum per bin in the 'interesting' energy range from min_E_cut to max_E_cut
 # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
-spectrum_Signal_per_bin = Spectrum_signal[entry_min_E_cut: (entry_max_E_cut + 1)]
 spectrum_DSNB_per_bin = Spectrum_DSNB[entry_min_E_cut: (entry_max_E_cut + 1)]
 spectrum_CCatmo_per_bin = Spectrum_CCatmo[entry_min_E_cut: (entry_max_E_cut + 1)]
 spectrum_Reactor_per_bin = Spectrum_reactor[entry_min_E_cut: (entry_max_E_cut + 1)]
 spectrum_NCatmo_per_bin = Spectrum_NCatmo[entry_min_E_cut: (entry_max_E_cut + 1)]
-spectrum_FN_per_bin = Spectrum_FN[entry_min_E_cut: (entry_max_E_cut + 1)]
 
 """ 'true' values of the parameters: """
-# expected number of signal events in the energy window (float):
-S_true = np.sum(spectrum_Signal_per_bin)
-# maximum value of signal events consistent with existing limits (assuming the 'new' 90 % upper limit for annihilation
-# cross-section of Super-K from paper "Dark matter-neutrino interactions through the lens of their cosmological
-# implications" (PhysRevD.97.075039 of Olivares-Del Campo), for the description and calculation see
-# limit_from_SuperK.py)
-# INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
-S_max = 60
 # expected number of DSNB background events in the energy window (float):
 B_DSNB_true = np.sum(spectrum_DSNB_per_bin)
 # expected number of CCatmo background events in the energy window (float):
@@ -155,12 +105,8 @@ B_CCatmo_true = np.sum(spectrum_CCatmo_per_bin)
 B_Reactor_true = np.sum(spectrum_Reactor_per_bin)
 # expected number of NCatmo background events in the energy window (float):
 B_NCatmo_true = np.sum(spectrum_NCatmo_per_bin)
-# expected number of fast neutron background events in the energy window (float):
-B_FN_true = np.sum(spectrum_FN_per_bin)
 
 """ fractions (normalized shapes) of signal and background spectra: """
-# Fraction of DM signal (np.array of float):
-fraction_Signal = spectrum_Signal_per_bin / S_true
 # Fraction of DSNB background (np.array of float):
 fraction_DSNB = spectrum_DSNB_per_bin / B_DSNB_true
 # Fraction of CCatmo background (np.array of float):
@@ -169,10 +115,6 @@ fraction_CCatmo = spectrum_CCatmo_per_bin / B_CCatmo_true
 fraction_Reactor = spectrum_Reactor_per_bin / B_Reactor_true
 # Fraction of NCatmo background (np.array of float):
 fraction_NCatmo = spectrum_NCatmo_per_bin / B_NCatmo_true
-# Fraction of fast neutron background (np.array of float):
-fraction_FN = spectrum_FN_per_bin / B_FN_true
-
-S_true = 0
 
 """ Preallocate the array, where the acceptance fraction of the actual sampling of each analysis is appended to 
 (empty np.array): """
@@ -182,13 +124,16 @@ af_burnin_mean_array = np.array([])
 """ Preallocate the array, where the mean of autocorrelation time is appended to (empty np.array): """
 mean_acor_array = np.array([])
 
+# array, where 90 % limit of signal contribution is stored:
+S_90_array = []
+
 
 """ Define functions: """
 # INFO-me: emcee actually requires the logarithm of p (see http://dfm.io/emcee/current/user/quickstart/)
 
 
 def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor,
-                  fraction_ncatmo, fraction_fn):
+                  fraction_ncatmo):
     """
     Function, which represents the log-likelihood function.
     The function is defined by the natural logarithm of the function p_spectrum_sb(), that is defined
@@ -224,20 +169,16 @@ def ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, 
     GERDA paper), equivalent to the number of NC atmo. background events per bin from the theoretical spectrum
     (np.array of float)
 
-    :param fraction_fn: normalized shapes of the fast neutron background spectra (represents f_B_FN in equ. 9 of the
-    GERDA paper), equivalent to the number of fast neutron background events per bin from the theoretical spectrum
-    (np.array of float)
-
     :return: the value of the log-likelihood function (float) (alternatively: returns the log-likelihood function
     as function of the unknown parameters param)
     """
     # get the single parameters from param (float):
-    s, b_dsnb, b_ccatmo, b_reactor, b_ncatmo, b_fn = param
+    s, b_dsnb, b_ccatmo, b_reactor, b_ncatmo = param
     # calculate the variable lambda_i(s, b_dsnb, b_ccatmo, b_reactor, b_ncatmo, b_fn), which is defined on page 3,
     # equ. 9 of the GERDA paper 'A Bayesian approach to the analysis of sparsely populated spectra, Calculating the
     # sensitivity of the GERDA experiment' (np.array of float):
     lamb = (fraction_signal*s + fraction_dsnb*b_dsnb + fraction_ccatmo*b_ccatmo + fraction_reactor*b_reactor +
-            fraction_ncatmo*b_ncatmo + fraction_fn*b_fn)
+            fraction_ncatmo*b_ncatmo)
 
     # calculate the addends (Summanden) of the log-likelihood-function defined on page 3, equ. 11 of the GERDA paper
     # (np.array of float):
@@ -272,7 +213,7 @@ def ln_priorprob(param):
     :return: the sum of log of the prior probabilities of the different parameters param
     """
     # get the single parameters from param (float):
-    s, b_dsnb, b_ccatmo, b_reactor, b_ncatmo, b_fn = param
+    s, b_dsnb, b_ccatmo, b_reactor, b_ncatmo = param
 
     # define the ln of the prior probability for the expected signal contribution
     # (flat probability until maximum value S_max):
@@ -393,33 +334,11 @@ def ln_priorprob(param):
         # if b_ncatmo < 0, the prior probability is set to 0 -> ln(o) = -infinity (float):
         ln_prior_b_ncatmo = -np.inf
 
-    # define the ln of the prior probability for the expected fast neutron background contribution (the background
-    # contribution is assumed to be known up to a factor of 2 -> 'fairly known background'.
-    # The prior probability is chosen to be of Gaussian shape with mean value mu = B_FN_true and
-    # width = B_FN_true/2)
-    if b_fn >= 0.0:
-        # define the mean and the width of the Gaussian function (float):
-        mu_b_fn = B_FN_true
-        sigma_b_fn = B_FN_true * 2
-        # calculate the natural logarithm of the denominator of equ. 21 (integral over B from 0 to infinity of
-        # exp(-(B-mu)**2 / (2*sigma**2)), the integral is given by the error function) (float):
-        sum_2_fn = np.log(np.sqrt(np.pi/2) * (sigma_b_fn * (erf(mu_b_fn / (np.sqrt(2)*sigma_b_fn)) + 1)))
-        # calculate the natural logarithm of the numerator of equ. 21 (do NOT calculate exp(-(B-mu)**2)/(2*sigma**2))
-        # first and then take the logarithm, because exp(-1e-3)=0.0 in python and therefore ln(0.0)=-inf for small
-        # values) (float):
-        sum_1_fn = -(b_fn - mu_b_fn)**2 / (2 * sigma_b_fn**2)
-        # natural logarithm of the prior probability (float):
-        ln_prior_b_fn = sum_1_fn - sum_2_fn
-    else:
-        # if b_fn < 0, the prior probability is set to 0 -> ln(o) = -infinity (float):
-        ln_prior_b_fn = -np.inf
-
     # return the sum of the log of the prior probabilities (float)
-    return ln_prior_s + ln_prior_b_dsnb + ln_prior_b_ccatmo + ln_prior_b_reactor + ln_prior_b_ncatmo + ln_prior_b_fn
+    return ln_prior_s + ln_prior_b_dsnb + ln_prior_b_ccatmo + ln_prior_b_reactor + ln_prior_b_ncatmo
 
 
-def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor, fraction_ncatmo,
-                     fraction_fn):
+def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor, fraction_ncatmo):
     """
     Function, which represents the natural logarithm of the full posterior probability of the Bayesian statistic.
 
@@ -458,10 +377,6 @@ def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatm
     GERDA paper), equivalent to the number of NC atmo. background events per bin from the theoretical spectrum
     (np.array of float)
 
-    :param fraction_fn: normalized shapes of the fast neutron background spectra (represents f_B_FN in equ. 9 of the
-    GERDA paper), equivalent to the number of fast neutron background events per bin from the theoretical spectrum
-    (np.array of float)
-
     :return: the value of the log of the posterior-probability function (full Bayesian probability) (float)
     (alternatively: returns the log of the posterior probability as function of the unknown parameters param)
 
@@ -474,7 +389,7 @@ def ln_posteriorprob(param, data, fraction_signal, fraction_dsnb, fraction_ccatm
         return -np.inf
 
     return lnprior + ln_likelihood(param, data, fraction_signal, fraction_dsnb, fraction_ccatmo, fraction_reactor,
-                                   fraction_ncatmo, fraction_fn)
+                                   fraction_ncatmo)
 
 
 def neg_ln_likelihood(*args):
@@ -488,37 +403,60 @@ def neg_ln_likelihood(*args):
     return -ln_likelihood(*args)
 
 
-# loop over the Datasets (from dataset_start to dataset_stop):
-for number in np.arange(dataset_start, dataset_stop+1, 1):
+# loop over DM masses:
+for mass in mass_DM:
+    print("----------------------------------------------------------------------------")
+    print("\nDM mass = {0:.0f}\n".format(mass))
 
-    print("Analyze dataset_{0:d}".format(number))
-    # load corresponding dataset (unit: events/bin) (np.array of float):
-    Data = np.loadtxt(path_dataset + "/datasets/Dataset_{0:d}.txt".format(number))
-    # dataset in the 'interesting' energy range from min_E_cut to max_E_cut
-    # (you have to take (entry_max+1) to get the array, that includes max_E_cut):
-    Data = Data[entry_min_E_cut: (entry_max_E_cut + 1)]
+    # signal spectrum in events/bin:
+    file_signal = path_simu + "/signal_DMmass{0:.0f}_bin500keV_PSD.txt".format(mass)
+    Spectrum_signal = np.loadtxt(file_signal)
+    file_info_signal = path_simu + "/signal_info_DMmass{0:.0f}_bin500keV_PSD.txt".format(mass)
+    info_signal = np.loadtxt(file_info_signal)
 
-    time_minimize_0 = time.time()
+    """ Get Dark Matter mass from the info_signal file: """
+    DM_mass = info_signal[10]
+
+    spectrum_Signal_per_bin = Spectrum_signal[entry_min_E_cut: (entry_max_E_cut + 1)]
+
+    # expected number of signal events in the energy window (float):
+    S_true = np.sum(spectrum_Signal_per_bin)
+    # maximum value of signal events consistent with existing limits (assuming the 'new' 90 % upper limit for
+    # annihilation cross-section of Super-K from paper "Dark matter-neutrino interactions through the lens of their
+    # cosmological implications" (PhysRevD.97.075039 of Olivares-Del Campo), for the description and calculation see
+    # limit_from_SuperK.py)
+    # INFO-me: S_max is assumed from the limit on the annihilation cross-section of Super-K (see limit_from_SuperK.py)
+    S_max = 60
+
+    # Fraction of DM signal (np.array of float):
+    fraction_Signal = spectrum_Signal_per_bin / S_true
+
+    S_true = 0
+
+    # load corresponding dataset (unit: events/bin) (background-only spectrum:
+    Data = spectrum_DSNB_per_bin + spectrum_CCatmo_per_bin + spectrum_Reactor_per_bin + spectrum_NCatmo_per_bin
+
     # guess of the parameters (as guess, the total number of events from the simulated spectrum are used)
     # (np.array of float):
-    parameter_guess = np.array([S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true, B_NCatmo_true, B_FN_true])
+    parameter_guess = np.array([S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true, B_NCatmo_true])
 
     # bounds of the parameters (parameters have to be positive or zero) (tuple):
-    bnds = ((0, None), (0, None), (0, None), (0, None), (0, None), (0, None))
+    bnds = ((0, None), (0, None), (0, None), (0, None), (0, None))
 
     # Minimize the negative log-likelihood function with the L-BFGS-B method for the defined bounds above:
     result = op.minimize(neg_ln_likelihood, parameter_guess,
                          args=(Data, fraction_Signal, fraction_DSNB, fraction_CCatmo, fraction_Reactor,
-                               fraction_NCatmo, fraction_FN),
+                               fraction_NCatmo),
                          method='L-BFGS-B', bounds=bnds, options={'disp': None})
 
     # get the best-fit parameters from the minimization (float):
-    (S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli, B_ncatmo_maxlikeli, B_fn_maxlikeli) = \
-        result["x"]
-    time_minimize_1 = time.time()
-    # print("time in seconds for minimization = {0}".format(time_minimize_1-time_minimize_0))
+    (S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli, B_ncatmo_maxlikeli) = result["x"]
+    print("Signal best fit = {0:.3f}".format(S_maxlikeli))
+    print("DSNB best fit = {0:.3f}".format(B_dsnb_maxlikeli))
+    print("CCatmo best fit = {0:.3f}".format(B_ccatmo_maxlikeli))
+    print("Reactor best fit = {0:.3f}".format(B_reactor_maxlikeli))
+    print("NCatmo best fit = {0:.3f}".format(B_ncatmo_maxlikeli))
 
-    time_sample_0 = time.time()
     """ Sample this distribution using emcee. 
         Start by initializing the walkers in a tiny Gaussian ball around the maximum likelihood result (in the example 
         on the emcee homepage they found that this tends to be a pretty good initialization ni most cases): 
@@ -529,7 +467,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         large number of walkers is that the burnin-phase can be slow. Therefore: use the smallest number of walkers 
         for which the acceptance fraction during burn-in is good (see emcee_1202.3665.pdf): """
     # INFO-me: nwalkers=200 might be ok
-    ndim, nwalkers = 6, 50
+    ndim, nwalkers = 5, 50
     P0 = [result["x"] + 10**(-4)*np.random.randn(ndim) for i in range(nwalkers)]
 
     """ Then, we can set up the sampler 
@@ -538,7 +476,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     value_of_a = 3.0
     sampler = emcee.EnsembleSampler(nwalkers, ndim, ln_posteriorprob, a=value_of_a,
                                     args=(Data, fraction_Signal, fraction_DSNB, fraction_CCatmo, fraction_Reactor,
-                                          fraction_NCatmo, fraction_FN))
+                                          fraction_NCatmo))
 
     """ Set up the burnin-phase:
         the burnin-phase is initial sampling phase from the initial conditions (tiny Gaussian
@@ -559,7 +497,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     af_burnin_mean = np.mean(af_burnin)
     # append af_mean to the array, which will be saved to txt-file (np.array of float):
     af_burnin_mean_array = np.append(af_burnin_mean_array, af_burnin_mean)
-    # print("mean acceptance fraction during burnin-phase = {0}".format(af_burnin_mean))
+    print("mean acceptance fraction during burnin-phase = {0}".format(af_burnin_mean))
 
     """ Reset the sampler (to get rid of the previous chain and start where the sampler left off at variable 'pos'):"""
     sampler.reset()
@@ -570,9 +508,6 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     number_of_steps = 40000
     sampler.run_mcmc(pos, number_of_steps)
 
-    time_sample_1 = time.time()
-    # print("time for sampling = {0}".format(time_sample_1 - time_sample_0))
-
     """ The best way to see this is to look at the time series of the parameters in the chain. 
     The sampler object now has an attribute called chain that is an array with the shape 
     (nwalkers, number_of_steps, ndim) giving the parameter values for each walker at each step in the chain. 
@@ -580,32 +515,27 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     (sampler.chain[:, :, 0] has shape (nwalkers, number_of_steps), so the steps as function of the walker, 
     sampler.chain[:, :, 0].T is the transpose of the array with shape (number_of_steps, nwalkers), so the walker as 
     function of steps): """
-    # fig, (ax1, ax2, ax3, ax4, ax5, ax6) = plt.subplots(ndim, 1, sharex='all')
-    # fig.set_size_inches(10, 10)
-    # ax1.plot(sampler.chain[:, :, 0].T, '-', color='k', alpha=0.3)
-    # ax1.axhline(y=S_true, color='b', linestyle='--')
-    # ax1.set_ylabel('$S$')
-    # ax2.plot(sampler.chain[:, :, 1].T, '-', color='k', alpha=0.3)
-    # ax2.axhline(y=B_DSNB_true, color='b', linestyle='--')
-    # ax2.set_ylabel('$B_{DSNB}$')
-    # ax3.plot(sampler.chain[:, :, 2].T, '-', color='k', alpha=0.3)
-    # ax3.axhline(y=B_CCatmo_true, color='b', linestyle='--')
-    # ax3.set_ylabel('$B_{CCatmo}$')
-    # ax4.plot(sampler.chain[:, :, 3].T, '-', color='k', alpha=0.3)
-    # ax4.axhline(y=B_Reactor_true, color='b', linestyle='--', label='expected number of events')
-    # ax4.set_ylabel('$B_{Reactor}$')
-    # ax5.plot(sampler.chain[:, :, 4].T, '-', color='k', alpha=0.3)
-    # ax5.axhline(y=B_NCatmo_true, color='b', linestyle='--')
-    # ax5.set_ylabel('$B_{NCatmo}$')
-    # ax6.plot(sampler.chain[:, :, 5].T, '-', color='k', alpha=0.3)
-    # ax6.axhline(y=B_FN_true, color='b', linestyle='--')
-    # ax6.set_ylabel('$B_{FN}$')
-    # ax6.set_xlabel('step number')
-    # plt.legend()
-    # ## plt.show()
-    # if SAVE_DATA:
-    #     fig.savefig(path_analysis + '/Dataset{0}_chain_traces.png'.format(number))
-    # plt.close(fig)
+    fig, (ax1, ax2, ax3, ax4, ax5) = plt.subplots(ndim, 1, sharex='all')
+    fig.set_size_inches(10, 10)
+    ax1.plot(sampler.chain[:, :, 0].T, '-', color='k', alpha=0.3)
+    ax1.axhline(y=S_true, color='b', linestyle='--')
+    ax1.set_ylabel('$S$')
+    ax2.plot(sampler.chain[:, :, 1].T, '-', color='k', alpha=0.3)
+    ax2.axhline(y=B_DSNB_true, color='b', linestyle='--')
+    ax2.set_ylabel('$B_{DSNB}$')
+    ax3.plot(sampler.chain[:, :, 2].T, '-', color='k', alpha=0.3)
+    ax3.axhline(y=B_CCatmo_true, color='b', linestyle='--')
+    ax3.set_ylabel('$B_{CCatmo}$')
+    ax4.plot(sampler.chain[:, :, 3].T, '-', color='k', alpha=0.3)
+    ax4.axhline(y=B_Reactor_true, color='b', linestyle='--', label='expected number of events')
+    ax4.set_ylabel('$B_{Reactor}$')
+    ax5.plot(sampler.chain[:, :, 4].T, '-', color='k', alpha=0.3)
+    ax5.axhline(y=B_NCatmo_true, color='b', linestyle='--')
+    ax5.set_ylabel('$B_{NCatmo}$')
+    plt.legend()
+    # plt.show()
+    fig.savefig(path_analysis + '/DMmass{0:.0f}_chain_traces.png'.format(mass))
+    plt.close(fig)
 
     """ Calculate the mean acceptance fraction. The acceptance fraction is the ratio between the accepted steps 
         over the total number of steps (Fraction of proposed steps that are accepted). In general, acceptance_fraction 
@@ -627,7 +557,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     af_sample_mean = np.mean(af_sample)
     # append af_mean to the array, which will be saved to txt-file (np.array of float):
     af_sample_mean_array = np.append(af_sample_mean_array, af_sample_mean)
-    # print("mean acceptance fraction during sampling = {0}".format(af_sample_mean))
+    print("mean acceptance fraction during sampling = {0}".format(af_sample_mean))
 
     """ Calculate the auto-correlation time for the chain. 
         The auto-correlation time is a direct measure of the number of evaluations of the posterior PDF required to 
@@ -645,14 +575,14 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
         # print("auto-correlation time = {0}".format(autocorr_time))
         # calculate the mean of autocorr_time (float):
         mean_autocorr_time = np.mean(autocorr_time)
-        # print("mean of autocorrelation time = {0}".format(mean_autocorr_time))
+        print("mean of autocorrelation time = {0}".format(mean_autocorr_time))
     except emcee.autocorr.AutocorrError:
         # if there is an emcee.autocorr.AutocorrError, set the autocorrelation time to 1001001 (-> this means that there
         # was an error):
         # You get AutoCorrError, if the autocorrelation time can't be reliably estimated from the chain.
         # This normally means that the chain is too short -> increase number of steps!
         mean_autocorr_time = 1001001
-        # print("emcee.autocorr.AutocorrError")
+        print("emcee.autocorr.AutocorrError")
 
     # append mean_autocorr_time to the array (np.array of float):
     mean_acor_array = np.append(mean_acor_array, mean_autocorr_time)
@@ -664,7 +594,6 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # array of shape (nwalkers*steps, ndim), so e.g. (200*3000, 6) = (600000, 6)):
     samples = sampler.flatchain
 
-    time_mode_0 = time.time()
     """ Calculate the mode and the 90% upper limit of the signal_sample distribution: """
     # get the sample-chain of the signal contribution (np.array of float):
     signal_sample = samples[:, 0]
@@ -682,12 +611,12 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     integral_hist_S = np.sum(hist_S) * bin_width_S
     # print("integral = {0}".format(integral_hist_S))
 
-    plt.step(bin_middle_S, hist_S, 'x')
-    plt.xticks(np.arange(0, 20, 0.5))
-    plt.xlabel("S")
-    plt.ylabel("counts")
-    plt.title("p(S) from MCMC sampling for one dataset")
-    ##plt.show()
+    # plt.step(bin_middle_S, hist_S, 'x')
+    # plt.xticks(np.arange(0, 20, 0.5))
+    # plt.xlabel("S")
+    # plt.ylabel("counts")
+    # plt.title("p(S) from MCMC sampling for one dataset")
+    # plt.show()
 
     # get the index of the bin, where hist_S is maximal (integer):
     index_S = np.argmax(hist_S)
@@ -701,26 +630,9 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
 
     # Calculate the 90 percent upper limit of the signal contribution (float)
     S_90 = np.percentile(signal_sample, 90)
-
-    # calculate S_90 by integrating hist_S over bin_middle_S up to 0.9*integral_hist_S:
-    for index_bin in np.arange(1, len(bin_middle_S), 1):
-        # integral until index_bin:
-        integral = np.sum(hist_S[0:index_bin]) * bin_width_S
-
-        if integral < 0.9*integral_hist_S:
-            continue
-        elif integral == 0.9*integral_hist_S:
-            S_90_test = bin_middle_S[index_bin]
-            break
-        else:
-            # must be improved further!!!!!
-            blabla = bin_middle_S[index_bin - 1]
-            S_90_test = bin_middle_S[index_bin]
-            break
-
-    # print("S_90 from old calculation = {0}".format(S_90))
-    # print("S_90 from new calculation (index - 1) = {0}".format(blabla))
-    # print("S_90 from new calculation = {0}".format(S_90_test))
+    # append value to array:
+    S_90_array.append(S_90)
+    print("S_90 = {0:.3f}".format(S_90))
 
     """ Calculate the mode of the DSNB_sample distribution: """
     # get the sample-chain of the DSNB background contribution (np.array of float):
@@ -736,6 +648,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # calculate the mode of the DSNB_sample, therefore calculate the mean of value_left_edge and value_right_edge to
     # get the value in the middle of the bin (float):
     DSNB_mode = (value_left_edge_DSNB + value_right_edge_DSNB) / 2
+    print("mode of DSNB_sample distribution = {0:.3f}".format(DSNB_mode))
 
     """ Calculate the mode of the CCatmo_sample distribution: """
     # get the sample-chain of the atmo. CC background contribution (np.array of float):
@@ -751,6 +664,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # calculate the mode of the CCatmo_sample, therefore calculate the mean of value_left_edge and value_right_edge to
     # get the value in the middle of the bin (float):
     CCatmo_mode = (value_left_edge_CCatmo + value_right_edge_CCatmo) / 2
+    print("mode of CCatmo_sample distribution = {0:.3f}".format(CCatmo_mode))
 
     """ Calculate the mode of the Reactor_sample distribution: """
     # get the sample-chain of the reactor background contribution (np.array of float):
@@ -766,6 +680,7 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # calculate the mode of the Reactor_sample, therefore calculate the mean of value_left_edge and value_right_edge to
     # get the value in the middle of the bin (float):
     Reactor_mode = (value_left_edge_Reactor + value_right_edge_Reactor) / 2
+    print("mode of Reactor_sample distribution = {0:.3f}".format(Reactor_mode))
 
     """ Calculate the mode of the NCatmo_sample distribution: """
     # get the sample-chain of the atmo. NC background contribution (np.array of float):
@@ -781,140 +696,179 @@ for number in np.arange(dataset_start, dataset_stop+1, 1):
     # calculate the mode of the NCatmo_sample, therefore calculate the mean of value_left_edge and value_right_edge to
     # get the value in the middle of the bin (float):
     NCatmo_mode = (value_left_edge_NCatmo + value_right_edge_NCatmo) / 2
-
-    """ Calculate the mode of the FN_sample distribution: """
-    # get the sample-chain of the fast neutron background contribution (np.array of float):
-    FN_sample = samples[:, 5]
-    # put FN_sample in a histogram (2 np.arrays of float):
-    hist_FN, bin_edges_FN = np.histogram(FN_sample, bins='auto', range=(0, FN_sample.max()))
-    # get the index of the bin, where hist_FN is maximal (integer):
-    index_FN = np.argmax(hist_FN)
-    # get the value of the left edge of the bin for index_FN from above (float):
-    value_left_edge_FN = bin_edges_FN[index_FN]
-    # get the value of the right edge of the bin for index_FN from above (float):
-    value_right_edge_FN = bin_edges_FN[index_FN+1]
-    # calculate the mode of the FN_sample, therefore calculate the mean of value_left_edge and value_right_edge to
-    # get the value in the middle of the bin (float):
-    FN_mode = (value_left_edge_FN + value_right_edge_FN) / 2
-
-    time_mode_1 = time.time()
-    # print("time to calculate the modes = {0}".format(time_mode_1-time_mode_0))
+    print("mode of NCatmo_sample distribution = {0:.3f}".format(NCatmo_mode))
 
     """ Now that we have this list of samples, let’s make one of the most useful plots you can make with your MCMC 
         results: a corner plot. Generate a corner plot is as simple as: """
     # NOTE: the quantile(0.5) is equal to the np.median() and is equal to np.percentile(50) -> NOT equal to np.mean()
     fig1 = corner.corner(samples,
-                         labels=["$S$", "$B_{DSNB}$", "$B_{CCatmo}$", "$B_{reactor}$", "$B_{NCatmo}$", "$B_{FN}$"],
-                         truths=[S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true, B_NCatmo_true, B_FN_true],
+                         labels=["$S$", "$B_{DSNB}$", "$B_{CCatmo}$", "$B_{reactor}$", "$B_{NCatmo}$"],
+                         truths=[S_true, B_DSNB_true, B_CCatmo_true, B_Reactor_true, B_NCatmo_true],
                          truth_color='b',
                          labels_args={"fontsize": 40})
-    ##plt.show(fig1)
+    # plt.show(fig1)
     # save figure:
-    if SAVE_DATA:
-        fig1.savefig(path_analysis + "/Dataset{0}_fitresult.png".format(number))
+    fig1.savefig(path_analysis + "/DMmass{0:.0f}_fitresult.png".format(mass))
     plt.close(fig1)
 
     """ Clear the chain and lnprobability array. Also reset the bookkeeping parameters: """
     sampler.reset()
 
-    # to save the analysis, SAVE_DATA must be True:
-    if SAVE_DATA:
-        # save the output of the analysis of the dataset to txt-file:
-        np.savetxt(path_analysis + '/Dataset{0}_mcmc_analysis.txt'.format(number),
-                   np.array([S_mode, S_90, DSNB_mode, CCatmo_mode, Reactor_mode, NCatmo_mode, FN_mode,
-                             S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli, B_ncatmo_maxlikeli,
-                             B_fn_maxlikeli]),
-                   fmt='%4.5f',
-                   header='Results of the MCMC analysis of virtual experiment (Dataset_{0:d}) to the expected spectrum'
-                          '(analyzed with analyze_spectra_v6_local.py, {1}):\n'
-                          'General information of the analysis are saved in info_mcmc_analysis_{2:d}_{3:d}.txt\n'
-                          'Results of the analysis:\n'
-                          'mode of the number of signal events,\n'
-                          '90% upper limit of the number of signal events,\n'
-                          'mode of the number of DSNB background events,\n'
-                          'mode of the number of atmospheric CC background events,\n'
-                          'mode of the number of reactor background events,\n'
-                          'mode of the number of atmospheric NC background events,\n'
-                          'mode of the number of fast neutron background events,\n'
-                          'best-fit parameter for the number of signal events,\n'
-                          'best-fit parameter for the number of DSNB background events,\n'
-                          'best-fit parameter for the number of atmo. CC background events,\n'
-                          'best-fit parameter for the number of reactor background events\n'
-                          'best-fit parameter for the number of atmo. NC background events,\n'
-                          'best-fit parameter for the number of fast neutron background events,\n'
-                   .format(number, now, dataset_start, dataset_stop))
-
-# To save the general information about the analysis, SAVE_DATA must be True:
-if SAVE_DATA:
-    # save the general information of the analysis in txt file:
-    np.savetxt(path_analysis + '/info_mcmc_analysis_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
-               np.array([DM_mass, min_E_cut, max_E_cut, interval_E_visible, S_true, S_max, B_DSNB_true,
-                         B_CCatmo_true, B_Reactor_true, B_NCatmo_true, B_FN_true,
-                         nwalkers, value_of_a, number_of_steps, step_burnin]),
+    # save the output of the analysis of the dataset to txt-file:
+    np.savetxt(path_analysis + '/DMmass{0:.0f}_mcmc_analysis.txt'.format(mass),
+               np.array([S_mode, S_90, DSNB_mode, CCatmo_mode, Reactor_mode, NCatmo_mode,
+                         S_maxlikeli, B_dsnb_maxlikeli, B_ccatmo_maxlikeli, B_reactor_maxlikeli, B_ncatmo_maxlikeli]),
                fmt='%4.5f',
-               header='General information about the MCMC analysis of virtual experiment to the expected spectra '
-                      '(analyzed with analyze_spectra_v6_local.py, {0}):\n'
-                      'The Datasets are saved in folder: {3}\n'
-                      'Analyzed datasets: Dataset_{1:d}.txt to Dataset_{2:d}.txt\n'
-                      'Input files of the simulated spectra:\n'
-                      '{4},\n'
-                      '{5},\n'
-                      '{6},\n'
-                      '{7},\n'
-                      '{8},\n'
-                      '{9},\n'
-                      'Prior Probability of Signal: flat_distribution (1/S_max) from 0 to S_max = 60\n'
-                      'Prior Prob. of DSNB bkg: Gaussian with mean=B_DSNB_true and sigma = 2 * B_DSNB_true\n'
-                      'Corresponding to page 16 in the GERDA paper -> "very poorly known background"\n'
-                      'Prior Prob. of atmo. CC bkg: Gaussian with mean=B_CCatmo_true and sigma = B_CCatmo_true * 2\n'
-                      'Prior Prob. of reactor bkg: Gaussian with mean=B_Reactor_true and sigma = B_Reactor_true * 2\n'
-                      'Prior Prob. of atmo. NC bkg: Gaussian with mean=B_NCatmo_true and sigma = B_NCatmo_true * 2\n'
-                      'Prior Prob. of fast neutron bkg: Gaussian with mean=B_FN_true and sigma = B_FN_true * 2\n'
-                      'Equations 20 and 21 of GERDA paper ("very poorly known background")\n'
-                      'Values below:\n'
-                      'Dark matter mass in MeV:\n'
-                      'minimum E_cut in MeV, maximum E_cut in MeV, interval-width of the E_cut array in MeV,\n'
-                      'Expected number of signal events in this energy range,\n'
-                      'S_max,\n'
-                      'Expected number of DSNB background events in this energy range,\n'
-                      'Expected number of CC atmospheric background events in this energy range,\n'
-                      'Expected number of reactor background events in this energy range,\n'
-                      'Expected number of NC atmospheric background events in this energy range,\n'
-                      'Expected number of fast neutron background events in this energy range,\n'
-                      'Number of walkers in the Markov Chain,\n'
-                      'parameter "a", which controls the step size in the Markov Chain,\n'
-                      'number of steps in the chain,\n'
-                      'number of step, which are used for "burning in" (the first steps are not considered in the '
-                      'sample):'
-               .format(now, dataset_start, dataset_stop, path_dataset, file_signal, file_DSNB, file_CCatmo,
-                       file_reactor, file_NCatmo, file_FN))
+               header='Results of the MCMC analysis for DM mass {0:.0f} MeV to the expected spectrum'
+                      '(analyzed with analyze_spectra_v7_local.py, {1}):\n'
+                      'Results of the analysis:\n'
+                      'mode of the number of signal events,\n'
+                      '90% upper limit of the number of signal events,\n'
+                      'mode of the number of DSNB background events,\n'
+                      'mode of the number of atmospheric CC background events,\n'
+                      'mode of the number of reactor background events,\n'
+                      'mode of the number of atmospheric NC background events,\n'
+                      'best-fit parameter for the number of signal events,\n'
+                      'best-fit parameter for the number of DSNB background events,\n'
+                      'best-fit parameter for the number of atmo. CC background events,\n'
+                      'best-fit parameter for the number of reactor background events\n'
+                      'best-fit parameter for the number of atmo. NC background events,\n'
+               .format(mass, now))
 
-    # Save the mean of the acceptance fractions during sampling of every analyzed dataset to txt-file:
-    np.savetxt(path_analysis + '/acceptance_fraction_sampling_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
-               af_sample_mean_array, fmt='%4.5f',
-               header='Mean values of the acceptance fraction during sampling of the sample from the MCMC analysis of '
-                      'the virt. experiments {0:d} to {1:d}:\n'
-                      '(analyzed with analyze_spectra_v6_local.py, {2})\n'
-                      'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
-                      'Thumb rule: mean of acceptance fraction should be roughly between 0.2 and 0.5:'
-               .format(dataset_start, dataset_stop, now))
 
-    # Save the mean of the acceptance fractions during burnin-phase of every analyzed dataset to txt-file:
-    np.savetxt(path_analysis + '/acceptance_fraction_burnin_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
-               af_burnin_mean_array, fmt='%4.5f',
-               header='Mean values of the acceptance fraction during burnin-phase of the sample from the MCMC analysis '
-                      'of the virt. experiments {0:d} to {1:d}:\n'
-                      '(analyzed with analyze_spectra_v6_local.py, {2})\n'
-                      'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
-                      'Thumb rule: mean of acceptance fraction should be roughly between 0.2 and 0.5:'
-               .format(dataset_start, dataset_stop, now))
+plt.plot(mass_DM, S_90_array)
+plt.show()
 
-    # Save the mean of the autocorrelation time of every analyzed dataset to txt-file:
-    np.savetxt(path_analysis + '/autocorrelation_time_{0:d}_{1:d}.txt'.format(dataset_start, dataset_stop),
-               mean_acor_array, fmt='%4.5f',
-               header='Mean values of the autocorrelation time of the sample from the MCMC analysis of the virt.'
-                      'experiments {0:d} to {1:d}:\n'
-                      '(analyzed with analyze_spectra_v6_local.py, {2}\n'
-                      'General information of the analysis are saved in info_mcmc_analysis_{0:d}_{1:d}.txt\n'
-                      'IMPORTANT: value=1001001 means there was an emcee.autocorr.AutocorrError:'
-               .format(dataset_start, dataset_stop, now))
+# Calculate the 90 percent probability limit of the averaged DM self-annihilation cross-section for DM with
+# mass of "mass" MeV in cm**2 (float)
+J_avg = 5
+# mass of positron in MeV (float constant):
+MASS_POSITRON = 0.51099892
+# mass of proton in MeV (float constant):
+MASS_PROTON = 938.27203
+# mass of neutron in MeV (float constant):
+MASS_NEUTRON = 939.56536
+
+N_target = 1.450000000e+33
+time_s = 10 * 3.156 * 10 ** 7
+epsilon_IBD = 0.67005
+sigma_anni_natural = 3 * 10 ** (-26)
+
+limit_90_array = []
+
+for index in range(len(mass_DM)):
+    limit_90 = limit_annihilation_crosssection(S_90_array[index], mass_DM[index], J_avg, N_target, time_s, epsilon_IBD,
+                                               MASS_NEUTRON, MASS_PROTON, MASS_POSITRON)
+    limit_90_array.append(limit_90)
+
+# consider the degree of freedom:
+limit_90_array = np.asarray(limit_90_array)
+
+""" 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
+    New Super-K limit of 2853 days = 7.82 years of data (the old limit from 0710.5420 was for only 1496 days of data).
+    (they have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 4 of the paper 
+    'Dark matter-neutrino interactions through the lens of their cosmological implications', PhysRevD.97.075039)
+    The digitized data is saved in "/home/astro/blum/PhD/paper/MeV_DM/SuperK_limit_new.csv".
+"""
+# Dark matter mass in MeV (array of float):
+DM_mass_SuperK = np.array([10.5384, 10.9966, 10.9966, 11.2257, 11.9129, 12.8293, 14.433, 15.1203, 16.2658, 16.953,
+                           17.4112, 18.0985, 18.5567, 19.244, 20.3895, 21.5349, 22.9095, 23.8259, 24.9714, 25.8877,
+                           27.2623, 28.1787, 28.866, 30.2405, 32.5315, 33.9061, 35.7388, 37.5716, 39.4044, 41.4662,
+                           43.5281, 45.3608, 47.1936, 49.2554, 50.4009, 51.7755, 53.3792, 54.9828, 57.9611, 60.9393,
+                           62.543, 64.3757, 66.8958, 69.874, 72.6231, 75.3723, 78.5796, 81.7869, 85.2234, 88.6598,
+                           91.4089, 94.1581, 98.5109, 100.802])
+# 90% limit of the self-annihilation cross-section in cm^3/s (np.array of float):
+sigma_anni_SuperK = np.array([2.50761E-22, 2.20703E-22, 1.90157E-22, 1.38191E-22, 4.19682E-23, 8.15221E-24, 1.5502E-24,
+                              8.18698E-25, 4.32374E-25, 3.3493E-25, 3.01122E-25, 2.70727E-25, 2.59447E-25, 2.59447E-25,
+                              2.76551E-25, 2.94782E-25, 3.01122E-25, 2.88575E-25, 2.70727E-25, 2.53984E-25, 2.48636E-25,
+                              2.53984E-25, 2.70727E-25, 3.14215E-25, 4.51174E-25, 5.23647E-25, 5.82438E-25, 6.07762E-25,
+                              5.94965E-25, 5.94965E-25, 6.34188E-25, 7.51892E-25, 9.30201E-25, 1.10284E-24, 1.17555E-24,
+                              1.17555E-24, 1.1508E-24, 1.07962E-24, 9.10614E-25, 7.51892E-25, 6.90537E-25, 6.61763E-25,
+                              6.75997E-25, 7.3606E-25, 8.36308E-25, 9.10614E-25, 9.30201E-25, 8.91441E-25, 8.54296E-25,
+                              8.7267E-25, 9.70646E-25, 1.1508E-24, 1.72424E-24, 2.22589E-24])
+
+""" 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way expected for 
+    Hyper-Kamiokande after 10 years.
+    (they have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 2 of the paper 
+    'Implications of a Dark Matter-Neutrino Coupling at Hyper–Kamiokande', Arxiv:1805.09830)
+    The digitized data is saved in "/home/astro/blum/PhD/paper/MeV_DM/HyperK_limit_no_Gd.csv".
+"""
+# Dark matter mass in MeV (array of float):
+DM_mass_HyperK = np.array([11.4202, 11.4898, 11.5711, 11.6313, 11.6313, 11.7241, 11.7859, 11.9793, 12.0118, 12.1336,
+                           12.2554, 12.4642, 12.4642, 12.6034, 12.7426, 12.7774, 12.8795, 13.0142, 13.0906, 13.2298,
+                           13.4386, 13.6473, 13.7865, 13.9953, 14.1323, 14.2737, 14.4129, 14.5544, 14.6936, 14.7771,
+                           14.9719, 15.1785, 15.4337, 15.6657, 16.5727, 17.1665, 17.8641, 19.0992, 20.8513, 22.2884,
+                           23.9136, 25.4049, 26.8199, 28.4739, 30.005, 31.5361, 33.0673, 34.5984, 36.1922, 37.6607,
+                           39.1919, 40.723, 42.3168, 43.8201, 45.3164, 46.8476, 48.4251, 49.7794, 52.0071, 54.2249,
+                           55.7561, 57.1908, 59.418, 60.9394, 62.4374, 63.9686, 65.4997, 67.0309, 68.562, 70.0931,
+                           71.6243, 73.1554, 74.7534, 76.281, 77.782, 79.3132, 80.8443, 82.3423, 83.8734, 85.4046,
+                           86.9357, 88.4234, 89.998, 91.5292, 93.123, 94.5915, 96.0961, 97.6537, 99.1849, 100.716])
+
+# 90 % limit of the self-annihilation cross-section in cm^3/s (array of float):
+sigma_anni_HyperK = np.array([2.81969E-23, 2.3984E-23, 2.07369E-23, 1.79792E-23, 1.5389E-23, 1.34158E-23, 1.08796E-23,
+                              9.07639E-24, 7.67308E-24, 6.07612E-24, 5.10954E-24, 4.29904E-24, 3.72832E-24, 3.1529E-24,
+                              2.75079E-24, 2.42671E-24, 2.07014E-24, 1.76387E-24, 1.53958E-24, 1.34482E-24,
+                              1.07845E-24, 8.76268E-25, 7.47593E-25, 6.49867E-25, 5.60194E-25, 4.82895E-25,
+                              4.18958E-25, 3.64793E-25, 3.08801E-25, 2.6732E-25, 2.2808E-25, 2.00699E-25, 1.5469E-25,
+                              1.32772E-25, 6.85055E-26, 5.56656E-26, 4.55841E-26, 3.74336E-26, 3.91269E-26,
+                              4.31199E-26, 4.78795E-26, 5.27168E-26, 5.75659E-26, 6.33309E-26, 6.96262E-26,
+                              7.63859E-26, 8.27672E-26, 8.99002E-26, 9.75563E-26, 1.05156E-25, 1.12134E-25, 1.207E-25,
+                              1.28126E-25, 1.34863E-25, 1.40667E-25, 1.42365E-25, 1.41514E-25, 1.35923E-25,
+                              1.23903E-25, 1.07922E-25, 9.82287E-26, 8.90453E-26, 8.01206E-26, 7.52633E-26,
+                              7.20222E-26, 7.08082E-26, 7.08747E-26, 7.22607E-26, 7.50706E-26, 7.95367E-26,
+                              8.48912E-26, 9.1121E-26, 1.00294E-25, 1.12329E-25, 1.24761E-25, 1.38262E-25,
+                              1.54204E-25, 1.7043E-25, 1.80407E-25, 1.87869E-25, 1.90304E-25, 1.90679E-25, 1.92784E-25,
+                              1.96469E-25, 2.02367E-25, 2.13703E-25, 2.27027E-25, 2.43049E-25, 2.62985E-25,
+                              2.81874E-25])
+
+""" 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way obtained from KamLAND data 
+    for 2343 days = 6.42 years of data taking.
+    (they have used the canonical value J_avg = 5, the results are digitized from figure 5, on page 19 of the paper 
+    'Search for extraterrestrial antineutrino sources with the KamLAND detector', Arxiv:1105.3516)
+    The digitized data is saved in "/home/astro/blum/PhD/paper/KamLand/limit_KamLAND.csv".
+"""
+# Dark matter mass in MeV (array of float):
+DM_mass_Kamland = np.array([10.321, 11.8765, 12.4691, 13.284, 13.8025, 14.2469, 14.7654, 15.358, 15.358, 15.6543,
+                            15.9506, 16.6173, 17.8025, 18.4691, 19.2099, 19.9506, 20.6173, 21.358, 22.0988, 22.3951,
+                            22.6173, 23.0617, 23.4321, 23.9506, 24.6914, 25.4321, 26.0988, 26.8395, 27.5802, 28.321,
+                            29.8765])
+
+# 90 % limit of the self-annihilation cross-section in cm^3/s (array of float):
+sigma_anni_Kamland = np.array([1.18275E-24, 9.19504E-25, 1.34141E-24, 1.95691E-24, 2.21943E-24, 2.36361E-24,
+                               2.29039E-24, 1.89629E-24, 2.01948E-24, 1.89629E-24, 1.72545E-24, 1.42856E-24,
+                               1.04285E-24, 9.48901E-25, 8.91017E-25, 9.79238E-25, 1.22056E-24, 1.52136E-24,
+                               1.72545E-24, 1.67199E-24, 1.57E-24, 1.29986E-24, 1.04285E-24, 9.19504E-25, 8.91017E-25,
+                               9.79238E-25, 1.1106E-24, 1.18275E-24, 1.14611E-24, 9.79238E-25, 3.55838E-24])
+
+""" Semi-log. plot of the 90% upper limit of the DM self-annihilation cross-section from JUNO, Super-K, Hyper-K and 
+KamLAND: """
+# maximum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
+y_max = 10 ** (-22)
+# minimum value for the 90% limit on the annihilation cross-section in cm**3/s (float):
+y_min = 10 ** (-26)
+
+h3 = plt.figure(3, figsize=(13, 8))
+plt.semilogy(mass_DM, limit_90_array, marker='x', markersize='6.0', linestyle='-', color='red', linewidth=2.0,
+             label='90% C.L. limit simulated for JUNO (10 years)')
+plt.fill_between(mass_DM, limit_90_array, y_max, facecolor='red', alpha=0.4)
+plt.semilogy(DM_mass_SuperK, sigma_anni_SuperK, linestyle="--", color='black', linewidth=2.0,
+             label="90% C.L. limit from Super-K data (7.82 years)")
+plt.semilogy(DM_mass_HyperK, sigma_anni_HyperK, linestyle=":", color='black', linewidth=2.0,
+             label="90% C.L. limit simulated for Hyper-K (10 years)")
+plt.semilogy(DM_mass_Kamland, sigma_anni_Kamland, linestyle="-", color='black', linewidth=2.0,
+             label="90% C.L. limit from KamLAND data (6.42 years)")
+plt.axhline(sigma_anni_natural, linestyle=':', color='black',
+            label='natural scale of the annihilation cross-section ($<\sigma_A v>_{natural}=3*10^{-26}\,cm^3/s$)')
+plt.fill_between(DM_mass_SuperK, y_min, sigma_anni_natural, facecolor="grey", alpha=0.25, hatch='/')
+plt.xlim(np.min(DM_mass_Kamland), np.max(DM_mass_SuperK))
+plt.ylim(y_min, y_max)
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlabel("Dark Matter mass in MeV", fontsize=15)
+plt.ylabel("$<\sigma_A v>_{90}$ in $cm^3/s$", fontsize=15)
+plt.title("90% upper limit on the total DM self-annihilation cross-section \nfrom the JUNO experiment", fontsize=20)
+plt.legend(fontsize=13)
+plt.grid()
+plt.show()
+
+

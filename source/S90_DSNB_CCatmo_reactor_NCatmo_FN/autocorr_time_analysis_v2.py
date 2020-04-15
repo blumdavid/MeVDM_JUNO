@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 # DM mass in MeV:
 DM_mass = 100
 
-path_output = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN/simulation_1/dataset_output_{0}"\
+path_output = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN/simulation_2/dataset_output_{0}"\
     .format(DM_mass)
 
 # path to the folder, where the txt files are saved:
@@ -70,7 +70,7 @@ for index in np.arange(0, 9999, 100):
     acc_frac_sampling = np.append(acc_frac_sampling, fraction_sampling)
 
 print("number of AutocorrErrors for 10000 datasets = {0}".format(number_acor_failed))
-print("number of dataset, where autocorr. time was calculated = {0} (for 5000 datasets)".format(number_acor_calculated))
+print("number of dataset, where autocorr. time was calculated = {0}".format(number_acor_calculated))
 
 # mean of the calculated autocorr. times (float):
 mean_acor_time_calculated = np.mean(acor_time_calculated)

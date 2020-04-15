@@ -14,26 +14,43 @@
 
 # The datasets are the same for all DM masses and saved in the folder "S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_0/datasets"
 
-# To analyze the dataset for the different Dark Matter masses create one Condor description file for each mass.
-# The condor files are also saved in the directory "/junofs/users/dblum/work/signal_DSNB_CCatmo_reactor_NCatmo_FN"
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_15
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_20
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_25
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_30
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_35
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_40
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_45
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_50
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_55
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_60
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_65
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_70
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_75
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_80
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_85
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_90
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_95
-condor_submit /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/condor_desc_file_100
+# To analyze the dataset for the different Dark Matter masses create one job submission file for each mass.
+# The job sbufiles are also saved in the directory "/junofs/users/dblum/work/signal_DSNB_CCatmo_reactor_NCatmo_FN"
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_15/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_15/err%{ProcId} job_15.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_20/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_20/err%{ProcId} job_20.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_25/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_25/err%{ProcId} job_25.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_30/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_30/err%{ProcId} job_30.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_35/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_35/err%{ProcId} job_35.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_40/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_40/err%{ProcId} job_40.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_45/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_45/err%{ProcId} job_45.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_50/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_50/err%{ProcId} job_50.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_55/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_55/err%{ProcId} job_55.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_60/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_60/err%{ProcId} job_60.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_65/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_65/err%{ProcId} job_65.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_70/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_70/err%{ProcId} job_70.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_75/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_75/err%{ProcId} job_75.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_80/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_80/err%{ProcId} job_80.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_85/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_85/err%{ProcId} job_85.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_90/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_90/err%{ProcId} job_90.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_95/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_95/err%{ProcId} job_95.sh
+
+hep_sub -g juno -u vanilla -os SL6 -argu %{ProcId} -n 100 -o /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_100/out%{ProcId} -e /junofs/users/dblum/work/S90_DSNB_CCatmo_reactor_NCatmo_FN/dataset_output_100/err%{ProcId} job_100.sh
 
 # Check the status of the jobs and check, if they have finished:
 python check_job_status_v2.py
@@ -60,5 +77,3 @@ tar -cf dataset_output_85.tar dataset_output_85/
 tar -cf dataset_output_90.tar dataset_output_90/
 tar -cf dataset_output_95.tar dataset_output_95/
 tar -cf dataset_output_100.tar dataset_output_100/
-
-

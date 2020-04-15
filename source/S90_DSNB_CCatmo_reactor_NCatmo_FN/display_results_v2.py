@@ -23,7 +23,7 @@ from scipy.interpolate import interp1d
 DarkMatter_mass = np.array([15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
 
 """ set the path to the correct folder: """
-path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN/simulation_1"
+path_folder = "/home/astro/blum/PhD/work/MeVDM_JUNO/S90_DSNB_CCatmo_reactor_NCatmo_FN_newIBD/simulation_3"
 
 for DM_mass in DarkMatter_mass:
 
