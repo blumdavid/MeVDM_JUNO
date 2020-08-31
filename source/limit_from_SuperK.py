@@ -1,15 +1,22 @@
 """ Script to calculate the limit on the number of signal events from the limit on the annihilation cross-section
     from Super-Kamiokande in the paper 0710.5420.pdf
 
-    The result can be used to define the maximum of the prior probability of the signal contribution (S_max) in
-    the script analyze_spectra_v4_*.py
+    AND to calculate the limit on the number of signal events from the limit on the annihilation cross-section
+    from Super-Kamiokande in the paper PhysRevD.97.075039
+
+    The result of 0710.5420.pdf can be used to define the maximum of the prior probability of the signal contribution
+    (S_max) in the script analyze_spectra_v4_*.py
+
+    The result of PhysRevD.97.075039 can be used to define the maximum of the prior probability of the signal
+    contribution (S_max) in the script analyze_spectra_v6_*.py
 
 """
 import numpy as np
-from work.MeVDM_JUNO.source.gen_spectrum_functions import sigma_ibd
+from gen_spectrum_functions import sigma_ibd
 
 # define the DM masses in MeV:
 DM_mass = np.array([20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
+DM_mass_new = np.array([15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100])
 
 # mass of positron in MeV (reference PDG 2016) (float constant):
 MASS_POSITRON = 0.51099892
@@ -27,6 +34,8 @@ N_target = 1.45 * 10 ** 33
 # detection efficiency of IBD in JUNO, from physics_report.pdf, page 40, table 2.1
 # (combined efficiency of energy cut, time cut, vertex cut, Muon veto, fiducial volume (only r<17m)) (float):
 detection_eff = 0.73
+# 'new' detection efficiency from S90_DSNB_CCatmo_reactor_NCatmo_FN:
+detection_eff_new = 0.67060
 
 # solar radius circle in cm, 8.5 kiloparsec, 1kpc = 3.086*10**21 cm (float):
 r_solar = 8.5 * 3.086 * 10 ** 21
@@ -36,6 +45,7 @@ rho_0 = 0.3 * 1000
 J_avg_5 = 5
 J_avg_1 = 1.3
 
+""" Calculation for 'old' Super-K limit from 0710.5420.pdf: """
 # Limit on the self-annihilation cross-section from Super-K in cm**3/s (0710.5420.pdf) (as a function of DM_mass
 # from above) (the limits are taken from the digitized Plot of 0710.5420 for J_avg=5)
 # (data is saved in limit_SuperK_digitized.csv)) (np.array of float):
@@ -78,3 +88,30 @@ print(number_signal_Javg5)
 print("Number of signal events assuming the limit on the annihilation cross-section of Super-K for DM masses of above "
       "(J_avg = 1.3):")
 print(number_signal_Javg1)
+
+
+""" Calculation for 'new' Super-K limit from PhysRevD.97.075039: """
+# Limit on the self-annihilation cross-section from Super-K in cm**3/s (PhysRevD.97.075039)
+# (as a function of DM_mass from above) (the limits are taken from the digitized Plot of PhysRevD.97.075039)
+# (data is saved in SuperK_limit_new.csv)) (np.array of float):
+sigma_annihilation_new = np.array([8.18698E-25, 2.76551E-25, 2.70727E-25, 3.14215E-25, 5.82438E-25, 5.94965E-25,
+                                   7.51892E-25, 1.17555E-24, 1.07962E-24, 7.51892E-25, 6.61763E-25, 7.3606E-25,
+                                   9.10614E-25, 9.30201E-25, 8.54296E-25, 9.70646E-25, 1.1508E-24, 2.22589E-24])
+
+# Cross-section of the Inverse Beta Decay in cm**2 (np.array of float):
+sigma_IBD_new = sigma_ibd(DM_mass_new, DELTA, MASS_POSITRON)
+
+# Electron-Antineutrino flux from DM annihilation in 1/(s*cm**2) (np.array of float):
+flux_nuEbar_new = sigma_annihilation_new * J_avg_5 * r_solar * rho_0**2 / (2 * DM_mass_new**2 * 3)
+
+# Number of signal events assuming the limit on the annihilation cross-section of Super-K from PhysRevD.97.075039:
+# (np.array of float):
+number_signal_new = sigma_IBD_new * flux_nuEbar_new * N_target * time * detection_eff_new
+
+print("DM masses in MEV:")
+print(DM_mass_new)
+print("Number of signal events assuming the 'new' limit on the annihilation cross-section of Super-K for "
+      "DM masses of above ")
+print(number_signal_new)
+
+
