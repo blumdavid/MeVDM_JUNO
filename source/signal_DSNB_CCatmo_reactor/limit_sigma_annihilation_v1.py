@@ -433,7 +433,7 @@ if ASIMOV:
 """ 90% C.L. bound on the total DM self-annihilation cross-section from the whole Milky Way, obtained from Super-K Data.
     (th have used the canonical value J_avg = 5, the results are digitized from figure 1, on page 7 of the paper 
     'Testing MeV Dark Matter with neutrino detectors', arXiv: 0710.5420v1)
-    The digitized data is saved in "/home/astro/blum/PhD/paper/SuperKamiokande/limit_SuperK_digitized.csv".
+    The digitized data is saved in "/home/astro/blum/PhD/paper/MeVDM/limit_SuperK_digitized.csv".
 """
 # Dark matter mass in MeV (array of float):
 DM_mass_SuperK = np.array([13.3846, 13.5385, 13.6923, 13.6923, 14.1538, 15.2308, 15.8462, 16.7692, 17.6923, 19.0769,
