@@ -34,15 +34,15 @@ from gen_spectrum_functions import sigma_ibd, darkmatter_signal_v3, dsnb_backgro
 
 """ Set boolean values to define, what is simulated in the code, if the data is saved and if spectra are displayed: """
 # generate signal from DM annihilation:
-# DM_SIGNAL = True
-DM_SIGNAL = False
+DM_SIGNAL = True
+# DM_SIGNAL = False
 # generate DSNB background:
 # DSNB_BACKGROUND = True
 DSNB_BACKGROUND = False
 # generate CC atmospheric background:
-CCATMOSPHERIC_BACKGROUND = True
-CCATMOSPHERIC_BACKGROUND_onlyProton = True
-# CCATMOSPHERIC_BACKGROUND = False
+# CCATMOSPHERIC_BACKGROUND = True
+CCATMOSPHERIC_BACKGROUND_onlyProton = False
+CCATMOSPHERIC_BACKGROUND = False
 # generate reactor antineutrino background:
 # REACTOR_BACKGROUND = True
 REACTOR_BACKGROUND = False
@@ -51,8 +51,6 @@ REACTOR_BACKGROUND = False
 FAST_NEUTRON = False
 # save the data:
 SAVE_DATA = True
-# display the generated spectra:
-DISPLAY_SPECTRA = False
 
 """ Variable, which defines the date and time of running the script: """
 # get the date and time, when the script was run:
@@ -71,20 +69,17 @@ mass_DM = 100.0
 # energy corresponding to the electron-antineutrino energy in MeV (np.array of float64):
 interval_E_neutrino = 0.01
 E_neutrino = np.arange(10, 179 + interval_E_neutrino, interval_E_neutrino)
+# E_neutrino = np.arange(11, 30 + interval_E_neutrino, interval_E_neutrino)
+
 # energy corresponding to the visible energy in MeV (np.array of float64):
 # TODO-me: what is the best bin size???
-interval_E_visible = 0.5
+interval_E_visible = 1.0
 # energy window corresponding to E_neutrino:
 E_visible_whole_range = np.arange(2, 179 + interval_E_visible, interval_E_visible)
 # energy window corresponding to observation region (10 MeV to 100 MeV):
 E_vis_min = 10.0
 E_vis_max = 100.0
 E_visible = np.arange(E_vis_min, E_vis_max + interval_E_visible, interval_E_visible)
-# calculate the indices of E_visible, wich belong to 10 MeV, 20 MeV, 30 MeV, 40 MeV:
-index_10MeV = int((10.0 - min(E_visible)) / interval_E_visible)
-index_20MeV = int((20.0 - min(E_visible)) / interval_E_visible)
-index_30MeV = int((30.0 - min(E_visible)) / interval_E_visible)
-index_40MeV = int((40.0 - min(E_visible)) / interval_E_visible)
 
 """ set parameters to define random numbers"""
 # number of randomly generated values for E_nu:
@@ -116,6 +111,7 @@ time = t_years * 3.156 * 10 ** 7
 # Number of free protons (target particles) for IBD in JUNO (page 18 of JUNO DesignReport) (float):
 # INFO-me: for a fiducial volume of 20 kton (R=17.7m), you get 1.45 * 10**33 free protons
 N_target = 1.45 * 10 ** 33
+
 # detection efficiency of IBD in JUNO, see total_efficiencies_IBD_wo_PSD.txt
 # (folder: /home/astro/blum/juno/atmoNC/data_NC/output_detsim_v2/
 # DCR_results_16000mm_10MeVto100MeV_1000nsto1ms_mult1_1800keVto2550keV_dist500mm_R17700mm_PSD99/
@@ -142,9 +138,10 @@ sigma_IBD = sigma_ibd(E_neutrino, DELTA, MASS_POSITRON)
 on energy): """
 path_PSD_info = "/home/astro/blum/juno/atmoNC/data_NC/output_detsim_v2/" \
                 "DCR_results_16000mm_10MeVto100MeV_1000nsto1ms_mult1_1800keVto2550keV_dist500mm_R17700mm_PSD99/" \
-                "test_10to20_20to30_30to40_40to100_final/"
+                "test_350ns_600ns_400000atmoNC_1MeV/"
+
 # PSD suppression for real IBD events (see folder path_PSD_info):
-PSD_eff_total = 0.1160
+PSD_eff_total = 0.1179
 # load simulated IBD spectrum (from 10 to 100 MeV with bin-width 1 MeV):
 array_IBD_spectrum = np.loadtxt(path_PSD_info + "IBDspectrum_woPSD_bin1000keV.txt")
 # load simulated IBD spectrum after PSD (from 10 to 100 MeV with bin-width 1 MeV):
@@ -152,25 +149,12 @@ array_IBD_spectrum_PSD = np.loadtxt(path_PSD_info + "IBDspectrum_wPSD_bin1000keV
 
 # calculate PSD survival efficiency of IBD events for each energy bin (bin-width 1 MeV):
 # INFO-me: survival efficiency and NOT suppression is calculated!
-array_eff_IBD_1MeV = array_IBD_spectrum_PSD / array_IBD_spectrum
-# INFO-me: last entry of array_IBD_spectrum = 0, therefore is the last entry of array_eff_IBD_1MeV = NaN!
-# Therefore replay the last entry of array_eff_IBD_1MeV by the second last value:
-array_eff_IBD_1MeV[-1] = array_eff_IBD_1MeV[-2]
-
-# build new array with efficiencies with same bin-width than E_visible, where the entries of array_eff_IBD are
-# 'vervielfacht'. (array_eff_IBD_1MeV = [x, y, z, ...], array_eff_IBD = [x, x, y, y, z, z]):
-array_eff_IBD = double_array_entries(array_eff_IBD_1MeV, 1.0, interval_E_visible)
-# last entry should not be 'vervielfacht':
-array_eff_IBD = array_eff_IBD[:-1]
+array_eff_IBD = array_IBD_spectrum_PSD / array_IBD_spectrum
 
 # PSD suppression for fast neutron events (see fast_neutron_summary.ods in folder
 # /home/astro/blum/PhD/work/MeVDM_JUNO/fast_neutrons/). Fast neutron efficiency and IBD efficiency depend both on NC
 # efficiency and on the energy:
-PSD_eff_FN_total = 0.9994
-PSD_eff_FN_10_20 = 1.0
-PSD_eff_FN_20_30 = 0.9984
-PSD_eff_FN_30_40 = 0.9976
-PSD_eff_FN_40_100 = 0.9997
+PSD_eff_FN_total = 0.9990
 
 # INFO-me: currently all neutrinos interact in the detector via Inverse Beta Decay. BUT a neutrino can also interact
 # INFO-me: via elastic scattering or IBD on bound protons.
@@ -606,7 +590,7 @@ if CCATMOSPHERIC_BACKGROUND:
         if SAVE_DATA:
             # save Spectrum_CCatmospheric to txt-spectrum-file and information about simulation in txt-info-file:
             print("... save data of spectrum to file...")
-            np.savetxt(output_path + 'CCatmo_Osc{0:d}_bin{1:.0f}keV.txt'
+            np.savetxt(output_path + 'CCatmo_onlyP_Osc{0:d}_bin{1:.0f}keV.txt'
                        .format(Oscillation, interval_E_visible * 1000), Spectrum_CCatmospheric, fmt='%1.5e',
                        header='Spectrum in 1/bin of CC atmospheric electron-antineutrino background before PSD '
                               '(calculated with gen_spectrum_v4.py \n'
@@ -618,7 +602,7 @@ if CCATMOSPHERIC_BACKGROUND:
                               'oscillation prob. nu_Mubar to nu_Ebar = {5:.2f}:'
                        .format(now, N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis, Oscillation,
                                Prob_e_to_e, Prob_mu_to_e))
-            np.savetxt(output_path + 'CCatmo_info_Osc{0:d}_bin{1:.0f}keV.txt'
+            np.savetxt(output_path + 'CCatmo_onlyP_info_Osc{0:d}_bin{1:.0f}keV.txt'
                        .format(Oscillation, interval_E_visible * 1000),
                        np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
                                  interval_E_visible, t_years, N_target, detection_eff,
@@ -641,7 +625,7 @@ if CCATMOSPHERIC_BACKGROUND:
 
             # save Spectrum_CCatmospheric_PSD to txt-spectrum-file and information about simulation in txt-info-file:
             print("... save data of spectrum to file...")
-            np.savetxt(output_path + 'CCatmo_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
+            np.savetxt(output_path + 'CCatmo_onlyP_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
                        .format(Oscillation, interval_E_visible * 1000), Spectrum_CCatmospheric_PSD, fmt='%1.5e',
                        header='Spectrum in 1/bin of CC atmospheric electron-antineutrino background after PSD '
                               '(calculated with gen_spectrum_v4.py \n'
@@ -655,7 +639,7 @@ if CCATMOSPHERIC_BACKGROUND:
                               'oscillation prob. nu_Mubar to nu_Ebar = {5:.2f}:'
                        .format(now, N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis, Oscillation,
                                Prob_e_to_e, Prob_mu_to_e, PSD_eff_total, N_neutrino_CCatmospheric_vis_PSD))
-            np.savetxt(output_path + 'CCatmo_info_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
+            np.savetxt(output_path + 'CCatmo_onlyP_info_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
                        .format(Oscillation, interval_E_visible * 1000),
                        np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
                                  interval_E_visible, t_years, N_target, detection_eff, PSD_eff_total,
@@ -677,33 +661,6 @@ if CCATMOSPHERIC_BACKGROUND:
                        .format(Oscillation, interval_E_visible * 1000))
 
     else:
-        # simulate atmospheric CC background on proton:
-        # get theoretical spectrum in 1/MeV:
-        (Theo_spectrum_CCatmospheric_proton, N_neutrino_CCatmospheric_theo_proton, Oscillation, Prob_e_to_e,
-         Prob_mu_to_e) = \
-            ccatmospheric_background_v5(E_neutrino, sigma_IBD, N_target, time, detection_eff, exposure_ratio_Muon_veto)
-
-        # get visible spectrum in events/bin (spectrum is normalized to number_random_E_nu):
-        Spectrum_CCatmospheric_proton = generate_vis_spectrum(Theo_spectrum_CCatmospheric_proton,
-                                                              N_neutrino_CCatmospheric_theo_proton, E_neutrino,
-                                                              interval_E_neutrino, number_random_E_nu,
-                                                              E_visible_whole_range, number_of_theta, theta_interval,
-                                                              MASS_PROTON, MASS_POSITRON, DELTA)
-
-        # normalize Spectrum_CCatmospheric with the number_random_E_nu numbers to get visible spectrum with correct
-        # number of events:
-        Spectrum_CCatmospheric_proton = Spectrum_CCatmospheric_proton / number_random_E_nu
-
-        print("number of events in visible spectrum = {0:.3f} (from {1:.3f} MeV to {2:.3f} MeV)"
-              .format(np.sum(Spectrum_CCatmospheric_proton), min(E_visible_whole_range), max(E_visible_whole_range)))
-
-        # consider the number of theoretical events:
-        Spectrum_CCatmospheric_proton = Spectrum_CCatmospheric_proton * N_neutrino_CCatmospheric_theo_proton
-
-        print("number of events in visible spectrum = {0:.3f} (from {1:.3f} MeV to {2:.3f} MeV, N_neutrino_theo is "
-              "considered)".format(np.sum(Spectrum_CCatmospheric_proton), min(E_visible_whole_range),
-                                   max(E_visible_whole_range)))
-
         # simulate atmospheric CC background on C12 (theoretical spectrum in 1/MeV):
         (Theo_spectrum_CCatmospheric_C12, N_neutrino_CCatmospheric_theo_C12, Oscillation, Prob_e_to_e,
          Prob_mu_to_e, number_C12) = ccatmospheric_background_v6(E_neutrino, time, detection_eff,
@@ -772,7 +729,7 @@ if CCATMOSPHERIC_BACKGROUND:
                                    max(E_visible_whole_range)))
 
         # calculate total atmospheric CC background (from 2 to 200 MeV, in events/bin):
-        Spectrum_CCatmospheric = Spectrum_CCatmospheric_proton + Spectrum_CCatmospheric_C12
+        Spectrum_CCatmospheric = Spectrum_CCatmospheric_C12
 
         # get bin corresponding to E_vis_min:
         index_E_vis_min = int((E_vis_min - min(E_visible_whole_range)) / interval_E_visible)
@@ -785,7 +742,7 @@ if CCATMOSPHERIC_BACKGROUND:
         N_neutrino_CCatmospheric_vis = np.sum(Spectrum_CCatmospheric)
 
         # calculate total number of events from theoretical spectrum:
-        N_neutrino_CCatmospheric_theo = N_neutrino_CCatmospheric_theo_proton + N_neutrino_CCatmospheric_theo_C12
+        N_neutrino_CCatmospheric_theo = N_neutrino_CCatmospheric_theo_C12
 
         print("number of events in visible spectrum = {0:.3f} (from {1:.3f} MeV to {2:.3f} MeV)"
               .format(np.sum(Spectrum_CCatmospheric), E_vis_min, E_vis_max))
@@ -805,22 +762,22 @@ if CCATMOSPHERIC_BACKGROUND:
                  .format(N_neutrino_CCatmospheric_vis_PSD, E_vis_min, E_vis_max))
         plt.xlabel("energy in MeV")
         plt.ylabel("spectrum in 1/MeV")
-        plt.title("Simulated atmospheric CC spectrum on protons and C12 in JUNO after {0:.0f} years of lifetime"
+        plt.title("Simulated atmospheric CC spectrum on C12 in JUNO after {0:.0f} years of lifetime"
                   .format(t_years))
         plt.legend()
         plt.grid()
-        plt.savefig(output_path + "CCatmo_PandC12_spectrum.png")
+        plt.savefig(output_path + "CCatmo_onlyC12_spectrum.png")
         plt.close()
 
         if SAVE_DATA:
             # save Spectrum_CCatmospheric to txt-spectrum-file and information about simulation in txt-info-file:
             print("... save data of spectrum to file...")
-            np.savetxt(output_path + 'CCatmo_total_Osc{0:d}_bin{1:.0f}keV.txt'
+            np.savetxt(output_path + 'CCatmo_onlyC12_Osc{0:d}_bin{1:.0f}keV.txt'
                        .format(Oscillation, interval_E_visible * 1000), Spectrum_CCatmospheric, fmt='%1.5e',
                        header='Spectrum in 1/MeV of CC atmospheric electron-antineutrino background before PSD\n'
-                              '(nu_e_bar + proton -> positron + neutron and nu_e_bar + C12 -> positron + neutron + X)\n'
+                              '(only nu_e_bar + C12 -> positron + neutron + X)\n'
                               '(calculated with gen_spectrum_v4.py \n'
-                              'and function ccatmospheric_background_v5() and ccatmospheric_background_v6(), {0}):'
+                              'and ccatmospheric_background_v6(), {0}):'
                               'Atmospheric CC electron-antineutrino flux at the site of JUNO!\n'
                               '\nTheo. number of neutrinos = {1:.6f}, Number of neutrinos from spectrum = {2:.6f},'
                               'Is oscillation considered (1=yes, 0=no)? {3:d}, '
@@ -828,20 +785,20 @@ if CCATMOSPHERIC_BACKGROUND:
                               'oscillation prob. nu_Mubar to nu_Ebar = {5:.2f},:'
                        .format(now, N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis, Oscillation,
                                Prob_e_to_e, Prob_mu_to_e))
-            np.savetxt(output_path + 'CCatmo_total_info_Osc{0:d}_bin{1:.0f}keV.txt'
+            np.savetxt(output_path + 'CCatmo_onlyC12_info_Osc{0:d}_bin{1:.0f}keV.txt'
                        .format(Oscillation, interval_E_visible * 1000),
                        np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
-                                 interval_E_visible, t_years, N_target, detection_eff,
+                                 interval_E_visible, t_years, detection_eff,
                                  N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis,
                                  Oscillation,
                                  Prob_e_to_e, Prob_mu_to_e, exposure_ratio_Muon_veto, number_C12]),
                        fmt='%1.9e',
-                       header='Information to CCatmo_Osc{0:d}_bin{1:.0f}keV.txt:\n'
-                              '(nu_e_bar + proton -> positron + neutron and nu_e_bar + C12 -> positron + neutron + X)\n'
+                       header='Information to CCatmo_onlyC12_Osc{0:d}_bin{1:.0f}keV.txt:\n'
+                              '(nu_e_bar + C12 -> positron + neutron + X)\n'
                               'Atmospheric CC electron-antineutrino flux at the site of JUNO!\n'
                               'values below: E_neutrino[0] in MeV, E_neutrino[-1] in MeV, interval_E_neutrino in MeV,'
                               '\nE_visible[0] in MeV, E_visible[-1] in MeV, interval_E_visible in MeV,\n'
-                              'exposure time t_years in years, number of free protons N_target, IBD detection '
+                              'exposure time t_years in years, IBD detection '
                               'efficiency,'
                               '\ntheo. number of neutrinos, '
                               '\nNumber of neutrinos from spectrum,\n'
@@ -853,12 +810,12 @@ if CCATMOSPHERIC_BACKGROUND:
 
             # save Spectrum_CCatmospheric_PSD to txt-spectrum-file and information about simulation in txt-info-file:
             print("... save data of spectrum to file...")
-            np.savetxt(output_path + 'CCatmo_total_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
+            np.savetxt(output_path + 'CCatmo_onlyC12_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
                        .format(Oscillation, interval_E_visible * 1000), Spectrum_CCatmospheric_PSD, fmt='%1.5e',
                        header='Spectrum in 1/MeV of CC atmospheric electron-antineutrino background after PSD\n'
-                              '(nu_e_bar + proton -> positron + neutron and nu_e_bar + C12 -> positron + neutron + X)\n'
+                              '(nu_e_bar + C12 -> positron + neutron + X)\n'
                               '(calculated with gen_spectrum_v4.py \n'
-                              'and function ccatmospheric_background_v5() and ccatmopsheric_background_v6(), {0}):'
+                              'and function ccatmospheric_background_v6(), {0}):'
                               'Atmospheric CC electron-antineutrino flux at the site of JUNO!\n'
                               '\nTheo. number of neutrinos = {1:.6f}, Number of neutrinos from spectrum = {2:.6f},'
                               '\ntotal PSD efficiency of IBD events = {6:.5f}, Number of neutrinos from '
@@ -868,20 +825,20 @@ if CCATMOSPHERIC_BACKGROUND:
                               'oscillation prob. nu_Mubar to nu_Ebar = {5:.2f}:'
                        .format(now, N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis, Oscillation,
                                Prob_e_to_e, Prob_mu_to_e, PSD_eff_total, N_neutrino_CCatmospheric_vis_PSD))
-            np.savetxt(output_path + 'CCatmo_total_info_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
+            np.savetxt(output_path + 'CCatmo_onlyC12_info_Osc{0:d}_bin{1:.0f}keV_PSD.txt'
                        .format(Oscillation, interval_E_visible * 1000),
                        np.array([E_neutrino[0], E_neutrino[-1], interval_E_neutrino, E_visible[0], E_visible[-1],
-                                 interval_E_visible, t_years, N_target, detection_eff, PSD_eff_total,
+                                 interval_E_visible, t_years, detection_eff, PSD_eff_total,
                                  N_neutrino_CCatmospheric_theo, N_neutrino_CCatmospheric_vis,
                                  N_neutrino_CCatmospheric_vis_PSD, Oscillation,
                                  Prob_e_to_e, Prob_mu_to_e, exposure_ratio_Muon_veto, number_C12]),
                        fmt='%1.9e',
                        header='Information to CCatmo_Osc{0:d}_bin{1:.0f}keV_PSD.txt:\n'
-                              '(nu_e_bar + proton -> positron + neutron and nu_e_bar + C12 -> positron + neutron + X)\n'
+                              '(nu_e_bar + C12 -> positron + neutron + X)\n'
                               'Atmospheric CC electron-antineutrino flux at the site of JUNO!\n'
                               'values below: E_neutrino[0] in MeV, E_neutrino[-1] in MeV, interval_E_neutrino in MeV,'
                               '\nE_visible[0] in MeV, E_visible[-1] in MeV, interval_E_visible in MeV,\n'
-                              'exposure time t_years in years, number of free protons N_target, IBD detection '
+                              'exposure time t_years in years,IBD detection '
                               'efficiency,'
                               '\ntotal PSD efficiency for IBD events, theo. number of neutrinos, '
                               '\nNumber of neutrinos from spectrum, number of neutrinos from spectrum after PSD,\n'
@@ -910,16 +867,8 @@ if FAST_NEUTRON:
     # create fast neutron spectrum in events per bin with np.full(length of array, value to fill):
     Spectrum_fast_neutron = np.full(number_bins, N_fast_neutron_per_bin)
 
-    # consider PSD efficiency of fast neutron background (energy dependent for 10 to 20 MeV, 20 to 30 MeV,
-    # 30 to 40 MeV, 40 to 100 MeV):
-    spectrum_FN_PSD_10_20 = Spectrum_fast_neutron[index_10MeV:index_20MeV] * (1.0 - PSD_eff_FN_10_20)
-    spectrum_FN_PSD_20_30 = Spectrum_fast_neutron[index_20MeV:index_30MeV] * (1.0 - PSD_eff_FN_20_30)
-    spectrum_FN_PSD_30_40 = Spectrum_fast_neutron[index_30MeV:index_40MeV] * (1.0 - PSD_eff_FN_30_40)
-    spectrum_FN_PSD_40_100 = Spectrum_fast_neutron[index_40MeV:] * (1.0 - PSD_eff_FN_40_100)
-
     # build fast neutron spectrum after PSD in 1/bin:
-    spectrum_FN_PSD = np.concatenate((spectrum_FN_PSD_10_20, spectrum_FN_PSD_20_30, spectrum_FN_PSD_30_40,
-                                      spectrum_FN_PSD_40_100), axis=None)
+    spectrum_FN_PSD = Spectrum_fast_neutron * (1 - PSD_eff_FN_total)
 
     # number of fast neutron events after PSD:
     N_fast_neutron_PSD = np.sum(spectrum_FN_PSD)
@@ -976,8 +925,8 @@ if FAST_NEUTRON:
         np.savetxt(output_path + 'fast_neutron_info_{0:.0f}events_bin{1:.0f}keV_PSD.txt'
                    .format(N_fast_neutron, interval_E_visible*1000),
                    np.array([E_visible[0], E_visible[-1], interval_E_visible, t_years, 16.0,
-                             N_fast_neutron_theo, N_fast_neutron, PSD_eff_FN_total, PSD_eff_FN_10_20, PSD_eff_FN_20_30,
-                             PSD_eff_FN_30_40, PSD_eff_FN_40_100, N_fast_neutron_PSD, exposure_ratio_Muon_veto]),
+                             N_fast_neutron_theo, N_fast_neutron, PSD_eff_FN_total, N_fast_neutron_PSD,
+                             exposure_ratio_Muon_veto]),
                    fmt='%1.9e',
                    header='Information to fast_neutron_{0:.0f}events_bin{1:.0f}keV_PSD.txt:\n'
                           'values below:'
@@ -985,99 +934,6 @@ if FAST_NEUTRON:
                           'exposure time t_years in years, fiducial volume R in m, '
                           'theo. number of events, '
                           '\nNumber of events from spectrum, total fast neutron PSD efficiency,\n'
-                          'FN PSD suppression 10 to 20 MeV, FN PSD suppression 20 to 30 MeV,\n'
-                          'FN PSD suppression 30 to 40 MeV, FN PSD suppression 40 to 100 MeV,\n'
                           'number of events after PSD, '
                           '\nexposure ratio of muon veto cut:'
                    .format(N_fast_neutron, interval_E_visible*1000))
-
-""" Display the calculated spectrum: """
-if DISPLAY_SPECTRA:
-    print("... display plots...")
-    # Display the theoretical spectra with the settings below:
-    h1 = pyplot.figure(1)
-    if DM_SIGNAL:
-        pyplot.step(E_neutrino, Theo_spectrum_signal, 'r-', label='signal from DM annihilation for '
-                    '$<\sigma_Av>=${0:.1e}$cm^3/s$'.format(sigma_Anni), where='mid')
-    if DSNB_BACKGROUND:
-        pyplot.step(E_neutrino, Theo_spectrum_DSNB, 'b-', label='DSNB background', where='mid')
-    if REACTOR_BACKGROUND:
-        pyplot.step(E_neutrino, Theo_spectrum_reactor, 'c-', label='reactor background', where='mid')
-    if CCATMOSPHERIC_BACKGROUND:
-        pyplot.step(E_neutrino, Theo_spectrum_CCatmospheric, 'g-', label='atmospheric CC background', where='mid')
-
-    pyplot.xlim(E_neutrino[0], E_neutrino[-1])
-    pyplot.ylim(ymin=0)
-    pyplot.xlabel("Electron-antineutrino energy in MeV")
-    pyplot.ylabel("Theoretical spectrum dN/dE in 1/MeV")
-    pyplot.title(
-        "Theoretical electron-antineutrino spectrum in JUNO after {0:.0f} years and for DM of mass = {1:.0f} MeV"
-        .format(t_years, mass_DM))
-    pyplot.legend()
-
-    # Display the theoretical spectra after PSD with the settings below:
-    h2 = pyplot.figure(2)
-    if DM_SIGNAL:
-        pyplot.step(E_neutrino, Theo_spectrum_signal_PSD, 'r-', label='signal from DM annihilation for '
-                    '$<\sigma_Av>=${0:.1e}$cm^3/s$'.format(sigma_Anni), where='mid')
-    if DSNB_BACKGROUND:
-        pyplot.step(E_neutrino, Theo_spectrum_DSNB_PSD, 'b-', label='DSNB background', where='mid')
-    if REACTOR_BACKGROUND:
-        pyplot.step(E_neutrino, Theo_spectrum_reactor_PSD, 'c-', label='reactor background', where='mid')
-    if CCATMOSPHERIC_BACKGROUND:
-        pyplot.step(E_neutrino, Theo_spectrum_CCatmospheric_PSD, 'g-', label='atmospheric CC background', where='mid')
-
-    pyplot.xlim(E_neutrino[0], E_neutrino[-1])
-    pyplot.ylim(ymin=0)
-    pyplot.xlabel("Electron-antineutrino energy in MeV")
-    pyplot.ylabel("Theoretical spectrum dN/dE in 1/MeV")
-    pyplot.title(
-        "Theoretical electron-antineutrino spectrum in JUNO after {0:.0f} years and for DM of mass = {1:.0f} MeV\n"
-        "(PSD efficiency = {2:.3f} %)"
-        .format(t_years, mass_DM, PSD_eff*100.0))
-    pyplot.legend()
-
-
-    # Display the expected spectra with the settings below:
-    h3 = pyplot.figure(3)
-    if DM_SIGNAL:
-        pyplot.step(E_visible, Spectrum_signal, 'r-', label='signal from DM annihilation for '
-                    '$<\sigma_Av>=${0:.1e}$cm^3/s$'.format(sigma_Anni), where='mid')
-    if DSNB_BACKGROUND:
-        pyplot.step(E_visible, Spectrum_DSNB, 'b-', label='DSNB background', where='mid')
-    if REACTOR_BACKGROUND:
-        pyplot.step(E_visible, Spectrum_reactor, 'c-', label='reactor background', where='mid')
-    if CCATMOSPHERIC_BACKGROUND:
-        pyplot.step(E_visible, Spectrum_CCatmospheric, 'g-', label='atmospheric CC background', where='mid')
-
-    pyplot.xlim(E_visible[0], E_visible[-1])
-    pyplot.ylim(ymin=0)
-    pyplot.xlabel("Visible energy in MeV")
-    pyplot.ylabel("Expected spectrum dN/dE in 1/MeV")
-    pyplot.title("Expected spectrum in JUNO after {0:.0f} years and for DM of mass = {1:.0f} MeV"
-                 .format(t_years, mass_DM))
-    pyplot.legend()
-
-    # Display the expected spectra with the settings below:
-    h4 = pyplot.figure(4)
-    if DM_SIGNAL:
-        pyplot.step(E_visible, Spectrum_signal_PSD, 'r-', label='signal from DM annihilation for '
-                    '$<\sigma_Av>=${0:.1e}$cm^3/s$'.format(sigma_Anni), where='mid')
-    if DSNB_BACKGROUND:
-        pyplot.step(E_visible, Spectrum_DSNB_PSD, 'b-', label='DSNB background', where='mid')
-    if REACTOR_BACKGROUND:
-        pyplot.step(E_visible, Spectrum_reactor_PSD, 'c-', label='reactor background', where='mid')
-    if CCATMOSPHERIC_BACKGROUND:
-        pyplot.step(E_visible, Spectrum_CCatmospheric_PSD, 'g-', label='atmospheric CC background', where='mid')
-
-    pyplot.xlim(E_visible[0], E_visible[-1])
-    pyplot.ylim(ymin=0)
-    pyplot.xlabel("Visible energy in MeV")
-    pyplot.ylabel("Expected spectrum dN/dE in 1/MeV")
-    pyplot.title("Expected spectrum in JUNO after {0:.0f} years and for DM of mass = {1:.0f} MeV\n"
-                 "(PSD efficiency = {2:.3f} %)"
-                 .format(t_years, mass_DM, PSD_eff*100.0))
-    pyplot.legend()
-
-
-    pyplot.show()
