@@ -65,8 +65,8 @@ for index in np.arange(0, 6):
           "number_inter = {1:.3f} neutrinos/fission".format(binwidth_inter[index], number_inter))
 
 """ Display the digitized and interpolated data: """
-# pyplot.step(energy_inter, flux_inter, 'y', where='post', label='interpolated')
-# pyplot.step(energy_digi, flux_fig, '+', where='post', label='digitized')
-# pyplot.legend()
-# pyplot.grid()
-# pyplot.show()
+pyplot.plot(energy_inter, flux_inter, '-', label='interpolated')
+pyplot.plot(energy_digi, flux_fig, '+', label='digitized')
+pyplot.legend()
+pyplot.grid()
+pyplot.show()

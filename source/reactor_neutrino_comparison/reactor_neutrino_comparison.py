@@ -28,7 +28,7 @@ def sigma_ibd(e, delta, mass_positron):
 
 
 # electron-antineutrino energy in MeV:
-energy = np.arange(2, 16, 0.01)
+energy = np.arange(2, 16, 0.1)
 # mass of positron in MeV (float constant):
 MASS_POSITRON = 0.51099892
 # mass of proton in MeV (float constant):
@@ -43,7 +43,7 @@ t_years = 10
 N_target = 1.45 * 10 ** 33
 # detection efficiency of IBD in JUNO, from physics_report.pdf, page 40, table 2.1
 # (combined efficiency of energy cut, time cut, vertex cut, Muon veto, fiducial volume) (float):
-detection_eff = 0.73
+detection_eff = 0.67
 # distance reactor to detector in meter:
 L_m = 5.25*10**4
 # distance reactor to detector in centimeter:
@@ -224,13 +224,18 @@ Pu241_fallot = np.interp(energy, energy_fallot_Pu241, flux_fallot_Pu241)
 # add the weighted sum of the terms:
 spectrum_fallot = Fraction235U*U235_fallot + Fraction238U*U238_fallot + Fraction239Pu*Pu239_fallot + \
                   Fraction241Pu*Pu241_fallot
+# calculate weighted sum for Fallot data (not interpolated):
+# spectrum_fallot_data = (Fraction235U*flux_fallot_U235 + Fraction238U*flux_fallot_U238 +
+#                         Fraction239Pu*flux_fallot_Pu239 + Fraction241Pu*flux_fallot_Pu241)
 # There are 3.125*10**19 fissions/GW/second, spectrum in units of electron-antineutrino/(MeV * GW * s):
 spectrum_fallot1 = spectrum_fallot * 3.125*10**19
+# spectrum_fallot1_data = spectrum_fallot_data * 3.125*10**19
 # There are about 3.156*10**7 seconds in a year, spectrum in units of electron-antineutrino/(MeV * GW * year):
 spectrum_fallot_total = spectrum_fallot1 * 3.156*10**7
+# spectrum_fallot_total_data = spectrum_fallot1_data * 3.156*10**7
 # electron-antineutrino flux in units of electron-antineutrino/(MeV * year):
 flux_fallot = spectrum_fallot_total * power_th
-
+# flux_fallot_data = spectrum_fallot_total_data * power_th
 
 """ Consider Neutrino oscillation for NORMAL HIERARCHY from NuOscillation.cc: """
 """
@@ -291,7 +296,7 @@ h2 = pyplot.figure(2)
 pyplot.semilogy(energy, flux_vogel, label='electron-antineutrino flux of Vogel1989')
 pyplot.semilogy(energy, flux_mueller, label='electron-antineutrino flux of Mueller2011')
 # pyplot.semilogy(energy, flux_huber, label='electron-antineutrino flux of Huber2011 (without 238U)')
-pyplot.semilogy(energy, flux_fallot, label='electron-antineutrino flux of Fallot2012')
+pyplot.semilogy(energy, flux_fallot, "-x", label='electron-antineutrino flux of Fallot2012')
 pyplot.ylim(ymin=0)
 # pyplot.xticks(np.arange(4.0, E1[-1]), 2.0)
 pyplot.xlabel("Electron-antineutrino energy in MeV")
